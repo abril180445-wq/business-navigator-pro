@@ -55,10 +55,10 @@ const topProducts = [
 ];
 
 const COLORS = [
-  "hsl(210, 12%, 22%)",
-  "hsl(185, 72%, 45%)",
-  "hsl(38, 92%, 50%)",
-  "hsl(280, 60%, 50%)",
+  "hsl(210, 8%, 25%)",
+  "hsl(210, 6%, 40%)",
+  "hsl(185, 55%, 42%)",
+  "hsl(210, 5%, 55%)",
 ];
 
 const recentActivities = [
@@ -159,23 +159,23 @@ export default function Dashboard() {
               <AreaChart data={revenueData}>
                 <defs>
                   <linearGradient id="colorReceita" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(210, 12%, 22%)" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="hsl(210, 12%, 22%)" stopOpacity={0} />
+                    <stop offset="5%" stopColor="hsl(210, 8%, 25%)" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="hsl(210, 8%, 25%)" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="colorDespesa" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(185, 72%, 45%)" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="hsl(185, 72%, 45%)" stopOpacity={0} />
+                    <stop offset="5%" stopColor="hsl(210, 6%, 45%)" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="hsl(210, 6%, 45%)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(210, 10%, 88%)" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="hsl(210, 6%, 46%)" />
-                <YAxis tick={{ fontSize: 12 }} stroke="hsl(210, 6%, 46%)" tickFormatter={(v) => `${v / 1000}k`} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(210, 6%, 86%)" />
+                <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="hsl(210, 4%, 46%)" />
+                <YAxis tick={{ fontSize: 12 }} stroke="hsl(210, 4%, 46%)" tickFormatter={(v) => `${v / 1000}k`} />
                 <Tooltip
                   formatter={(value: number) => [`R$ ${value.toLocaleString()}`, ""]}
-                  contentStyle={{ borderRadius: "8px", border: "1px solid hsl(210, 10%, 88%)", fontSize: 13 }}
+                  contentStyle={{ borderRadius: "8px", border: "1px solid hsl(210, 6%, 86%)", fontSize: 13 }}
                 />
-                <Area type="monotone" dataKey="receita" stroke="hsl(210, 12%, 22%)" fill="url(#colorReceita)" strokeWidth={2} name="Receita" />
-                <Area type="monotone" dataKey="despesa" stroke="hsl(185, 72%, 45%)" fill="url(#colorDespesa)" strokeWidth={2} name="Despesas" />
+                <Area type="monotone" dataKey="receita" stroke="hsl(210, 8%, 25%)" fill="url(#colorReceita)" strokeWidth={2} name="Receita" />
+                <Area type="monotone" dataKey="despesa" stroke="hsl(210, 6%, 45%)" fill="url(#colorDespesa)" strokeWidth={2} name="Despesas" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
@@ -220,11 +220,11 @@ export default function Dashboard() {
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={topProducts} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(210, 10%, 88%)" horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 12 }} stroke="hsl(210, 6%, 46%)" />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(210, 6%, 46%)" width={80} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(210, 6%, 86%)" horizontal={false} />
+                <XAxis type="number" tick={{ fontSize: 12 }} stroke="hsl(210, 4%, 46%)" />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(210, 4%, 46%)" width={80} />
                 <Tooltip contentStyle={{ borderRadius: "8px", fontSize: 13 }} />
-                <Bar dataKey="vendas" fill="hsl(185, 72%, 45%)" radius={[0, 4, 4, 0]} barSize={20} name="Vendas" />
+                <Bar dataKey="vendas" fill="hsl(210, 8%, 30%)" radius={[0, 4, 4, 0]} barSize={20} name="Vendas" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
