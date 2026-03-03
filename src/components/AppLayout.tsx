@@ -2,6 +2,10 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
+  Target,
+  ClipboardPlus,
+  FileText,
+  FileSpreadsheet,
   DollarSign,
   Package,
   Factory,
@@ -25,14 +29,20 @@ interface ModuleItem {
   icon: React.ElementType;
   path: string;
   children?: { label: string; path: string }[];
+  section?: string;
 }
 
 const modules: ModuleItem[] = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+  { label: "Dashboard", icon: LayoutDashboard, path: "/", section: "Principal" },
+  { label: "Metas", icon: Target, path: "/metas", section: "Principal" },
+  { label: "Cadastro de Dados", icon: ClipboardPlus, path: "/cadastro", section: "Principal" },
+  { label: "Relatórios", icon: FileText, path: "/relatorios", section: "Principal" },
+  { label: "Importar Excel", icon: FileSpreadsheet, path: "/importacao", section: "Principal" },
   {
     label: "Contabilidade",
     icon: DollarSign,
     path: "/contabilidade",
+    section: "Módulos ERP",
     children: [
       { label: "Faturamento", path: "/contabilidade/faturamento" },
       { label: "Pagamentos", path: "/contabilidade/pagamentos" },
@@ -45,6 +55,7 @@ const modules: ModuleItem[] = [
     label: "Pedidos",
     icon: Package,
     path: "/pedidos",
+    section: "Módulos ERP",
     children: [
       { label: "Vendas", path: "/pedidos/vendas" },
       { label: "Compras", path: "/pedidos/compras" },
@@ -56,17 +67,18 @@ const modules: ModuleItem[] = [
     label: "Manufatura",
     icon: Factory,
     path: "/manufatura",
+    section: "Módulos ERP",
     children: [
       { label: "Ordens de Produção", path: "/manufatura/ordens" },
       { label: "BOM", path: "/manufatura/bom" },
       { label: "Planejamento", path: "/manufatura/planejamento" },
     ],
   },
-  { label: "Ativos", icon: HardDrive, path: "/ativos" },
-  { label: "Projetos", icon: FolderKanban, path: "/projetos" },
-  { label: "RH", icon: Users, path: "/rh" },
-  { label: "Helpdesk", icon: Headphones, path: "/helpdesk" },
-  { label: "PDV", icon: ShoppingCart, path: "/pdv" },
+  { label: "Ativos", icon: HardDrive, path: "/ativos", section: "Módulos ERP" },
+  { label: "Projetos", icon: FolderKanban, path: "/projetos", section: "Módulos ERP" },
+  { label: "RH", icon: Users, path: "/rh", section: "Módulos ERP" },
+  { label: "Helpdesk", icon: Headphones, path: "/helpdesk", section: "Módulos ERP" },
+  { label: "PDV", icon: ShoppingCart, path: "/pdv", section: "Módulos ERP" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -81,7 +93,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
+  const isActive = (path: string) => location.pathname === path || (path !== "/" && location.pathname.startsWith(path + "/"));
+
+  const sections = [...new Set(modules.map((m) => m.section))];
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
@@ -93,73 +107,86 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <h1 className="text-sm font-bold text-sidebar-primary tracking-tight font-sans truncate">
               ERP San Remo
             </h1>
-            <p className="text-[10px] text-sidebar-muted leading-none">Construtora</p>
+            <p className="text-[10px] text-sidebar-muted leading-none font-sans">Construtora</p>
           </div>
         )}
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
-        {modules.map((mod) => {
-          const Icon = mod.icon;
-          const active = isActive(mod.path);
-          const expanded = expandedModules.includes(mod.label);
-          const hasChildren = mod.children && mod.children.length > 0;
+      <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-1">
+        {sections.map((section) => (
+          <div key={section}>
+            {!collapsed && (
+              <p className="text-[10px] uppercase tracking-widest text-sidebar-muted font-semibold px-3 pt-3 pb-1 font-sans">
+                {section}
+              </p>
+            )}
+            <div className="space-y-0.5">
+              {modules
+                .filter((m) => m.section === section)
+                .map((mod) => {
+                  const Icon = mod.icon;
+                  const active = isActive(mod.path);
+                  const expanded = expandedModules.includes(mod.label);
+                  const hasChildren = mod.children && mod.children.length > 0;
 
-          return (
-            <div key={mod.label}>
-              <div
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors text-sm font-medium
-                  ${active && !hasChildren ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-2 border-gold" : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"}`}
-                onClick={() => hasChildren ? toggleModule(mod.label) : undefined}
-              >
-                {hasChildren ? (
-                  <>
-                    <Icon className="w-4 h-4 shrink-0" />
-                    {!collapsed && (
-                      <>
-                        <span className="flex-1">{mod.label}</span>
-                        {expanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-                      </>
-                    )}
-                  </>
-                ) : (
-                  <Link to={mod.path} className="flex items-center gap-3 w-full" onClick={() => setMobileOpen(false)}>
-                    <Icon className="w-4 h-4 shrink-0" />
-                    {!collapsed && <span>{mod.label}</span>}
-                  </Link>
-                )}
-              </div>
-              {hasChildren && expanded && !collapsed && (
-                <div className="ml-6 mt-0.5 space-y-0.5 border-l border-sidebar-border pl-3">
-                  {mod.children!.map((child) => (
-                    <Link
-                      key={child.path}
-                      to={child.path}
-                      onClick={() => setMobileOpen(false)}
-                      className={`block px-3 py-2 rounded-md text-sm transition-colors
-                        ${isActive(child.path) ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-accent/30"}`}
-                    >
-                      {child.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
+                  return (
+                    <div key={mod.label}>
+                      <div
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors text-sm font-medium font-sans
+                          ${active && !hasChildren ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-2 border-gold" : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"}`}
+                        onClick={() => hasChildren ? toggleModule(mod.label) : undefined}
+                      >
+                        {hasChildren ? (
+                          <>
+                            <Icon className="w-4 h-4 shrink-0" />
+                            {!collapsed && (
+                              <>
+                                <span className="flex-1">{mod.label}</span>
+                                {expanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                              </>
+                            )}
+                          </>
+                        ) : (
+                          <Link to={mod.path} className="flex items-center gap-3 w-full" onClick={() => setMobileOpen(false)}>
+                            <Icon className="w-4 h-4 shrink-0" />
+                            {!collapsed && <span>{mod.label}</span>}
+                          </Link>
+                        )}
+                      </div>
+                      {hasChildren && expanded && !collapsed && (
+                        <div className="ml-6 mt-0.5 space-y-0.5 border-l border-sidebar-border pl-3">
+                          {mod.children!.map((child) => (
+                            <Link
+                              key={child.path}
+                              to={child.path}
+                              onClick={() => setMobileOpen(false)}
+                              className={`block px-3 py-2 rounded-md text-sm transition-colors font-sans
+                                ${isActive(child.path) ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-accent/30"}`}
+                            >
+                              {child.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
             </div>
-          );
-        })}
+          </div>
+        ))}
       </nav>
 
       {/* Footer */}
       {!collapsed && (
         <div className="px-4 py-4 border-t border-sidebar-border">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center text-xs font-semibold text-sidebar-accent-foreground">
+            <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center text-xs font-semibold text-sidebar-accent-foreground font-sans">
               SR
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-sidebar-primary truncate">San Remo</p>
-              <p className="text-xs text-sidebar-muted truncate">admin@sanremo.com.br</p>
+              <p className="text-sm font-medium text-sidebar-primary truncate font-sans">San Remo</p>
+              <p className="text-xs text-sidebar-muted truncate font-sans">admin@sanremo.com.br</p>
             </div>
           </div>
         </div>
@@ -193,7 +220,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex-1 max-w-md">
             <div className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2">
               <Search className="w-4 h-4 text-muted-foreground" />
-              <input type="text" placeholder="Buscar..." className="bg-transparent border-none outline-none text-sm flex-1 text-foreground placeholder:text-muted-foreground" />
+              <input type="text" placeholder="Buscar..." className="bg-transparent border-none outline-none text-sm flex-1 text-foreground placeholder:text-muted-foreground font-sans" />
             </div>
           </div>
 
@@ -208,7 +235,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           {children}
         </main>
       </div>
