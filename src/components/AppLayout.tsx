@@ -18,6 +18,7 @@ import {
   Bell,
   Settings,
 } from "lucide-react";
+import logoSanRemo from "@/assets/logo-san-remo.png";
 
 interface ModuleItem {
   label: string;
@@ -61,31 +62,11 @@ const modules: ModuleItem[] = [
       { label: "Planejamento", path: "/manufatura/planejamento" },
     ],
   },
-  {
-    label: "Ativos",
-    icon: HardDrive,
-    path: "/ativos",
-  },
-  {
-    label: "Projetos",
-    icon: FolderKanban,
-    path: "/projetos",
-  },
-  {
-    label: "RH",
-    icon: Users,
-    path: "/rh",
-  },
-  {
-    label: "Helpdesk",
-    icon: Headphones,
-    path: "/helpdesk",
-  },
-  {
-    label: "PDV",
-    icon: ShoppingCart,
-    path: "/pdv",
-  },
+  { label: "Ativos", icon: HardDrive, path: "/ativos" },
+  { label: "Projetos", icon: FolderKanban, path: "/projetos" },
+  { label: "RH", icon: Users, path: "/rh" },
+  { label: "Helpdesk", icon: Headphones, path: "/helpdesk" },
+  { label: "PDV", icon: ShoppingCart, path: "/pdv" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -105,14 +86,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-5 border-b border-sidebar-border">
-        <div className="w-8 h-8 rounded-lg bg-sidebar-ring flex items-center justify-center">
-          <span className="text-sm font-bold text-sidebar-primary">E</span>
-        </div>
+      <div className="flex items-center gap-3 px-4 py-4 border-b border-sidebar-border">
+        <img src={logoSanRemo} alt="San Remo Construtora" className="w-9 h-9 object-contain rounded" />
         {!collapsed && (
-          <div>
-            <h1 className="text-base font-bold text-sidebar-primary tracking-tight">ERPNext</h1>
-            <p className="text-[10px] text-sidebar-muted leading-none">v16.5.0</p>
+          <div className="min-w-0">
+            <h1 className="text-sm font-bold text-sidebar-primary tracking-tight font-sans truncate">
+              ERP San Remo
+            </h1>
+            <p className="text-[10px] text-sidebar-muted leading-none">Construtora</p>
           </div>
         )}
       </div>
@@ -129,7 +110,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <div key={mod.label}>
               <div
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors text-sm font-medium
-                  ${active && !hasChildren ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"}`}
+                  ${active && !hasChildren ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-2 border-gold" : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"}`}
                 onClick={() => hasChildren ? toggleModule(mod.label) : undefined}
               >
                 {hasChildren ? (
@@ -171,14 +152,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Footer */}
       {!collapsed && (
-        <div className="px-5 py-4 border-t border-sidebar-border">
+        <div className="px-4 py-4 border-t border-sidebar-border">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center text-xs font-semibold text-sidebar-accent-foreground">
-              AD
+              SR
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-sidebar-primary truncate">Administrator</p>
-              <p className="text-xs text-sidebar-muted truncate">admin@empresa.com</p>
+              <p className="text-sm font-medium text-sidebar-primary truncate">San Remo</p>
+              <p className="text-xs text-sidebar-muted truncate">admin@sanremo.com.br</p>
             </div>
           </div>
         </div>
@@ -188,12 +169,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* Mobile overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 bg-foreground/40 z-40 lg:hidden" onClick={() => setMobileOpen(false)} />
       )}
 
-      {/* Sidebar mobile */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar transform transition-transform lg:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <button onClick={() => setMobileOpen(false)} className="absolute top-4 right-4 text-sidebar-foreground">
           <X className="w-5 h-5" />
@@ -201,14 +180,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarContent />
       </aside>
 
-      {/* Sidebar desktop */}
       <aside className={`hidden lg:flex flex-col bg-sidebar transition-all duration-200 ${collapsed ? "w-16" : "w-64"} shrink-0`}>
         <SidebarContent />
       </aside>
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top bar */}
         <header className="h-14 bg-card border-b border-border flex items-center px-4 gap-3 shrink-0">
           <button onClick={() => { if (window.innerWidth < 1024) setMobileOpen(true); else setCollapsed(!collapsed); }} className="p-2 rounded-lg hover:bg-muted transition-colors">
             <Menu className="w-5 h-5 text-muted-foreground" />
@@ -224,7 +200,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2">
             <button className="p-2 rounded-lg hover:bg-muted transition-colors relative">
               <Bell className="w-5 h-5 text-muted-foreground" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full" />
             </button>
             <button className="p-2 rounded-lg hover:bg-muted transition-colors">
               <Settings className="w-5 h-5 text-muted-foreground" />
@@ -232,7 +208,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        {/* Page content */}
         <main className="flex-1 overflow-y-auto p-6">
           {children}
         </main>

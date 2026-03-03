@@ -1,7 +1,5 @@
 import {
   DollarSign,
-  TrendingUp,
-  TrendingDown,
   ShoppingCart,
   Package,
   Users,
@@ -55,19 +53,19 @@ const topProducts = [
 ];
 
 const COLORS = [
-  "hsl(215, 80%, 28%)",
-  "hsl(170, 60%, 40%)",
-  "hsl(38, 92%, 50%)",
-  "hsl(280, 60%, 50%)",
+  "hsl(220, 60%, 18%)",
+  "hsl(42, 70%, 50%)",
+  "hsl(42, 65%, 65%)",
+  "hsl(220, 45%, 28%)",
 ];
 
 const recentActivities = [
-  { action: "Pedido de Venda #PV-2024-0891 criado", time: "Há 5 min", type: "sale" },
-  { action: "Pagamento de R$ 12.500 recebido", time: "Há 15 min", type: "payment" },
-  { action: "Ordem de Produção #OP-0234 finalizada", time: "Há 32 min", type: "production" },
-  { action: "Novo fornecedor cadastrado: Tech Parts Ltda", time: "Há 1h", type: "supplier" },
-  { action: "Inventário do Armazém Central atualizado", time: "Há 2h", type: "stock" },
-  { action: "Nota Fiscal #NF-8821 emitida", time: "Há 3h", type: "invoice" },
+  { action: "Pedido de Venda #PV-2024-0891 criado", time: "Há 5 min" },
+  { action: "Pagamento de R$ 12.500 recebido", time: "Há 15 min" },
+  { action: "Ordem de Produção #OP-0234 finalizada", time: "Há 32 min" },
+  { action: "Novo fornecedor cadastrado: Tech Parts Ltda", time: "Há 1h" },
+  { action: "Inventário do Armazém Central atualizado", time: "Há 2h" },
+  { action: "Nota Fiscal #NF-8821 emitida", time: "Há 3h" },
 ];
 
 const kpis = [
@@ -77,7 +75,6 @@ const kpis = [
     change: "+12.5%",
     trend: "up" as const,
     icon: DollarSign,
-    color: "text-success",
   },
   {
     title: "Pedidos Ativos",
@@ -85,7 +82,6 @@ const kpis = [
     change: "+8.2%",
     trend: "up" as const,
     icon: ShoppingCart,
-    color: "text-info",
   },
   {
     title: "Itens em Estoque",
@@ -93,7 +89,6 @@ const kpis = [
     change: "-3.1%",
     trend: "down" as const,
     icon: Package,
-    color: "text-warning",
   },
   {
     title: "Clientes Ativos",
@@ -101,17 +96,17 @@ const kpis = [
     change: "+5.7%",
     trend: "up" as const,
     icon: Users,
-    color: "text-primary",
   },
 ];
 
 export default function Dashboard() {
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-1">Visão geral da sua empresa — Dezembro 2024</p>
+        <p className="text-sm text-muted-foreground mt-1 font-sans">
+          Visão geral — San Remo Construtora
+        </p>
       </div>
 
       {/* KPI Cards */}
@@ -119,25 +114,25 @@ export default function Dashboard() {
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <Card key={kpi.title} className="erp-card-shadow hover:erp-card-shadow-hover transition-shadow">
+            <Card key={kpi.title} className="erp-card-shadow hover:erp-card-shadow-hover transition-shadow border-t-2 border-t-accent">
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground font-medium">{kpi.title}</p>
-                    <p className="text-2xl font-bold text-card-foreground">{kpi.value}</p>
+                    <p className="text-sm text-muted-foreground font-medium font-sans">{kpi.title}</p>
+                    <p className="text-2xl font-bold text-card-foreground font-sans">{kpi.value}</p>
                     <div className="flex items-center gap-1">
                       {kpi.trend === "up" ? (
                         <ArrowUpRight className="w-3.5 h-3.5 text-success" />
                       ) : (
                         <ArrowDownRight className="w-3.5 h-3.5 text-destructive" />
                       )}
-                      <span className={`text-xs font-medium ${kpi.trend === "up" ? "text-success" : "text-destructive"}`}>
+                      <span className={`text-xs font-medium font-sans ${kpi.trend === "up" ? "text-success" : "text-destructive"}`}>
                         {kpi.change}
                       </span>
-                      <span className="text-xs text-muted-foreground">vs mês anterior</span>
+                      <span className="text-xs text-muted-foreground font-sans">vs mês anterior</span>
                     </div>
                   </div>
-                  <div className={`p-2.5 rounded-lg bg-muted ${kpi.color}`}>
+                  <div className="p-2.5 rounded-lg bg-accent/10 text-accent">
                     <Icon className="w-5 h-5" />
                   </div>
                 </div>
@@ -147,9 +142,8 @@ export default function Dashboard() {
         })}
       </div>
 
-      {/* Charts Row */}
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Revenue Chart */}
         <Card className="lg:col-span-2 erp-card-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold">Receita vs Despesas</CardTitle>
@@ -159,29 +153,28 @@ export default function Dashboard() {
               <AreaChart data={revenueData}>
                 <defs>
                   <linearGradient id="colorReceita" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(215, 80%, 28%)" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="hsl(215, 80%, 28%)" stopOpacity={0} />
+                    <stop offset="5%" stopColor="hsl(220, 60%, 18%)" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="hsl(220, 60%, 18%)" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="colorDespesa" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(170, 60%, 40%)" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="hsl(170, 60%, 40%)" stopOpacity={0} />
+                    <stop offset="5%" stopColor="hsl(42, 70%, 50%)" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="hsl(42, 70%, 50%)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 90%)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 88%)" />
                 <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="hsl(220, 10%, 46%)" />
                 <YAxis tick={{ fontSize: 12 }} stroke="hsl(220, 10%, 46%)" tickFormatter={(v) => `${v / 1000}k`} />
                 <Tooltip
                   formatter={(value: number) => [`R$ ${value.toLocaleString()}`, ""]}
-                  contentStyle={{ borderRadius: "8px", border: "1px solid hsl(220, 15%, 90%)", fontSize: 13 }}
+                  contentStyle={{ borderRadius: "8px", border: "1px solid hsl(220, 15%, 88%)", fontSize: 13 }}
                 />
-                <Area type="monotone" dataKey="receita" stroke="hsl(215, 80%, 28%)" fill="url(#colorReceita)" strokeWidth={2} name="Receita" />
-                <Area type="monotone" dataKey="despesa" stroke="hsl(170, 60%, 40%)" fill="url(#colorDespesa)" strokeWidth={2} name="Despesas" />
+                <Area type="monotone" dataKey="receita" stroke="hsl(220, 60%, 18%)" fill="url(#colorReceita)" strokeWidth={2} name="Receita" />
+                <Area type="monotone" dataKey="despesa" stroke="hsl(42, 70%, 50%)" fill="url(#colorDespesa)" strokeWidth={2} name="Despesas" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Pie Chart */}
         <Card className="erp-card-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold">Pedidos por Módulo</CardTitle>
@@ -199,7 +192,7 @@ export default function Dashboard() {
             </ResponsiveContainer>
             <div className="grid grid-cols-2 gap-2 mt-2">
               {ordersByModule.map((item, i) => (
-                <div key={item.name} className="flex items-center gap-2 text-xs">
+                <div key={item.name} className="flex items-center gap-2 text-xs font-sans">
                   <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[i] }} />
                   <span className="text-muted-foreground">{item.name}</span>
                   <span className="font-semibold text-card-foreground ml-auto">{item.value}</span>
@@ -210,9 +203,8 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Bottom Row */}
+      {/* Bottom */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Top Products */}
         <Card className="erp-card-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold">Top Produtos</CardTitle>
@@ -220,17 +212,16 @@ export default function Dashboard() {
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={topProducts} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 90%)" horizontal={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 88%)" horizontal={false} />
                 <XAxis type="number" tick={{ fontSize: 12 }} stroke="hsl(220, 10%, 46%)" />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(220, 10%, 46%)" width={80} />
                 <Tooltip contentStyle={{ borderRadius: "8px", fontSize: 13 }} />
-                <Bar dataKey="vendas" fill="hsl(215, 80%, 28%)" radius={[0, 4, 4, 0]} barSize={20} name="Vendas" />
+                <Bar dataKey="vendas" fill="hsl(42, 70%, 50%)" radius={[0, 4, 4, 0]} barSize={20} name="Vendas" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Recent Activity */}
         <Card className="erp-card-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold">Atividade Recente</CardTitle>
@@ -239,10 +230,10 @@ export default function Dashboard() {
             <div className="space-y-3">
               {recentActivities.map((activity, i) => (
                 <div key={i} className="flex items-start gap-3 py-2 border-b border-border last:border-0">
-                  <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-accent mt-2 shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-card-foreground">{activity.action}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{activity.time}</p>
+                    <p className="text-sm text-card-foreground font-sans">{activity.action}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 font-sans">{activity.time}</p>
                   </div>
                 </div>
               ))}
