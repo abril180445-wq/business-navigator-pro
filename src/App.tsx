@@ -5,6 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import Dashboard from "@/pages/Dashboard";
+import Metas from "@/pages/Metas";
+import CadastroDados from "@/pages/CadastroDados";
+import Relatorios from "@/pages/Relatorios";
+import ImportacaoExcel from "@/pages/ImportacaoExcel";
 import Contabilidade from "@/pages/Contabilidade";
 import Pedidos from "@/pages/Pedidos";
 import ModulePlaceholder from "@/pages/ModulePlaceholder";
@@ -21,6 +25,10 @@ const App = () => (
         <AppLayout>
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/metas" element={<Metas />} />
+            <Route path="/cadastro" element={<CadastroDados />} />
+            <Route path="/relatorios" element={<Relatorios />} />
+            <Route path="/importacao" element={<ImportacaoExcel />} />
             <Route path="/contabilidade" element={<Contabilidade />} />
             <Route path="/contabilidade/*" element={<Contabilidade />} />
             <Route path="/pedidos" element={<Pedidos />} />
