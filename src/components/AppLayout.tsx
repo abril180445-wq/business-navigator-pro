@@ -21,8 +21,12 @@ import {
   Search,
   Bell,
   Settings,
+  LogOut,
+  ShieldCheck,
 } from "lucide-react";
 import logoSanRemo from "@/assets/logo-san-remo.png";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ModuleItem {
   label: string;
@@ -33,7 +37,7 @@ interface ModuleItem {
 }
 
 const modules: ModuleItem[] = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/", section: "Principal" },
+  { label: "Dashboard Admin", icon: LayoutDashboard, path: "/", section: "Principal" },
   { label: "Metas", icon: Target, path: "/metas", section: "Principal" },
   { label: "Cadastro de Dados", icon: ClipboardPlus, path: "/cadastro", section: "Principal" },
   { label: "Relatórios", icon: FileText, path: "/relatorios", section: "Principal" },
@@ -86,6 +90,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const location = useLocation();
+  const { profile, user, signOut } = useAuth();
 
   const toggleModule = (label: string) => {
     setExpandedModules((prev) =>
@@ -99,20 +104,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
-      {/* Logo */}
       <div className="flex items-center gap-3 px-4 py-4 border-b border-sidebar-border">
         <img src={logoSanRemo} alt="San Remo Construtora" className="w-9 h-9 object-contain rounded" />
         {!collapsed && (
           <div className="min-w-0">
             <h1 className="text-sm font-bold text-sidebar-primary tracking-tight font-sans truncate">
-              ERP San Remo
+              Sistema ERP San Remo
             </h1>
-            <p className="text-[10px] text-sidebar-muted leading-none font-sans">Construtora</p>
+            <p className="text-[10px] text-sidebar-muted leading-none font-sans">Acesso administrativo</p>
           </div>
         )}
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-1">
         {sections.map((section) => (
           <div key={section}>
@@ -134,7 +137,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <div key={mod.label}>
                       <div
                         className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors text-sm font-medium font-sans
-                          ${active && !hasChildren ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-2 border-gold" : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"}`}
+                          ${active && !hasChildren ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-2 border-accent" : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"}`}
                         onClick={() => hasChildren ? toggleModule(mod.label) : undefined}
                       >
                         {hasChildren ? (
@@ -177,25 +180,30 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         ))}
       </nav>
 
-      {/* Footer */}
       {!collapsed && (
-        <div className="px-4 py-4 border-t border-sidebar-border">
+        <div className="px-4 py-4 border-t border-sidebar-border space-y-3">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center text-xs font-semibold text-sidebar-accent-foreground font-sans">
-              SR
+              {profile?.full_name?.slice(0, 2).toUpperCase() || "SR"}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-sidebar-primary truncate font-sans">San Remo</p>
-              <p className="text-xs text-sidebar-muted truncate font-sans">admin@sanremo.com.br</p>
+              <p className="text-sm font-medium text-sidebar-primary truncate font-sans">
+                {profile?.full_name || "Administrador"}
+              </p>
+              <p className="text-xs text-sidebar-muted truncate font-sans">{user?.email || "admin@sanremo.com.br"}</p>
             </div>
           </div>
+          <Button variant="outline" className="w-full justify-start border-sidebar-border bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={signOut}>
+            <LogOut className="w-4 h-4" />
+            Sair
+          </Button>
         </div>
       )}
     </div>
   );
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-background">
       {mobileOpen && (
         <div className="fixed inset-0 bg-foreground/40 z-40 lg:hidden" onClick={() => setMobileOpen(false)} />
       )}
@@ -220,8 +228,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex-1 max-w-md">
             <div className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2">
               <Search className="w-4 h-4 text-muted-foreground" />
-              <input type="text" placeholder="Buscar..." className="bg-transparent border-none outline-none text-sm flex-1 text-foreground placeholder:text-muted-foreground font-sans" />
+              <input type="text" placeholder="Buscar módulos e relatórios..." className="bg-transparent border-none outline-none text-sm flex-1 text-foreground placeholder:text-muted-foreground font-sans" />
             </div>
+          </div>
+
+          <div className="hidden sm:flex items-center gap-2 rounded-full border border-border px-3 py-1.5 bg-muted/50">
+            <ShieldCheck className="w-4 h-4 text-accent" />
+            <span className="text-sm text-foreground font-sans">Admin</span>
           </div>
 
           <div className="flex items-center gap-2">
