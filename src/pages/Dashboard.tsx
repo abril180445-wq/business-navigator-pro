@@ -1,7 +1,7 @@
 import {
   DollarSign,
-  ShoppingCart,
-  Package,
+  Building2,
+  HardHat,
   Users,
   ArrowUpRight,
   ArrowDownRight,
@@ -23,33 +23,33 @@ import {
 } from "recharts";
 
 const revenueData = [
-  { month: "Jan", receita: 45000, despesa: 32000 },
-  { month: "Fev", receita: 52000, despesa: 34000 },
-  { month: "Mar", receita: 48000, despesa: 31000 },
-  { month: "Abr", receita: 61000, despesa: 37000 },
-  { month: "Mai", receita: 55000, despesa: 35000 },
-  { month: "Jun", receita: 67000, despesa: 38000 },
-  { month: "Jul", receita: 72000, despesa: 41000 },
-  { month: "Ago", receita: 69000, despesa: 39000 },
-  { month: "Set", receita: 78000, despesa: 43000 },
-  { month: "Out", receita: 82000, despesa: 45000 },
-  { month: "Nov", receita: 88000, despesa: 47000 },
-  { month: "Dez", receita: 95000, despesa: 50000 },
+  { month: "Jan", receita: 850000, despesa: 620000 },
+  { month: "Fev", receita: 920000, despesa: 680000 },
+  { month: "Mar", receita: 780000, despesa: 590000 },
+  { month: "Abr", receita: 1100000, despesa: 750000 },
+  { month: "Mai", receita: 950000, despesa: 700000 },
+  { month: "Jun", receita: 1250000, despesa: 820000 },
+  { month: "Jul", receita: 1400000, despesa: 890000 },
+  { month: "Ago", receita: 1300000, despesa: 860000 },
+  { month: "Set", receita: 1550000, despesa: 950000 },
+  { month: "Out", receita: 1680000, despesa: 1020000 },
+  { month: "Nov", receita: 1820000, despesa: 1100000 },
+  { month: "Dez", receita: 2100000, despesa: 1250000 },
 ];
 
-const ordersByModule = [
-  { name: "Vendas", value: 340 },
-  { name: "Compras", value: 210 },
-  { name: "Manufatura", value: 125 },
-  { name: "Projetos", value: 85 },
+const obrasPorStatus = [
+  { name: "Em andamento", value: 8 },
+  { name: "Planejamento", value: 3 },
+  { name: "Concluídas", value: 12 },
+  { name: "Paralisadas", value: 1 },
 ];
 
-const topProducts = [
-  { name: "Produto A", vendas: 1250 },
-  { name: "Produto B", vendas: 980 },
-  { name: "Produto C", vendas: 870 },
-  { name: "Produto D", vendas: 650 },
-  { name: "Produto E", vendas: 520 },
+const topEmpreendimentos = [
+  { name: "Res. Vila Serena", vendas: 42 },
+  { name: "Ed. Monte Carlo", vendas: 35 },
+  { name: "Cond. Jardim Real", vendas: 28 },
+  { name: "Res. Bela Vista", vendas: 22 },
+  { name: "Ed. Torre Dourada", vendas: 18 },
 ];
 
 const COLORS = [
@@ -60,40 +60,40 @@ const COLORS = [
 ];
 
 const recentActivities = [
-  { action: "Pedido de Venda #PV-2024-0891 criado", time: "Há 5 min" },
-  { action: "Pagamento de R$ 12.500 recebido", time: "Há 15 min" },
-  { action: "Ordem de Produção #OP-0234 finalizada", time: "Há 32 min" },
-  { action: "Novo fornecedor cadastrado: Tech Parts Ltda", time: "Há 1h" },
-  { action: "Inventário do Armazém Central atualizado", time: "Há 2h" },
-  { action: "Nota Fiscal #NF-8821 emitida", time: "Há 3h" },
+  { action: "Vistoria concluída — Res. Vila Serena, Bloco C", time: "Há 5 min" },
+  { action: "Pagamento de R$ 185.000 recebido — Ed. Monte Carlo", time: "Há 15 min" },
+  { action: "Ordem de serviço #OS-0234 finalizada — Fundação Bloco D", time: "Há 32 min" },
+  { action: "Novo contrato assinado — Terraplanagem Lote 22", time: "Há 1h" },
+  { action: "Entrega de materiais — Cimento e aço, Armazém Central", time: "Há 2h" },
+  { action: "Alvará aprovado — Cond. Jardim Real, Fase 2", time: "Há 3h" },
 ];
 
 const kpis = [
   {
-    title: "Receita Mensal",
-    value: "R$ 95.420",
-    change: "+12.5%",
+    title: "Faturamento Mensal",
+    value: "R$ 2,1M",
+    change: "+14.8%",
     trend: "up" as const,
     icon: DollarSign,
   },
   {
-    title: "Pedidos Ativos",
-    value: "342",
-    change: "+8.2%",
+    title: "Obras Ativas",
+    value: "8",
+    change: "+2",
     trend: "up" as const,
-    icon: ShoppingCart,
+    icon: Building2,
   },
   {
-    title: "Itens em Estoque",
-    value: "1.284",
-    change: "-3.1%",
-    trend: "down" as const,
-    icon: Package,
+    title: "Unidades Vendidas",
+    value: "145",
+    change: "+12.3%",
+    trend: "up" as const,
+    icon: HardHat,
   },
   {
     title: "Clientes Ativos",
-    value: "856",
-    change: "+5.7%",
+    value: "312",
+    change: "+8.1%",
     trend: "up" as const,
     icon: Users,
   },
@@ -103,9 +103,9 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Dashboard Administrativo</h1>
+        <h1 className="text-2xl font-bold text-foreground">Dashboard — San Remo Construtora</h1>
         <p className="text-sm text-muted-foreground mt-1 font-sans">
-          Visão geral executiva do Sistema ERP San Remo.
+          Visão geral das obras, vendas e finanças.
         </p>
       </div>
 
@@ -146,7 +146,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card className="lg:col-span-2 erp-card-shadow">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">Receita vs Despesas</CardTitle>
+            <CardTitle className="text-base font-semibold">Faturamento vs Custos de Obra</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>
@@ -168,8 +168,8 @@ export default function Dashboard() {
                   formatter={(value: number) => [`R$ ${value.toLocaleString()}`, ""]}
                   contentStyle={{ borderRadius: "8px", border: "1px solid hsl(220, 15%, 88%)", fontSize: 13 }}
                 />
-                <Area type="monotone" dataKey="receita" stroke="hsl(220, 60%, 18%)" fill="url(#colorReceita)" strokeWidth={2} name="Receita" />
-                <Area type="monotone" dataKey="despesa" stroke="hsl(42, 70%, 50%)" fill="url(#colorDespesa)" strokeWidth={2} name="Despesas" />
+                <Area type="monotone" dataKey="receita" stroke="hsl(220, 60%, 18%)" fill="url(#colorReceita)" strokeWidth={2} name="Faturamento" />
+                <Area type="monotone" dataKey="despesa" stroke="hsl(42, 70%, 50%)" fill="url(#colorDespesa)" strokeWidth={2} name="Custos" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
@@ -177,21 +177,21 @@ export default function Dashboard() {
 
         <Card className="erp-card-shadow">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">Pedidos por Módulo</CardTitle>
+            <CardTitle className="text-base font-semibold">Obras por Status</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
-                <Pie data={ordersByModule} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={3}>
-                  {ordersByModule.map((_, index) => (
+                <Pie data={obrasPorStatus} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={3}>
+                  {obrasPorStatus.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => [value, "pedidos"]} contentStyle={{ borderRadius: "8px", fontSize: 13 }} />
+                <Tooltip formatter={(value: number) => [value, "obras"]} contentStyle={{ borderRadius: "8px", fontSize: 13 }} />
               </PieChart>
             </ResponsiveContainer>
             <div className="grid grid-cols-2 gap-2 mt-2">
-              {ordersByModule.map((item, i) => (
+              {obrasPorStatus.map((item, i) => (
                 <div key={item.name} className="flex items-center gap-2 text-xs font-sans">
                   <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[i] }} />
                   <span className="text-muted-foreground">{item.name}</span>
@@ -207,16 +207,16 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="erp-card-shadow">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">Top Produtos</CardTitle>
+            <CardTitle className="text-base font-semibold">Top Empreendimentos — Unidades Vendidas</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={topProducts} layout="vertical">
+              <BarChart data={topEmpreendimentos} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 88%)" horizontal={false} />
                 <XAxis type="number" tick={{ fontSize: 12 }} stroke="hsl(220, 10%, 46%)" />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(220, 10%, 46%)" width={80} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(220, 10%, 46%)" width={120} />
                 <Tooltip contentStyle={{ borderRadius: "8px", fontSize: 13 }} />
-                <Bar dataKey="vendas" fill="hsl(42, 70%, 50%)" radius={[0, 4, 4, 0]} barSize={20} name="Vendas" />
+                <Bar dataKey="vendas" fill="hsl(42, 70%, 50%)" radius={[0, 4, 4, 0]} barSize={20} name="Unidades" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

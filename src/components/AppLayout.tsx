@@ -7,13 +7,13 @@ import {
   FileText,
   FileSpreadsheet,
   DollarSign,
-  Package,
-  Factory,
-  HardDrive,
+  Building2,
+  HardHat,
+  Landmark,
   FolderKanban,
   Users,
   Headphones,
-  ShoppingCart,
+  Truck,
   ChevronDown,
   ChevronRight,
   Menu,
@@ -37,52 +37,52 @@ interface ModuleItem {
 }
 
 const modules: ModuleItem[] = [
-  { label: "Dashboard Admin", icon: LayoutDashboard, path: "/", section: "Principal" },
+  { label: "Dashboard", icon: LayoutDashboard, path: "/", section: "Principal" },
   { label: "Metas", icon: Target, path: "/metas", section: "Principal" },
   { label: "Cadastro de Dados", icon: ClipboardPlus, path: "/cadastro", section: "Principal" },
   { label: "Relatórios", icon: FileText, path: "/relatorios", section: "Principal" },
   { label: "Importar Excel", icon: FileSpreadsheet, path: "/importacao", section: "Principal" },
   {
-    label: "Contabilidade",
+    label: "Financeiro",
     icon: DollarSign,
     path: "/contabilidade",
-    section: "Módulos ERP",
+    section: "Módulos",
     children: [
       { label: "Faturamento", path: "/contabilidade/faturamento" },
-      { label: "Pagamentos", path: "/contabilidade/pagamentos" },
-      { label: "Bancário", path: "/contabilidade/bancario" },
+      { label: "Contas a Pagar", path: "/contabilidade/pagamentos" },
+      { label: "Contas a Receber", path: "/contabilidade/bancario" },
       { label: "Impostos", path: "/contabilidade/impostos" },
-      { label: "Relatórios", path: "/contabilidade/relatorios" },
+      { label: "Relatórios Financeiros", path: "/contabilidade/relatorios" },
     ],
   },
   {
-    label: "Pedidos",
-    icon: Package,
+    label: "Obras",
+    icon: Building2,
     path: "/pedidos",
-    section: "Módulos ERP",
+    section: "Módulos",
     children: [
-      { label: "Vendas", path: "/pedidos/vendas" },
-      { label: "Compras", path: "/pedidos/compras" },
-      { label: "Estoque", path: "/pedidos/estoque" },
-      { label: "CRM", path: "/pedidos/crm" },
+      { label: "Empreendimentos", path: "/pedidos/vendas" },
+      { label: "Contratos", path: "/pedidos/compras" },
+      { label: "Materiais", path: "/pedidos/estoque" },
+      { label: "Clientes", path: "/pedidos/crm" },
     ],
   },
   {
-    label: "Manufatura",
-    icon: Factory,
+    label: "Engenharia",
+    icon: HardHat,
     path: "/manufatura",
-    section: "Módulos ERP",
+    section: "Módulos",
     children: [
-      { label: "Ordens de Produção", path: "/manufatura/ordens" },
-      { label: "BOM", path: "/manufatura/bom" },
+      { label: "Ordens de Serviço", path: "/manufatura/ordens" },
+      { label: "Cronogramas", path: "/manufatura/bom" },
       { label: "Planejamento", path: "/manufatura/planejamento" },
     ],
   },
-  { label: "Ativos", icon: HardDrive, path: "/ativos", section: "Módulos ERP" },
-  { label: "Projetos", icon: FolderKanban, path: "/projetos", section: "Módulos ERP" },
-  { label: "RH", icon: Users, path: "/rh", section: "Módulos ERP" },
-  { label: "Helpdesk", icon: Headphones, path: "/helpdesk", section: "Módulos ERP" },
-  { label: "PDV", icon: ShoppingCart, path: "/pdv", section: "Módulos ERP" },
+  { label: "Patrimônio", icon: Landmark, path: "/ativos", section: "Módulos" },
+  { label: "Projetos", icon: FolderKanban, path: "/projetos", section: "Módulos" },
+  { label: "RH", icon: Users, path: "/rh", section: "Módulos" },
+  { label: "Suporte", icon: Headphones, path: "/helpdesk", section: "Módulos" },
+  { label: "Logística", icon: Truck, path: "/pdv", section: "Módulos" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -109,9 +109,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {!collapsed && (
           <div className="min-w-0">
             <h1 className="text-sm font-bold text-sidebar-primary tracking-tight font-sans truncate">
-              Sistema ERP San Remo
+              San Remo Construtora
             </h1>
-            <p className="text-[10px] text-sidebar-muted leading-none font-sans">Acesso administrativo</p>
+            <p className="text-[10px] text-sidebar-muted leading-none font-sans">Painel administrativo</p>
           </div>
         )}
       </div>
@@ -228,7 +228,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex-1 max-w-md">
             <div className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2">
               <Search className="w-4 h-4 text-muted-foreground" />
-              <input type="text" placeholder="Buscar módulos e relatórios..." className="bg-transparent border-none outline-none text-sm flex-1 text-foreground placeholder:text-muted-foreground font-sans" />
+              <input type="text" placeholder="Buscar obras, relatórios..." className="bg-transparent border-none outline-none text-sm flex-1 text-foreground placeholder:text-muted-foreground font-sans" />
             </div>
           </div>
 

@@ -18,17 +18,17 @@ interface DataEntry {
 }
 
 const categorias = [
-  "Vendas",
-  "Compras",
-  "Despesas",
-  "Receitas",
-  "Produção",
-  "Estoque",
-  "RH",
-  "Projetos",
+  "Vendas de Unidades",
+  "Compra de Materiais",
+  "Serviços Terceirizados",
+  "Mão de Obra",
+  "Despesas Administrativas",
+  "Receitas Financeiras",
+  "Infraestrutura",
+  "Licenças e Alvarás",
 ];
 
-const responsaveis = ["João", "Maria", "Carlos", "Ana"];
+const responsaveis = ["Emerson", "Marcos", "Juliana", "Rafael", "Fernanda"];
 
 export default function CadastroDados() {
   const { toast } = useToast();
@@ -85,11 +85,10 @@ export default function CadastroDados() {
       <div>
         <h1 className="text-2xl font-bold text-foreground">Cadastro de Dados</h1>
         <p className="text-sm text-muted-foreground mt-1 font-sans">
-          Insira dados de forma rápida pelo celular ou computador
+          Registre dados de obras, vendas e despesas rapidamente
         </p>
       </div>
 
-      {/* Formulário */}
       <Card className="erp-card-shadow">
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
@@ -134,7 +133,7 @@ export default function CadastroDados() {
               <Textarea
                 value={form.descricao}
                 onChange={(e) => setForm({ ...form, descricao: e.target.value })}
-                placeholder="Descreva o dado..."
+                placeholder="Ex: Compra de cimento para Bloco C..."
                 className="resize-none h-20"
                 maxLength={500}
               />
@@ -170,7 +169,6 @@ export default function CadastroDados() {
         </CardContent>
       </Card>
 
-      {/* Lista de registros recentes */}
       {entries.length > 0 && (
         <Card className="erp-card-shadow">
           <CardHeader className="pb-3">

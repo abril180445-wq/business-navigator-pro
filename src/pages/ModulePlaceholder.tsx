@@ -3,12 +3,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Construction } from "lucide-react";
 
 const moduleNames: Record<string, string> = {
-  "/manufatura": "Manufatura",
-  "/ativos": "Gestão de Ativos",
-  "/projetos": "Projetos",
+  "/manufatura": "Engenharia",
+  "/ativos": "Patrimônio",
+  "/projetos": "Projetos de Obra",
   "/rh": "Recursos Humanos",
-  "/helpdesk": "Helpdesk",
-  "/pdv": "Ponto de Venda",
+  "/helpdesk": "Suporte",
+  "/pdv": "Logística",
 };
 
 export default function ModulePlaceholder() {

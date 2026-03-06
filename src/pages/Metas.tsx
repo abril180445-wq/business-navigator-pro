@@ -47,22 +47,22 @@ const coresMeta = [
 ];
 
 const initialMetas: Meta[] = [
-  { id: "1", nome: "Faturamento Mensal", atual: 720000, objetivo: 1000000, unidade: "R$", cor: coresMeta[0] },
-  { id: "2", nome: "Obras Entregues", atual: 8, objetivo: 12, unidade: "obras", cor: coresMeta[1] },
-  { id: "3", nome: "Novos Clientes", atual: 15, objetivo: 20, unidade: "clientes", cor: coresMeta[2] },
+  { id: "1", nome: "Faturamento Mensal", atual: 2100000, objetivo: 3000000, unidade: "R$", cor: coresMeta[0] },
+  { id: "2", nome: "Obras Entregues no Ano", atual: 2, objetivo: 5, unidade: "obras", cor: coresMeta[1] },
+  { id: "3", nome: "Unidades Vendidas", atual: 145, objetivo: 200, unidade: "unidades", cor: coresMeta[2] },
   { id: "4", nome: "Satisfação do Cliente", atual: 92, objetivo: 95, unidade: "%", cor: coresMeta[3] },
-  { id: "5", nome: "Redução de Custos", atual: 18, objetivo: 25, unidade: "%", cor: coresMeta[4] },
-  { id: "6", nome: "Treinamentos", atual: 30, objetivo: 40, unidade: "horas", cor: coresMeta[5] },
+  { id: "5", nome: "Redução de Custos de Obra", atual: 18, objetivo: 25, unidade: "%", cor: coresMeta[4] },
+  { id: "6", nome: "Treinamentos Segurança", atual: 30, objetivo: 40, unidade: "horas", cor: coresMeta[5] },
 ];
 
 const evolucaoMensal = [
-  { mes: "Jan", faturamento: 480, meta: 1000 },
-  { mes: "Fev", faturamento: 520, meta: 1000 },
-  { mes: "Mar", faturamento: 580, meta: 1000 },
-  { mes: "Abr", faturamento: 610, meta: 1000 },
-  { mes: "Mai", faturamento: 650, meta: 1000 },
-  { mes: "Jun", faturamento: 690, meta: 1000 },
-  { mes: "Jul", faturamento: 720, meta: 1000 },
+  { mes: "Jan", faturamento: 850, meta: 3000 },
+  { mes: "Fev", faturamento: 1200, meta: 3000 },
+  { mes: "Mar", faturamento: 1550, meta: 3000 },
+  { mes: "Abr", faturamento: 1800, meta: 3000 },
+  { mes: "Mai", faturamento: 1950, meta: 3000 },
+  { mes: "Jun", faturamento: 2050, meta: 3000 },
+  { mes: "Jul", faturamento: 2100, meta: 3000 },
 ];
 
 const comparativoPeriodos = [
@@ -114,7 +114,7 @@ export default function Metas() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Acompanhamento de Metas</h1>
-          <p className="text-sm text-muted-foreground mt-1 font-sans">Monitore o progresso dos objetivos da San Remo</p>
+          <p className="text-sm text-muted-foreground mt-1 font-sans">Monitore o progresso dos objetivos da San Remo Construtora</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
