@@ -91,7 +91,7 @@ export default function Auth() {
   const handleBootstrap = setupForm.handleSubmit(async (values) => {
     setSubmitting(true);
 
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
       options: {
@@ -103,6 +103,18 @@ export default function Auth() {
     if (signUpError) {
       setSubmitting(false);
       toast({ title: "Não foi possível criar o admin", description: signUpError.message, variant: "destructive" });
+      return;
+    }
+
+    // Wait briefly for the profile trigger to complete
+    await new Promise((r) => setTimeout(r, 1000));
+
+    // Ensure session is active
+    if (!signUpData.session) {
+      setSubmitting(false);
+      toast({ title: "Erro de autenticação", description: "Não foi possível autenticar automaticamente. Tente fazer login.", variant: "destructive" });
+      setHasAdminAccount(false);
+      setMode("login");
       return;
     }
 
