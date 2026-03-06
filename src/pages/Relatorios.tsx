@@ -10,30 +10,30 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 const dadosExemplo = [
-  { data: "01/01/2025", categoria: "Vendas", descricao: "Venda apartamento Bloco A", valor: 350000 },
-  { data: "05/01/2025", categoria: "Compras", descricao: "Material de construção", valor: -45000 },
-  { data: "10/01/2025", categoria: "Vendas", descricao: "Venda lote 15", valor: 180000 },
-  { data: "12/01/2025", categoria: "Despesas", descricao: "Folha de pagamento", valor: -120000 },
-  { data: "15/01/2025", categoria: "Vendas", descricao: "Sinal apartamento 302", valor: 85000 },
-  { data: "18/01/2025", categoria: "Compras", descricao: "Cimento e aço", valor: -62000 },
-  { data: "22/01/2025", categoria: "Receitas", descricao: "Parcela financiamento", valor: 95000 },
-  { data: "25/01/2025", categoria: "Despesas", descricao: "Aluguel equipamentos", valor: -28000 },
-  { data: "28/01/2025", categoria: "Vendas", descricao: "Venda casa modelo", valor: 420000 },
-  { data: "30/01/2025", categoria: "Despesas", descricao: "Impostos INSS", valor: -35000 },
+  { data: "01/01/2026", categoria: "Vendas", descricao: "Venda Unid. 302 — Res. Vila Serena", valor: 385000 },
+  { data: "05/01/2026", categoria: "Compras", descricao: "Cimento e aço — Canteiro Monte Carlo", valor: -125000 },
+  { data: "10/01/2026", categoria: "Vendas", descricao: "Venda Lote 15 — Cond. Jardim Real", valor: 180000 },
+  { data: "12/01/2026", categoria: "Despesas", descricao: "Folha de pagamento — Engenharia", valor: -185000 },
+  { data: "15/01/2026", categoria: "Vendas", descricao: "Sinal Unid. 1201 — Ed. Monte Carlo", valor: 156000 },
+  { data: "18/01/2026", categoria: "Compras", descricao: "Concreto usinado — Concreteira Central", valor: -92000 },
+  { data: "22/01/2026", categoria: "Receitas", descricao: "Parcela financiamento — Vila Serena", valor: 195000 },
+  { data: "25/01/2026", categoria: "Despesas", descricao: "Aluguel de equipamentos pesados", valor: -48000 },
+  { data: "28/01/2026", categoria: "Vendas", descricao: "Venda Unid. 501 — Res. Vila Serena", valor: 395000 },
+  { data: "30/01/2026", categoria: "Despesas", descricao: "Impostos e encargos trabalhistas", valor: -65000 },
 ];
 
 const tiposRelatorio = [
   { value: "geral", label: "Relatório Geral" },
-  { value: "vendas", label: "Relatório de Vendas" },
-  { value: "despesas", label: "Relatório de Despesas" },
+  { value: "vendas", label: "Relatório de Vendas de Unidades" },
+  { value: "despesas", label: "Relatório de Custos de Obra" },
   { value: "metas", label: "Relatório de Metas" },
 ];
 
 export default function Relatorios() {
   const { toast } = useToast();
   const [tipo, setTipo] = useState("geral");
-  const [dataInicio, setDataInicio] = useState("2025-01-01");
-  const [dataFim, setDataFim] = useState("2025-01-31");
+  const [dataInicio, setDataInicio] = useState("2026-01-01");
+  const [dataFim, setDataFim] = useState("2026-01-31");
 
   const filteredData = dadosExemplo.filter((d) => {
     if (tipo === "vendas") return d.categoria === "Vendas";

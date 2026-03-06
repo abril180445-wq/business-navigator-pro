@@ -9,47 +9,46 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Plus, Filter, ShoppingCart, Package, TrendingUp, Users } from "lucide-react";
+import { Plus, Filter, Building2, FileText, TrendingUp, Users } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const salesOrders = [
-  { id: "PV-2024-0342", cliente: "Tech Solutions", itens: 5, valor: 23400, status: "confirmado", data: "15/12/2024" },
-  { id: "PV-2024-0341", cliente: "Indústria Beta", itens: 12, valor: 56700, status: "rascunho", data: "14/12/2024" },
-  { id: "PV-2024-0340", cliente: "Comércio Alfa", itens: 3, valor: 8900, status: "entregue", data: "13/12/2024" },
-  { id: "PV-2024-0339", cliente: "Global Parts", itens: 8, valor: 34200, status: "confirmado", data: "12/12/2024" },
-  { id: "PV-2024-0338", cliente: "Solar Energia", itens: 2, valor: 15600, status: "cancelado", data: "11/12/2024" },
+const empreendimentos = [
+  { id: "OBR-001", nome: "Res. Vila Serena", fase: "Acabamento", unidades: 120, vendidas: 98, status: "em andamento", previsao: "08/2026" },
+  { id: "OBR-002", nome: "Ed. Monte Carlo", fase: "Estrutura", unidades: 80, vendidas: 52, status: "em andamento", previsao: "03/2027" },
+  { id: "OBR-003", nome: "Cond. Jardim Real", fase: "Fundação", unidades: 200, vendidas: 45, status: "em andamento", previsao: "12/2027" },
+  { id: "OBR-004", nome: "Res. Bela Vista", fase: "Entregue", unidades: 64, vendidas: 64, status: "concluído", previsao: "01/2026" },
+  { id: "OBR-005", nome: "Ed. Torre Dourada", fase: "Projeto", unidades: 96, vendidas: 12, status: "planejamento", previsao: "06/2028" },
 ];
 
-const purchaseOrders = [
-  { id: "OC-2024-0198", fornecedor: "Fornecedor ABC", itens: 20, valor: 45000, status: "recebido", data: "15/12/2024" },
-  { id: "OC-2024-0197", fornecedor: "Parts Global", itens: 8, valor: 12300, status: "enviado", data: "14/12/2024" },
-  { id: "OC-2024-0196", fornecedor: "Metal Supply", itens: 15, valor: 28900, status: "pendente", data: "13/12/2024" },
-  { id: "OC-2024-0195", fornecedor: "Tech Components", itens: 30, valor: 67800, status: "recebido", data: "12/12/2024" },
+const contratos = [
+  { id: "CT-2026-042", fornecedor: "Concreteira Central", objeto: "Fornecimento de concreto usinado", valor: 890000, status: "ativo", data: "15/01/2026" },
+  { id: "CT-2026-041", fornecedor: "Aço Forte Ltda", objeto: "Aço CA-50 e CA-60", valor: 1250000, status: "ativo", data: "10/01/2026" },
+  { id: "CT-2026-040", fornecedor: "Terraplan Serviços", objeto: "Terraplanagem Lote 22", valor: 340000, status: "concluído", data: "05/01/2026" },
+  { id: "CT-2026-039", fornecedor: "Elétrica Master", objeto: "Instalações elétricas Bloco A-D", valor: 560000, status: "ativo", data: "02/01/2026" },
 ];
 
-const stockItems = [
-  { codigo: "SKU-001", nome: "Parafuso M8x30", armazem: "Central", qtd: 15000, minimo: 5000, unidade: "un" },
-  { codigo: "SKU-002", nome: "Chapa Aço 2mm", armazem: "Central", qtd: 230, minimo: 100, unidade: "m²" },
-  { codigo: "SKU-003", nome: "Motor Elétrico 5CV", armazem: "Fábrica", qtd: 12, minimo: 5, unidade: "un" },
-  { codigo: "SKU-004", nome: "Rolamento 6205", armazem: "Central", qtd: 450, minimo: 200, unidade: "un" },
-  { codigo: "SKU-005", nome: "Tinta Epóxi Cinza", armazem: "Fábrica", qtd: 85, minimo: 50, unidade: "L" },
+const materiais = [
+  { codigo: "MAT-001", nome: "Cimento CP-II 50kg", armazem: "Canteiro Vila Serena", qtd: 2500, minimo: 500, unidade: "sacos" },
+  { codigo: "MAT-002", nome: "Aço CA-50 10mm", armazem: "Canteiro Monte Carlo", qtd: 18000, minimo: 5000, unidade: "kg" },
+  { codigo: "MAT-003", nome: "Tijolo cerâmico 9 furos", armazem: "Canteiro Vila Serena", qtd: 45000, minimo: 10000, unidade: "un" },
+  { codigo: "MAT-004", nome: "Areia média lavada", armazem: "Canteiro Jardim Real", qtd: 120, minimo: 50, unidade: "m³" },
+  { codigo: "MAT-005", nome: "Brita nº 1", armazem: "Canteiro Monte Carlo", qtd: 85, minimo: 40, unidade: "m³" },
 ];
 
 const statusColors: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  confirmado: "default",
-  rascunho: "secondary",
-  entregue: "default",
+  "em andamento": "default",
+  planejamento: "secondary",
+  concluído: "default",
   cancelado: "destructive",
-  recebido: "default",
-  enviado: "secondary",
+  ativo: "default",
   pendente: "outline",
 };
 
 const summaryCards = [
-  { title: "Vendas do Mês", value: "R$ 138.800", icon: ShoppingCart },
-  { title: "Compras do Mês", value: "R$ 154.000", icon: Package },
-  { title: "Margem Bruta", value: "28.6%", icon: TrendingUp },
-  { title: "Clientes Ativos", value: "127", icon: Users },
+  { title: "Empreendimentos Ativos", value: "8", icon: Building2 },
+  { title: "Contratos Vigentes", value: "24", icon: FileText },
+  { title: "VGV Total", value: "R$ 285M", icon: TrendingUp },
+  { title: "Clientes Compradores", value: "312", icon: Users },
 ];
 
 export default function Pedidos() {
@@ -57,12 +56,12 @@ export default function Pedidos() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Gestão de Pedidos</h1>
-          <p className="text-sm text-muted-foreground mt-1">Vendas, compras e controle de estoque</p>
+          <h1 className="text-2xl font-bold text-foreground">Gestão de Obras</h1>
+          <p className="text-sm text-muted-foreground mt-1">Empreendimentos, contratos e materiais</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm"><Filter className="w-4 h-4 mr-1.5" /> Filtrar</Button>
-          <Button size="sm"><Plus className="w-4 h-4 mr-1.5" /> Novo Pedido</Button>
+          <Button size="sm"><Plus className="w-4 h-4 mr-1.5" /> Nova Obra</Button>
         </div>
       </div>
 
@@ -83,100 +82,102 @@ export default function Pedidos() {
         })}
       </div>
 
-      <Tabs defaultValue="vendas">
+      <Tabs defaultValue="empreendimentos">
         <TabsList>
-          <TabsTrigger value="vendas">Vendas</TabsTrigger>
-          <TabsTrigger value="compras">Compras</TabsTrigger>
-          <TabsTrigger value="estoque">Estoque</TabsTrigger>
+          <TabsTrigger value="empreendimentos">Empreendimentos</TabsTrigger>
+          <TabsTrigger value="contratos">Contratos</TabsTrigger>
+          <TabsTrigger value="materiais">Materiais</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="vendas">
+        <TabsContent value="empreendimentos">
           <Card className="erp-card-shadow">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Pedidos de Venda</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Pedido</TableHead>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Itens</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {salesOrders.map((order) => (
-                    <TableRow key={order.id} className="cursor-pointer hover:bg-muted/50">
-                      <TableCell className="font-medium text-primary">{order.id}</TableCell>
-                      <TableCell>{order.cliente}</TableCell>
-                      <TableCell className="text-muted-foreground">{order.data}</TableCell>
-                      <TableCell>{order.itens}</TableCell>
-                      <TableCell className="text-right font-medium">R$ {order.valor.toLocaleString()}</TableCell>
-                      <TableCell><Badge variant={statusColors[order.status]}>{order.status}</Badge></TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="compras">
-          <Card className="erp-card-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Ordens de Compra</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Ordem</TableHead>
-                    <TableHead>Fornecedor</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Itens</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {purchaseOrders.map((order) => (
-                    <TableRow key={order.id} className="cursor-pointer hover:bg-muted/50">
-                      <TableCell className="font-medium text-primary">{order.id}</TableCell>
-                      <TableCell>{order.fornecedor}</TableCell>
-                      <TableCell className="text-muted-foreground">{order.data}</TableCell>
-                      <TableCell>{order.itens}</TableCell>
-                      <TableCell className="text-right font-medium">R$ {order.valor.toLocaleString()}</TableCell>
-                      <TableCell><Badge variant={statusColors[order.status]}>{order.status}</Badge></TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="estoque">
-          <Card className="erp-card-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Itens em Estoque</CardTitle>
+              <CardTitle className="text-base font-semibold">Empreendimentos</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Código</TableHead>
-                    <TableHead>Produto</TableHead>
-                    <TableHead>Armazém</TableHead>
+                    <TableHead>Empreendimento</TableHead>
+                    <TableHead>Fase</TableHead>
+                    <TableHead>Unidades</TableHead>
+                    <TableHead>Vendidas</TableHead>
+                    <TableHead>Previsão</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {empreendimentos.map((e) => (
+                    <TableRow key={e.id} className="cursor-pointer hover:bg-muted/50">
+                      <TableCell className="font-medium text-primary">{e.id}</TableCell>
+                      <TableCell className="font-medium">{e.nome}</TableCell>
+                      <TableCell className="text-muted-foreground">{e.fase}</TableCell>
+                      <TableCell>{e.unidades}</TableCell>
+                      <TableCell>{e.vendidas}</TableCell>
+                      <TableCell className="text-muted-foreground">{e.previsao}</TableCell>
+                      <TableCell><Badge variant={statusColors[e.status]}>{e.status}</Badge></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="contratos">
+          <Card className="erp-card-shadow">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold">Contratos com Fornecedores</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Contrato</TableHead>
+                    <TableHead>Fornecedor</TableHead>
+                    <TableHead>Objeto</TableHead>
+                    <TableHead>Data</TableHead>
+                    <TableHead className="text-right">Valor</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {contratos.map((c) => (
+                    <TableRow key={c.id} className="cursor-pointer hover:bg-muted/50">
+                      <TableCell className="font-medium text-primary">{c.id}</TableCell>
+                      <TableCell>{c.fornecedor}</TableCell>
+                      <TableCell className="text-muted-foreground max-w-[200px] truncate">{c.objeto}</TableCell>
+                      <TableCell className="text-muted-foreground">{c.data}</TableCell>
+                      <TableCell className="text-right font-medium">R$ {c.valor.toLocaleString()}</TableCell>
+                      <TableCell><Badge variant={statusColors[c.status]}>{c.status}</Badge></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="materiais">
+          <Card className="erp-card-shadow">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold">Estoque de Materiais</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Código</TableHead>
+                    <TableHead>Material</TableHead>
+                    <TableHead>Canteiro</TableHead>
                     <TableHead className="text-right">Quantidade</TableHead>
                     <TableHead className="text-right">Mínimo</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {stockItems.map((item) => (
+                  {materiais.map((item) => (
                     <TableRow key={item.codigo} className="cursor-pointer hover:bg-muted/50">
                       <TableCell className="font-medium text-primary">{item.codigo}</TableCell>
                       <TableCell>{item.nome}</TableCell>

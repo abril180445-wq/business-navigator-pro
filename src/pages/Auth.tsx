@@ -180,10 +180,10 @@ export default function Auth() {
               Painel administrativo protegido
             </span>
             <h2 className="text-5xl leading-tight font-bold">
-              Controle metas, relatórios e operação em um único painel administrativo.
+              Gerencie obras, metas e finanças da construtora em um único painel.
             </h2>
             <p className="text-lg text-primary-foreground/72 font-sans">
-              Acesso exclusivo para administradores com login por e-mail, recuperação de senha e proteção de rotas.
+              Acesso exclusivo para administradores da San Remo Construtora.
             </p>
           </div>
 
