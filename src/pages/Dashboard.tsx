@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   DollarSign,
   Building2,
@@ -5,8 +6,11 @@ import {
   Users,
   ArrowUpRight,
   ArrowDownRight,
+  TrendingUp,
+  Calendar,
+  Filter,
+  ChevronDown,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AreaChart,
   Area,
@@ -20,226 +24,240 @@ import {
   PieChart,
   Pie,
   Cell,
+  LineChart,
+  Line,
+  Legend,
+  ComposedChart,
 } from "recharts";
 
 const revenueData = [
-  { month: "Jan", receita: 850000, despesa: 620000 },
-  { month: "Fev", receita: 920000, despesa: 680000 },
-  { month: "Mar", receita: 780000, despesa: 590000 },
-  { month: "Abr", receita: 1100000, despesa: 750000 },
-  { month: "Mai", receita: 950000, despesa: 700000 },
-  { month: "Jun", receita: 1250000, despesa: 820000 },
-  { month: "Jul", receita: 1400000, despesa: 890000 },
-  { month: "Ago", receita: 1300000, despesa: 860000 },
-  { month: "Set", receita: 1550000, despesa: 950000 },
-  { month: "Out", receita: 1680000, despesa: 1020000 },
-  { month: "Nov", receita: 1820000, despesa: 1100000 },
-  { month: "Dez", receita: 2100000, despesa: 1250000 },
+  { month: "Jan", receita: 850, custo: 620 },
+  { month: "Fev", receita: 920, custo: 680 },
+  { month: "Mar", receita: 780, custo: 590 },
+  { month: "Abr", receita: 1100, custo: 750 },
+  { month: "Mai", receita: 950, custo: 700 },
+  { month: "Jun", receita: 1250, custo: 820 },
+  { month: "Jul", receita: 1400, custo: 890 },
+  { month: "Ago", receita: 1300, custo: 860 },
+  { month: "Set", receita: 1550, custo: 950 },
+  { month: "Out", receita: 1680, custo: 1020 },
+  { month: "Nov", receita: 1820, custo: 1100 },
+  { month: "Dez", receita: 2100, custo: 1250 },
 ];
 
 const obrasPorStatus = [
-  { name: "Em andamento", value: 8 },
-  { name: "Planejamento", value: 3 },
-  { name: "Concluídas", value: 12 },
-  { name: "Paralisadas", value: 1 },
+  { name: "Em andamento", value: 8, color: "hsl(207, 89%, 48%)" },
+  { name: "Planejamento", value: 3, color: "hsl(45, 100%, 51%)" },
+  { name: "Concluídas", value: 12, color: "hsl(152, 60%, 38%)" },
+  { name: "Paralisadas", value: 1, color: "hsl(0, 72%, 51%)" },
 ];
 
 const topEmpreendimentos = [
-  { name: "Res. Vila Serena", vendas: 42 },
-  { name: "Ed. Monte Carlo", vendas: 35 },
-  { name: "Cond. Jardim Real", vendas: 28 },
-  { name: "Res. Bela Vista", vendas: 22 },
-  { name: "Ed. Torre Dourada", vendas: 18 },
+  { name: "Res. Vila Serena", vendas: 42, meta: 50 },
+  { name: "Ed. Monte Carlo", vendas: 35, meta: 40 },
+  { name: "Cond. Jardim Real", vendas: 28, meta: 35 },
+  { name: "Res. Bela Vista", vendas: 22, meta: 30 },
+  { name: "Ed. Torre Dourada", vendas: 18, meta: 25 },
 ];
 
-const COLORS = [
-  "hsl(220, 60%, 18%)",
-  "hsl(42, 70%, 50%)",
-  "hsl(42, 65%, 65%)",
-  "hsl(220, 45%, 28%)",
+const progressoObras = [
+  { obra: "Vila Serena", progresso: 78 },
+  { obra: "Monte Carlo", progresso: 45 },
+  { obra: "Jardim Real", progresso: 92 },
+  { obra: "Bela Vista", progresso: 33 },
+  { obra: "Torre Dourada", progresso: 15 },
 ];
 
-const recentActivities = [
-  { action: "Vistoria concluída — Res. Vila Serena, Bloco C", time: "Há 5 min" },
-  { action: "Pagamento de R$ 185.000 recebido — Ed. Monte Carlo", time: "Há 15 min" },
-  { action: "Ordem de serviço #OS-0234 finalizada — Fundação Bloco D", time: "Há 32 min" },
-  { action: "Novo contrato assinado — Terraplanagem Lote 22", time: "Há 1h" },
-  { action: "Entrega de materiais — Cimento e aço, Armazém Central", time: "Há 2h" },
-  { action: "Alvará aprovado — Cond. Jardim Real, Fase 2", time: "Há 3h" },
+const vendasMensais = [
+  { month: "Jan", unidades: 8 },
+  { month: "Fev", unidades: 12 },
+  { month: "Mar", unidades: 10 },
+  { month: "Abr", unidades: 15 },
+  { month: "Mai", unidades: 11 },
+  { month: "Jun", unidades: 18 },
+  { month: "Jul", unidades: 22 },
+  { month: "Ago", unidades: 19 },
+  { month: "Set", unidades: 25 },
+  { month: "Out", unidades: 28 },
+  { month: "Nov", unidades: 30 },
+  { month: "Dez", unidades: 35 },
 ];
 
 const kpis = [
-  {
-    title: "Faturamento Mensal",
-    value: "R$ 2,1M",
-    change: "+14.8%",
-    trend: "up" as const,
-    icon: DollarSign,
-  },
-  {
-    title: "Obras Ativas",
-    value: "8",
-    change: "+2",
-    trend: "up" as const,
-    icon: Building2,
-  },
-  {
-    title: "Unidades Vendidas",
-    value: "145",
-    change: "+12.3%",
-    trend: "up" as const,
-    icon: HardHat,
-  },
-  {
-    title: "Clientes Ativos",
-    value: "312",
-    change: "+8.1%",
-    trend: "up" as const,
-    icon: Users,
-  },
+  { title: "Faturamento", value: "R$ 2,1M", change: "+14.8%", trend: "up" as const, icon: DollarSign, color: "hsl(207, 89%, 48%)" },
+  { title: "Obras Ativas", value: "8", change: "+2", trend: "up" as const, icon: Building2, color: "hsl(45, 100%, 51%)" },
+  { title: "Unidades Vendidas", value: "145", change: "+12.3%", trend: "up" as const, icon: HardHat, color: "hsl(174, 62%, 47%)" },
+  { title: "Clientes Ativos", value: "312", change: "+8.1%", trend: "up" as const, icon: Users, color: "hsl(28, 87%, 55%)" },
 ];
 
+const PBITile = ({ children, title, className = "" }: { children: React.ReactNode; title?: string; className?: string }) => (
+  <div className={`pbi-tile p-4 ${className}`}>
+    {title && (
+      <h3 className="text-[13px] font-semibold text-foreground mb-3">{title}</h3>
+    )}
+    {children}
+  </div>
+);
+
 export default function Dashboard() {
+  const [periodo, setPeriodo] = useState("2025");
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Dashboard — San Remo Construtora</h1>
-        <p className="text-sm text-muted-foreground mt-1 font-sans">
-          Visão geral das obras, vendas e finanças.
-        </p>
+    <div className="space-y-3">
+      {/* Filter bar — Power BI style */}
+      <div className="pbi-filter-bar rounded-sm px-4 py-2.5 flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
+          <Filter className="w-3.5 h-3.5" />
+          <span className="font-medium">Filtros</span>
+        </div>
+        <div className="h-4 w-px bg-border" />
+
+        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-secondary text-[12px] font-medium text-foreground hover:bg-secondary/80 transition-colors">
+          <Calendar className="w-3 h-3" />
+          Ano: {periodo}
+          <ChevronDown className="w-3 h-3" />
+        </button>
+
+        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-secondary text-[12px] font-medium text-foreground hover:bg-secondary/80 transition-colors">
+          <Building2 className="w-3 h-3" />
+          Todas as Obras
+          <ChevronDown className="w-3 h-3" />
+        </button>
+
+        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-secondary text-[12px] font-medium text-foreground hover:bg-secondary/80 transition-colors">
+          Todos os Status
+          <ChevronDown className="w-3 h-3" />
+        </button>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* KPI Cards row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <Card key={kpi.title} className="erp-card-shadow hover:erp-card-shadow-hover transition-shadow border-t-2 border-t-accent">
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground font-medium font-sans">{kpi.title}</p>
-                    <p className="text-2xl font-bold text-card-foreground font-sans">{kpi.value}</p>
-                    <div className="flex items-center gap-1">
-                      {kpi.trend === "up" ? (
-                        <ArrowUpRight className="w-3.5 h-3.5 text-success" />
-                      ) : (
-                        <ArrowDownRight className="w-3.5 h-3.5 text-destructive" />
-                      )}
-                      <span className={`text-xs font-medium font-sans ${kpi.trend === "up" ? "text-success" : "text-destructive"}`}>
-                        {kpi.change}
-                      </span>
-                      <span className="text-xs text-muted-foreground font-sans">vs mês anterior</span>
-                    </div>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-accent/10 text-accent">
-                    <Icon className="w-5 h-5" />
+            <PBITile key={kpi.title}>
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">{kpi.title}</p>
+                  <p className="pbi-kpi-value mt-1" style={{ color: kpi.color }}>{kpi.value}</p>
+                  <div className="flex items-center gap-1 mt-1.5">
+                    {kpi.trend === "up" ? (
+                      <ArrowUpRight className="w-3 h-3 text-success" />
+                    ) : (
+                      <ArrowDownRight className="w-3 h-3 text-destructive" />
+                    )}
+                    <span className={`text-[11px] font-semibold ${kpi.trend === "up" ? "text-success" : "text-destructive"}`}>
+                      {kpi.change}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">vs anterior</span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="p-2 rounded" style={{ backgroundColor: `${kpi.color}15` }}>
+                  <Icon className="w-4 h-4" style={{ color: kpi.color }} />
+                </div>
+              </div>
+            </PBITile>
           );
         })}
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="lg:col-span-2 erp-card-shadow">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">Faturamento vs Custos de Obra</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={280}>
-              <AreaChart data={revenueData}>
-                <defs>
-                  <linearGradient id="colorReceita" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(220, 60%, 18%)" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="hsl(220, 60%, 18%)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorDespesa" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(42, 70%, 50%)" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="hsl(42, 70%, 50%)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 88%)" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="hsl(220, 10%, 46%)" />
-                <YAxis tick={{ fontSize: 12 }} stroke="hsl(220, 10%, 46%)" tickFormatter={(v) => `${v / 1000}k`} />
-                <Tooltip
-                  formatter={(value: number) => [`R$ ${value.toLocaleString()}`, ""]}
-                  contentStyle={{ borderRadius: "8px", border: "1px solid hsl(220, 15%, 88%)", fontSize: 13 }}
-                />
-                <Area type="monotone" dataKey="receita" stroke="hsl(220, 60%, 18%)" fill="url(#colorReceita)" strokeWidth={2} name="Faturamento" />
-                <Area type="monotone" dataKey="despesa" stroke="hsl(42, 70%, 50%)" fill="url(#colorDespesa)" strokeWidth={2} name="Custos" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      {/* Row 2: Revenue chart + Pie */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <PBITile title="Faturamento vs Custos (R$ mil)" className="lg:col-span-2">
+          <ResponsiveContainer width="100%" height={260}>
+            <ComposedChart data={revenueData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(0, 0%, 88%)" />
+              <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(0, 0%, 60%)" />
+              <YAxis tick={{ fontSize: 11 }} stroke="hsl(0, 0%, 60%)" />
+              <Tooltip
+                formatter={(value: number) => [`R$ ${value}k`, ""]}
+                contentStyle={{ borderRadius: "4px", border: "1px solid hsl(0, 0%, 88%)", fontSize: 12, boxShadow: "0 2px 8px hsl(0 0% 0% / 0.1)" }}
+              />
+              <Legend iconType="square" wrapperStyle={{ fontSize: 11 }} />
+              <Bar dataKey="receita" fill="hsl(207, 89%, 48%)" radius={[2, 2, 0, 0]} barSize={18} name="Faturamento" />
+              <Line type="monotone" dataKey="custo" stroke="hsl(0, 72%, 51%)" strokeWidth={2} dot={{ r: 3 }} name="Custos" />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </PBITile>
 
-        <Card className="erp-card-shadow">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">Obras por Status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie data={obrasPorStatus} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={3}>
-                  {obrasPorStatus.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value: number) => [value, "obras"]} contentStyle={{ borderRadius: "8px", fontSize: 13 }} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              {obrasPorStatus.map((item, i) => (
-                <div key={item.name} className="flex items-center gap-2 text-xs font-sans">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[i] }} />
-                  <span className="text-muted-foreground">{item.name}</span>
-                  <span className="font-semibold text-card-foreground ml-auto">{item.value}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <PBITile title="Obras por Status">
+          <ResponsiveContainer width="100%" height={180}>
+            <PieChart>
+              <Pie data={obrasPorStatus} cx="50%" cy="50%" innerRadius={45} outerRadius={70} dataKey="value" paddingAngle={2}>
+                {obrasPorStatus.map((entry, index) => (
+                  <Cell key={index} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(value: number) => [value, "obras"]} contentStyle={{ borderRadius: "4px", fontSize: 12 }} />
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="space-y-1.5 mt-1">
+            {obrasPorStatus.map((item) => (
+              <div key={item.name} className="flex items-center gap-2 text-[11px]">
+                <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: item.color }} />
+                <span className="text-muted-foreground flex-1">{item.name}</span>
+                <span className="font-bold text-foreground">{item.value}</span>
+              </div>
+            ))}
+          </div>
+        </PBITile>
       </div>
 
-      {/* Bottom */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="erp-card-shadow">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">Top Empreendimentos — Unidades Vendidas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={topEmpreendimentos} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 88%)" horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 12 }} stroke="hsl(220, 10%, 46%)" />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(220, 10%, 46%)" width={120} />
-                <Tooltip contentStyle={{ borderRadius: "8px", fontSize: 13 }} />
-                <Bar dataKey="vendas" fill="hsl(42, 70%, 50%)" radius={[0, 4, 4, 0]} barSize={20} name="Unidades" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      {/* Row 3: Bar chart + Progress + Line chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <PBITile title="Vendas por Empreendimento">
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={topEmpreendimentos} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(0, 0%, 88%)" horizontal={false} />
+              <XAxis type="number" tick={{ fontSize: 10 }} stroke="hsl(0, 0%, 60%)" />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} stroke="hsl(0, 0%, 60%)" width={100} />
+              <Tooltip contentStyle={{ borderRadius: "4px", fontSize: 12 }} />
+              <Legend iconType="square" wrapperStyle={{ fontSize: 10 }} />
+              <Bar dataKey="vendas" fill="hsl(207, 89%, 48%)" radius={[0, 2, 2, 0]} barSize={14} name="Vendas" />
+              <Bar dataKey="meta" fill="hsl(0, 0%, 80%)" radius={[0, 2, 2, 0]} barSize={14} name="Meta" />
+            </BarChart>
+          </ResponsiveContainer>
+        </PBITile>
 
-        <Card className="erp-card-shadow">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">Atividade Recente</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {recentActivities.map((activity, i) => (
-                <div key={i} className="flex items-start gap-3 py-2 border-b border-border last:border-0">
-                  <div className="w-2 h-2 rounded-full bg-accent mt-2 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-card-foreground font-sans">{activity.action}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5 font-sans">{activity.time}</p>
+        <PBITile title="Progresso das Obras (%)">
+          <div className="space-y-3 mt-1">
+            {progressoObras.map((item) => {
+              const barColor = item.progresso >= 80 ? "hsl(152, 60%, 38%)" : item.progresso >= 50 ? "hsl(207, 89%, 48%)" : item.progresso >= 30 ? "hsl(45, 100%, 51%)" : "hsl(0, 72%, 51%)";
+              return (
+                <div key={item.obra}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11px] text-foreground font-medium">{item.obra}</span>
+                    <span className="text-[11px] font-bold" style={{ color: barColor }}>{item.progresso}%</span>
+                  </div>
+                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{ width: `${item.progresso}%`, backgroundColor: barColor }}
+                    />
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              );
+            })}
+          </div>
+        </PBITile>
+
+        <PBITile title="Unidades Vendidas / Mês">
+          <ResponsiveContainer width="100%" height={220}>
+            <AreaChart data={vendasMensais}>
+              <defs>
+                <linearGradient id="colorUnidades" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(174, 62%, 47%)" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(174, 62%, 47%)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(0, 0%, 88%)" />
+              <XAxis dataKey="month" tick={{ fontSize: 10 }} stroke="hsl(0, 0%, 60%)" />
+              <YAxis tick={{ fontSize: 10 }} stroke="hsl(0, 0%, 60%)" />
+              <Tooltip contentStyle={{ borderRadius: "4px", fontSize: 12 }} />
+              <Area type="monotone" dataKey="unidades" stroke="hsl(174, 62%, 47%)" fill="url(#colorUnidades)" strokeWidth={2} name="Unidades" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </PBITile>
       </div>
     </div>
   );

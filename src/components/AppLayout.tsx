@@ -20,9 +20,10 @@ import {
   X,
   Search,
   Bell,
-  Settings,
   LogOut,
-  ShieldCheck,
+  MoreVertical,
+  BarChart3,
+  Filter,
 } from "lucide-react";
 import logoSanRemo from "@/assets/logo-san-remo.png";
 import { Button } from "@/components/ui/button";
@@ -37,11 +38,11 @@ interface ModuleItem {
 }
 
 const modules: ModuleItem[] = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/", section: "Principal" },
-  { label: "Metas", icon: Target, path: "/metas", section: "Principal" },
-  { label: "Cadastro de Dados", icon: ClipboardPlus, path: "/cadastro", section: "Principal" },
-  { label: "Relatórios", icon: FileText, path: "/relatorios", section: "Principal" },
-  { label: "Importar Excel", icon: FileSpreadsheet, path: "/importacao", section: "Principal" },
+  { label: "Dashboard", icon: LayoutDashboard, path: "/", section: "Visão Geral" },
+  { label: "Metas", icon: Target, path: "/metas", section: "Visão Geral" },
+  { label: "Relatórios", icon: FileText, path: "/relatorios", section: "Visão Geral" },
+  { label: "Cadastro de Dados", icon: ClipboardPlus, path: "/cadastro", section: "Dados" },
+  { label: "Importar Excel", icon: FileSpreadsheet, path: "/importacao", section: "Dados" },
   {
     label: "Financeiro",
     icon: DollarSign,
@@ -86,7 +87,7 @@ const modules: ModuleItem[] = [
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const location = useLocation();
@@ -102,29 +103,25 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const sections = [...new Set(modules.map((m) => m.section))];
 
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center gap-3 px-4 py-4 border-b border-sidebar-border">
-        <img src={logoSanRemo} alt="San Remo Construtora" className="w-9 h-9 object-contain rounded" />
-        {!collapsed && (
-          <div className="min-w-0">
-            <h1 className="text-sm font-bold text-sidebar-primary tracking-tight font-sans truncate">
-              San Remo Construtora
-            </h1>
-            <p className="text-[10px] text-sidebar-muted leading-none font-sans">Painel administrativo</p>
-          </div>
-        )}
+  const currentPage = modules.find(m => isActive(m.path))?.label || "Dashboard";
+
+  const SidebarNav = () => (
+    <div className="flex flex-col h-full bg-sidebar">
+      {/* Logo area */}
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-sidebar-border shrink-0">
+        <img src={logoSanRemo} alt="San Remo" className="w-7 h-7 object-contain rounded" />
+        <span className="text-sm font-semibold text-sidebar-primary tracking-tight truncate">
+          San Remo
+        </span>
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-1">
+      <nav className="flex-1 overflow-y-auto py-2 px-2">
         {sections.map((section) => (
-          <div key={section}>
-            {!collapsed && (
-              <p className="text-[10px] uppercase tracking-widest text-sidebar-muted font-semibold px-3 pt-3 pb-1 font-sans">
-                {section}
-              </p>
-            )}
-            <div className="space-y-0.5">
+          <div key={section} className="mb-1">
+            <p className="text-[10px] uppercase tracking-widest text-sidebar-muted font-semibold px-3 pt-3 pb-1">
+              {section}
+            </p>
+            <div className="space-y-px">
               {modules
                 .filter((m) => m.section === section)
                 .map((mod) => {
@@ -136,36 +133,38 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   return (
                     <div key={mod.label}>
                       <div
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors text-sm font-medium font-sans
-                          ${active && !hasChildren ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-2 border-accent" : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"}`}
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded cursor-pointer transition-all text-[13px] font-medium
+                          ${active && !hasChildren
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-[3px] border-sidebar-primary"
+                            : "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground border-l-[3px] border-transparent"
+                          }`}
                         onClick={() => hasChildren ? toggleModule(mod.label) : undefined}
                       >
                         {hasChildren ? (
                           <>
                             <Icon className="w-4 h-4 shrink-0" />
-                            {!collapsed && (
-                              <>
-                                <span className="flex-1">{mod.label}</span>
-                                {expanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-                              </>
-                            )}
+                            <span className="flex-1">{mod.label}</span>
+                            {expanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                           </>
                         ) : (
-                          <Link to={mod.path} className="flex items-center gap-3 w-full" onClick={() => setMobileOpen(false)}>
+                          <Link to={mod.path} className="flex items-center gap-2.5 w-full" onClick={() => setMobileOpen(false)}>
                             <Icon className="w-4 h-4 shrink-0" />
-                            {!collapsed && <span>{mod.label}</span>}
+                            <span>{mod.label}</span>
                           </Link>
                         )}
                       </div>
-                      {hasChildren && expanded && !collapsed && (
-                        <div className="ml-6 mt-0.5 space-y-0.5 border-l border-sidebar-border pl-3">
+                      {hasChildren && expanded && (
+                        <div className="ml-5 mt-0.5 space-y-px border-l border-sidebar-border pl-3">
                           {mod.children!.map((child) => (
                             <Link
                               key={child.path}
                               to={child.path}
                               onClick={() => setMobileOpen(false)}
-                              className={`block px-3 py-2 rounded-md text-sm transition-colors font-sans
-                                ${isActive(child.path) ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-accent/30"}`}
+                              className={`block px-3 py-1.5 rounded text-[12px] transition-colors
+                                ${isActive(child.path)
+                                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                  : "text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-accent/40"
+                                }`}
                             >
                               {child.label}
                             </Link>
@@ -180,75 +179,89 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         ))}
       </nav>
 
-      {!collapsed && (
-        <div className="px-4 py-4 border-t border-sidebar-border space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center text-xs font-semibold text-sidebar-accent-foreground font-sans">
-              {profile?.full_name?.slice(0, 2).toUpperCase() || "SR"}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-sidebar-primary truncate font-sans">
-                {profile?.full_name || "Administrador"}
-              </p>
-              <p className="text-xs text-sidebar-muted truncate font-sans">{user?.email || "admin@sanremo.com.br"}</p>
-            </div>
+      {/* User footer */}
+      <div className="px-3 py-3 border-t border-sidebar-border">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-full bg-sidebar-primary flex items-center justify-center text-[10px] font-bold text-sidebar-primary-foreground">
+            {profile?.full_name?.slice(0, 2).toUpperCase() || "SR"}
           </div>
-          <Button variant="outline" className="w-full justify-start border-sidebar-border bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={signOut}>
-            <LogOut className="w-4 h-4" />
-            Sair
-          </Button>
+          <div className="flex-1 min-w-0">
+            <p className="text-[12px] font-medium text-sidebar-accent-foreground truncate">
+              {profile?.full_name || "Administrador"}
+            </p>
+            <p className="text-[10px] text-sidebar-muted truncate">{user?.email}</p>
+          </div>
+          <button onClick={signOut} className="p-1.5 rounded hover:bg-sidebar-accent transition-colors" title="Sair">
+            <LogOut className="w-3.5 h-3.5 text-sidebar-muted" />
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
+      {/* Mobile overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 bg-foreground/40 z-40 lg:hidden" onClick={() => setMobileOpen(false)} />
       )}
 
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar transform transition-transform lg:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <button onClick={() => setMobileOpen(false)} className="absolute top-4 right-4 text-sidebar-foreground">
-          <X className="w-5 h-5" />
+      {/* Mobile sidebar */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-60 transform transition-transform lg:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <button onClick={() => setMobileOpen(false)} className="absolute top-3 right-3 text-sidebar-foreground z-10">
+          <X className="w-4 h-4" />
         </button>
-        <SidebarContent />
+        <SidebarNav />
       </aside>
 
-      <aside className={`hidden lg:flex flex-col bg-sidebar transition-all duration-200 ${collapsed ? "w-16" : "w-64"} shrink-0`}>
-        <SidebarContent />
-      </aside>
+      {/* Desktop sidebar */}
+      {sidebarOpen && (
+        <aside className="hidden lg:flex flex-col w-56 shrink-0 border-r border-border">
+          <SidebarNav />
+        </aside>
+      )}
 
+      {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-14 bg-card border-b border-border flex items-center px-4 gap-3 shrink-0">
-          <button onClick={() => { if (window.innerWidth < 1024) setMobileOpen(true); else setCollapsed(!collapsed); }} className="p-2 rounded-lg hover:bg-muted transition-colors">
-            <Menu className="w-5 h-5 text-muted-foreground" />
+        {/* Power BI-style top header */}
+        <header className="h-11 pbi-header flex items-center px-3 gap-2 shrink-0 z-30">
+          <button
+            onClick={() => { if (window.innerWidth < 1024) setMobileOpen(true); else setSidebarOpen(!sidebarOpen); }}
+            className="p-1.5 rounded hover:bg-white/10 transition-colors"
+          >
+            <Menu className="w-4 h-4 text-white/70" />
           </button>
 
-          <div className="flex-1 max-w-md">
-            <div className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2">
-              <Search className="w-4 h-4 text-muted-foreground" />
-              <input type="text" placeholder="Buscar obras, relatórios..." className="bg-transparent border-none outline-none text-sm flex-1 text-foreground placeholder:text-muted-foreground font-sans" />
+          <div className="flex items-center gap-1.5">
+            <BarChart3 className="w-4 h-4 text-primary" />
+            <span className="text-[13px] font-semibold text-white">{currentPage}</span>
+          </div>
+
+          <div className="flex-1" />
+
+          <div className="hidden sm:flex items-center gap-1 bg-white/10 rounded px-2.5 py-1.5 max-w-xs">
+            <Search className="w-3.5 h-3.5 text-white/50" />
+            <input
+              type="text"
+              placeholder="Pesquisar..."
+              className="bg-transparent border-none outline-none text-[12px] flex-1 text-white placeholder:text-white/40 w-32"
+            />
+          </div>
+
+          <button className="p-1.5 rounded hover:bg-white/10 transition-colors relative">
+            <Bell className="w-4 h-4 text-white/70" />
+            <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-primary rounded-full" />
+          </button>
+
+          <div className="flex items-center gap-2 ml-1">
+            <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground">
+              {profile?.full_name?.slice(0, 2).toUpperCase() || "SR"}
             </div>
-          </div>
-
-          <div className="hidden sm:flex items-center gap-2 rounded-full border border-border px-3 py-1.5 bg-muted/50">
-            <ShieldCheck className="w-4 h-4 text-accent" />
-            <span className="text-sm text-foreground font-sans">Admin</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button className="p-2 rounded-lg hover:bg-muted transition-colors relative">
-              <Bell className="w-5 h-5 text-muted-foreground" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full" />
-            </button>
-            <button className="p-2 rounded-lg hover:bg-muted transition-colors">
-              <Settings className="w-5 h-5 text-muted-foreground" />
-            </button>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+        {/* Power BI canvas */}
+        <main className="flex-1 overflow-y-auto pbi-canvas p-3 sm:p-4 lg:p-5">
           {children}
         </main>
       </div>
