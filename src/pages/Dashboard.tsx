@@ -215,6 +215,7 @@ export default function Dashboard() {
           </div>
         </PBITile>
       </div>
+      )}
 
       {/* Row 3: Bar chart + Progress + Line chart */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
