@@ -168,9 +168,6 @@ export default function Auth() {
           >
             {/* Title */}
             <div className="mb-10">
-              <p className="text-xs uppercase tracking-[0.4em] font-medium mb-1" style={{ color: "hsl(45, 100%, 51%)" }}>
-                Business Navigator
-              </p>
               <h1 className="text-3xl font-bold text-white tracking-tight">San Remo</h1>
             </div>
 
@@ -224,9 +221,7 @@ export default function Auth() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="w-full max-w-[420px]"
           >
-            {/* Mobile title */}
             <div className="mb-8 lg:hidden">
-              <p className="text-[10px] uppercase tracking-[0.3em]" style={{ color: "hsl(45, 100%, 51%)" }}>Business Navigator</p>
               <h1 className="text-xl font-bold text-white">San Remo</h1>
             </div>
 
@@ -442,7 +437,7 @@ export default function Auth() {
 
             {/* Footer */}
             <p className="text-center text-[10px] mt-4" style={{ color: "hsl(220, 15%, 28%)" }}>
-              © 2026 San Remo Construtora — Business Navigator Pro
+              © 2026 San Remo Construtora
             </p>
           </motion.div>
         </section>
