@@ -12,6 +12,12 @@ import {
   Calendar,
   Filter,
   ChevronDown,
+  Rocket,
+  Construction,
+  Landmark,
+  FolderKanban,
+  Headphones,
+  Truck,
 } from "lucide-react";
 import {
   AreaChart,
