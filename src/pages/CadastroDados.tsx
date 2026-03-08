@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Save, Trash2, CheckCircle2 } from "lucide-react";
+import { Plus, Save, Trash2, CheckCircle2, Database, Filter, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface DataEntry {
@@ -44,14 +43,9 @@ export default function CadastroDados() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.categoria || !form.descricao || !form.valor) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Preencha categoria, descrição e valor.",
-        variant: "destructive",
-      });
+      toast({ title: "Campos obrigatórios", description: "Preencha categoria, descrição e valor.", variant: "destructive" });
       return;
     }
-
     const newEntry: DataEntry = {
       id: Date.now().toString(),
       categoria: form.categoria,
@@ -60,155 +54,145 @@ export default function CadastroDados() {
       data: form.data,
       responsavel: form.responsavel,
     };
-
     setEntries((prev) => [newEntry, ...prev]);
-    setForm({
-      categoria: "",
-      descricao: "",
-      valor: "",
-      data: new Date().toISOString().split("T")[0],
-      responsavel: "",
-    });
-
-    toast({
-      title: "Dado registrado!",
-      description: `${newEntry.categoria}: ${newEntry.descricao}`,
-    });
+    setForm({ categoria: "", descricao: "", valor: "", data: new Date().toISOString().split("T")[0], responsavel: "" });
+    toast({ title: "Dado registrado!", description: `${newEntry.categoria}: ${newEntry.descricao}` });
   };
 
-  const removeEntry = (id: string) => {
-    setEntries((prev) => prev.filter((e) => e.id !== id));
-  };
+  const removeEntry = (id: string) => setEntries((prev) => prev.filter((e) => e.id !== id));
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Cadastro de Dados</h1>
-        <p className="text-sm text-muted-foreground mt-1 font-sans">
-          Registre dados de obras, vendas e despesas rapidamente
-        </p>
+    <div className="space-y-4">
+      {/* PBI Header */}
+      <div className="pbi-header flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Database className="w-5 h-5" style={{ color: "hsl(var(--pbi-yellow))" }} />
+          <div>
+            <h1 className="text-base font-semibold text-white">Cadastro de Dados</h1>
+            <p className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Registre dados de obras, vendas e despesas</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] px-2.5 py-1 rounded" style={{ background: "hsl(var(--pbi-yellow) / 0.15)", color: "hsl(var(--pbi-yellow))" }}>
+            {entries.length} registros
+          </span>
+        </div>
       </div>
 
-      <Card className="erp-card-shadow">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <Plus className="w-4 h-4 text-accent" />
-            Novo Registro
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="font-sans text-sm">Categoria *</Label>
-                <Select value={form.categoria} onValueChange={(v) => setForm({ ...form, categoria: v })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categorias.map((c) => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+      {/* Filter bar */}
+      <div className="flex items-center gap-2 flex-wrap" style={{ background: "hsl(var(--pbi-surface))", borderRadius: "6px", padding: "8px 12px", border: "1px solid hsl(var(--pbi-border))" }}>
+        <Filter className="w-3.5 h-3.5" style={{ color: "hsl(var(--pbi-text-secondary))" }} />
+        <span className="text-[11px] font-medium" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Filtros:</span>
+        {["Categoria", "Responsável", "Período"].map((f) => (
+          <button key={f} className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded transition-colors" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))", border: "1px solid hsl(var(--pbi-border))" }}>
+            {f} <ChevronDown className="w-3 h-3" />
+          </button>
+        ))}
+      </div>
 
-              <div className="space-y-2">
-                <Label className="font-sans text-sm">Responsável</Label>
-                <Select value={form.responsavel} onValueChange={(v) => setForm({ ...form, responsavel: v })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {responsaveis.map((r) => (
-                      <SelectItem key={r} value={r}>{r}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        {/* Form tile */}
+        <div className="lg:col-span-2 pbi-tile">
+          <div className="flex items-center gap-2 mb-4">
+            <Plus className="w-4 h-4" style={{ color: "hsl(var(--pbi-yellow))" }} />
+            <span className="text-[12px] font-semibold" style={{ color: "hsl(var(--pbi-text-primary))" }}>Novo Registro</span>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="space-y-1.5">
+              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Categoria *</Label>
+              <Select value={form.categoria} onValueChange={(v) => setForm({ ...form, categoria: v })}>
+                <SelectTrigger className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {categorias.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
-
-            <div className="space-y-2">
-              <Label className="font-sans text-sm">Descrição *</Label>
+            <div className="space-y-1.5">
+              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Responsável</Label>
+              <Select value={form.responsavel} onValueChange={(v) => setForm({ ...form, responsavel: v })}>
+                <SelectTrigger className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {responsaveis.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Descrição *</Label>
               <Textarea
                 value={form.descricao}
                 onChange={(e) => setForm({ ...form, descricao: e.target.value })}
                 placeholder="Ex: Compra de cimento para Bloco C..."
-                className="resize-none h-20"
+                className="resize-none h-16 text-[12px] border-none"
+                style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}
                 maxLength={500}
               />
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="font-sans text-sm">Valor (R$) *</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={form.valor}
-                  onChange={(e) => setForm({ ...form, valor: e.target.value })}
-                  placeholder="0,00"
-                />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Valor (R$) *</Label>
+                <Input type="number" step="0.01" value={form.valor} onChange={(e) => setForm({ ...form, valor: e.target.value })} placeholder="0,00" className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
               </div>
-
-              <div className="space-y-2">
-                <Label className="font-sans text-sm">Data</Label>
-                <Input
-                  type="date"
-                  value={form.data}
-                  onChange={(e) => setForm({ ...form, data: e.target.value })}
-                />
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Data</Label>
+                <Input type="date" value={form.data} onChange={(e) => setForm({ ...form, data: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
               </div>
             </div>
-
-            <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-gold-dark font-sans font-semibold">
-              <Save className="w-4 h-4 mr-2" />
-              Salvar Registro
+            <Button type="submit" className="w-full h-8 text-[12px] font-semibold" style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}>
+              <Save className="w-3.5 h-3.5 mr-1.5" /> Salvar Registro
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
 
-      {entries.length > 0 && (
-        <Card className="erp-card-shadow">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-success" />
+        {/* Entries tile */}
+        <div className="lg:col-span-3 pbi-tile">
+          <div className="flex items-center gap-2 mb-4">
+            <CheckCircle2 className="w-4 h-4" style={{ color: "hsl(152, 60%, 38%)" }} />
+            <span className="text-[12px] font-semibold" style={{ color: "hsl(var(--pbi-text-primary))" }}>
               Registros Recentes ({entries.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
+            </span>
+          </div>
+          {entries.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Database className="w-10 h-10 mb-3" style={{ color: "hsl(var(--pbi-text-secondary))" }} />
+              <p className="text-[12px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Nenhum registro ainda</p>
+              <p className="text-[11px] mt-1" style={{ color: "hsl(var(--pbi-text-secondary) / 0.6)" }}>Use o formulário ao lado para cadastrar</p>
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
               {entries.map((entry) => (
-                <div key={entry.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 border border-border">
+                <div key={entry.id} className="flex items-start gap-3 p-3 rounded-md transition-colors" style={{ background: "hsl(var(--pbi-dark))", border: "1px solid hsl(var(--pbi-border))" }}>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-accent/15 text-accent font-sans">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "hsl(var(--pbi-yellow) / 0.15)", color: "hsl(var(--pbi-yellow))" }}>
                         {entry.categoria}
                       </span>
                       {entry.responsavel && (
-                        <span className="text-xs text-muted-foreground font-sans">{entry.responsavel}</span>
+                        <span className="text-[10px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>{entry.responsavel}</span>
                       )}
                     </div>
-                    <p className="text-sm text-foreground mt-1 font-sans">{entry.descricao}</p>
+                    <p className="text-[12px] mt-1" style={{ color: "hsl(var(--pbi-text-primary))" }}>{entry.descricao}</p>
                     <div className="flex items-center gap-3 mt-1">
-                      <span className="text-sm font-bold text-foreground font-sans">
+                      <span className="text-[12px] font-bold" style={{ color: "hsl(var(--pbi-text-primary))" }}>
                         R$ {entry.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                       </span>
-                      <span className="text-xs text-muted-foreground font-sans">
+                      <span className="text-[10px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
                         {new Date(entry.data).toLocaleDateString("pt-BR")}
                       </span>
                     </div>
                   </div>
-                  <button onClick={() => removeEntry(entry.id)} className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
-                    <Trash2 className="w-4 h-4" />
+                  <button onClick={() => removeEntry(entry.id)} className="p-1.5 rounded hover:bg-red-500/20 transition-colors" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </div>
+      </div>
     </div>
   );
 }
