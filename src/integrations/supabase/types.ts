@@ -14,6 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
+      acoes_meta: {
+        Row: {
+          concluida: boolean
+          created_at: string
+          descricao: string
+          id: string
+          meta_id: string
+          prazo: string | null
+          responsavel: string | null
+        }
+        Insert: {
+          concluida?: boolean
+          created_at?: string
+          descricao: string
+          id?: string
+          meta_id: string
+          prazo?: string | null
+          responsavel?: string | null
+        }
+        Update: {
+          concluida?: boolean
+          created_at?: string
+          descricao?: string
+          id?: string
+          meta_id?: string
+          prazo?: string | null
+          responsavel?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acoes_meta_meta_id_fkey"
+            columns: ["meta_id"]
+            isOneToOne: false
+            referencedRelation: "metas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      metas: {
+        Row: {
+          atual: number
+          categoria: string
+          cor: string
+          created_at: string
+          created_by: string | null
+          id: string
+          nome: string
+          objetivo: number
+          prazo: string
+          prioridade: string
+          responsavel: string
+          unidade: string
+          updated_at: string
+        }
+        Insert: {
+          atual?: number
+          categoria?: string
+          cor?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nome: string
+          objetivo: number
+          prazo?: string
+          prioridade?: string
+          responsavel?: string
+          unidade?: string
+          updated_at?: string
+        }
+        Update: {
+          atual?: number
+          categoria?: string
+          cor?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nome?: string
+          objetivo?: number
+          prazo?: string
+          prioridade?: string
+          responsavel?: string
+          unidade?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
