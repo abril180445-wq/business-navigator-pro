@@ -5,6 +5,42 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function escapeSQL(val: any): string {
+  if (val === null || val === undefined) return "NULL";
+  if (typeof val === "boolean") return val ? "TRUE" : "FALSE";
+  if (typeof val === "number") return String(val);
+  if (Array.isArray(val)) {
+    return `ARRAY[${val.map(v => `'${String(v).replace(/'/g, "''")}'`).join(",")}]::text[]`;
+  }
+  if (typeof val === "object") {
+    return `'${JSON.stringify(val).replace(/'/g, "''")}'::jsonb`;
+  }
+  return `'${String(val).replace(/'/g, "''")}'`;
+}
+
+function generateTableSQL(tableName: string, rows: any[]): string {
+  if (!rows || rows.length === 0) return `-- Table ${tableName}: no data\n`;
+  
+  const columns = Object.keys(rows[0]);
+  const lines: string[] = [];
+  
+  lines.push(`-- =============================================`);
+  lines.push(`-- Table: public.${tableName}`);
+  lines.push(`-- Rows: ${rows.length}`);
+  lines.push(`-- =============================================`);
+  lines.push(``);
+  
+  // Use INSERT ... ON CONFLICT for idempotent restore
+  for (const row of rows) {
+    const vals = columns.map(col => escapeSQL(row[col]));
+    lines.push(
+      `INSERT INTO public.${tableName} (${columns.join(", ")}) VALUES (${vals.join(", ")}) ON CONFLICT (id) DO UPDATE SET ${columns.filter(c => c !== "id").map(c => `${c} = EXCLUDED.${c}`).join(", ")};`
+    );
+  }
+  lines.push(``);
+  return lines.join("\n");
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -29,7 +65,6 @@ Deno.serve(async (req) => {
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     if (action === "export") {
-      // Export ALL tables
       const { data: profiles } = await adminClient.from("profiles").select("*");
       const { data: userRoles } = await adminClient.from("user_roles").select("*");
       const { data: metas } = await adminClient.from("metas").select("*");
@@ -37,11 +72,34 @@ Deno.serve(async (req) => {
       const { data: metaCheckins } = await adminClient.from("meta_checkins").select("*");
       const { data: relatoriosGerados } = await adminClient.from("relatorios_gerados").select("*");
 
-      // Get all users from auth
       const { data: { users } } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
 
+      // Generate SQL dump
+      const sqlParts: string[] = [];
+      sqlParts.push(`-- =============================================`);
+      sqlParts.push(`-- SAN REMO ERP — Database Backup (SQL Format)`);
+      sqlParts.push(`-- Compatible with Supabase SQL Editor / psql`);
+      sqlParts.push(`-- Generated: ${new Date().toISOString()}`);
+      sqlParts.push(`-- By: ${caller.email}`);
+      sqlParts.push(`-- =============================================`);
+      sqlParts.push(``);
+      sqlParts.push(`BEGIN;`);
+      sqlParts.push(``);
+
+      // Order matters for foreign keys
+      sqlParts.push(generateTableSQL("profiles", profiles || []));
+      sqlParts.push(generateTableSQL("user_roles", userRoles || []));
+      sqlParts.push(generateTableSQL("metas", metas || []));
+      sqlParts.push(generateTableSQL("acoes_meta", acoesMeta || []));
+      sqlParts.push(generateTableSQL("meta_checkins", metaCheckins || []));
+      sqlParts.push(generateTableSQL("relatorios_gerados", relatoriosGerados || []));
+
+      sqlParts.push(`COMMIT;`);
+      sqlParts.push(``);
+      sqlParts.push(`-- End of backup`);
+
       const backup = {
-        version: "2.0",
+        version: "3.0",
         created_at: new Date().toISOString(),
         created_by: caller.email,
         data: {
@@ -58,6 +116,7 @@ Deno.serve(async (req) => {
             created_at: u.created_at,
           })) || [],
         },
+        sql_dump: sqlParts.join("\n"),
         metadata: {
           total_profiles: profiles?.length || 0,
           total_roles: userRoles?.length || 0,
@@ -82,7 +141,6 @@ Deno.serve(async (req) => {
         profiles: 0, user_roles: 0, metas: 0, acoes_meta: 0, meta_checkins: 0, relatorios_gerados: 0,
       };
 
-      // Restore in order (respecting foreign keys): profiles → user_roles → metas → acoes_meta → meta_checkins → relatorios_gerados
       if (backupData.data.profiles?.length > 0) {
         for (const row of backupData.data.profiles) {
           await adminClient.from("profiles").upsert(row, { onConflict: "id" });
