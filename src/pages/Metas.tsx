@@ -165,13 +165,15 @@ export default function Metas() {
     toast({ title: "Meta removida" });
   };
 
-  const addAcao = async () => {
+  const addAcao = async (tipo: "acao" | "contribuicao" = "acao") => {
     if (!newAcao.descricao || !acaoMetaId) return;
     const { error } = await supabase.from("acoes_meta").insert({
       meta_id: acaoMetaId,
       descricao: newAcao.descricao,
       responsavel: newAcao.responsavel || null,
       prazo: newAcao.prazo || null,
+      tipo,
+      created_by: user?.id,
     });
     if (error) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
@@ -179,7 +181,7 @@ export default function Metas() {
     }
     setNewAcao({ descricao: "", responsavel: "", prazo: "" });
     setAcaoDialogOpen(false);
-    toast({ title: "Ação adicionada!" });
+    toast({ title: tipo === "contribuicao" ? "Contribuição adicionada!" : "Ação adicionada!" });
   };
 
   const removeAcao = async (id: string) => {
