@@ -702,6 +702,15 @@ export default function Metas() {
                           )}
                         </button>
                         <span className={`text-[11px] flex-1 ${contrib.concluida ? "line-through text-muted-foreground" : "text-foreground"}`}>{contrib.descricao}</span>
+                        {contrib.imagens && contrib.imagens.length > 0 && (
+                          <div className="flex gap-1">
+                            {contrib.imagens.map((img, i) => (
+                              <a key={i} href={img} target="_blank" rel="noopener noreferrer">
+                                <img src={img} alt="" className="w-8 h-8 rounded object-cover" style={{ border: "1px solid hsl(var(--pbi-border))" }} />
+                              </a>
+                            ))}
+                          </div>
+                        )}
                         {contrib.responsavel && <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground hidden sm:inline">{contrib.responsavel}</span>}
                         {(canEditMetas || contrib.created_by === user?.id) && (
                           <button onClick={() => removeAcao(contrib.id)} className="p-0.5 rounded hover:bg-destructive/10 text-muted-foreground"><X className="w-3 h-3" /></button>
