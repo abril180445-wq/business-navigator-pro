@@ -13,19 +13,7 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
-// ============ DADOS EXEMPLO (financeiro) ============
-const dadosExemplo = [
-  { data: "01/01/2026", categoria: "Vendas", descricao: "Venda Unid. 302 — Res. Vila Serena", valor: 385000 },
-  { data: "05/01/2026", categoria: "Compras", descricao: "Cimento e aço — Canteiro Monte Carlo", valor: -125000 },
-  { data: "10/01/2026", categoria: "Vendas", descricao: "Venda Lote 15 — Cond. Jardim Real", valor: 180000 },
-  { data: "12/01/2026", categoria: "Despesas", descricao: "Folha de pagamento — Engenharia", valor: -185000 },
-  { data: "15/01/2026", categoria: "Vendas", descricao: "Venda Unid. 1201 — Ed. Monte Carlo", valor: 156000 },
-  { data: "18/01/2026", categoria: "Compras", descricao: "Concreto usinado — Concreteira Central", valor: -92000 },
-  { data: "22/01/2026", categoria: "Receitas", descricao: "Parcela financiamento — Vila Serena", valor: 195000 },
-  { data: "25/01/2026", categoria: "Despesas", descricao: "Aluguel de equipamentos pesados", valor: -48000 },
-  { data: "28/01/2026", categoria: "Vendas", descricao: "Venda Unid. 501 — Res. Vila Serena", valor: 395000 },
-  { data: "30/01/2026", categoria: "Despesas", descricao: "Impostos e encargos trabalhistas", valor: -65000 },
-];
+type DadoFinanceiro = { data: string; categoria: string; descricao: string; valor: number };
 
 const tiposRelatorio = [
   { value: "geral", label: "Relatório Geral" },
@@ -34,12 +22,6 @@ const tiposRelatorio = [
   { value: "metas", label: "Relatório de Metas" },
 ];
 
-const chartData = [
-  { cat: "Vendas", valor: 1116000 },
-  { cat: "Receitas", valor: 195000 },
-  { cat: "Compras", valor: 217000 },
-  { cat: "Despesas", valor: 298000 },
-];
 
 type RelatorioGerado = {
   id: string; user_id: string; user_name: string; tipo: string;
@@ -142,6 +124,7 @@ export default function Relatorios() {
   const [historico, setHistorico] = useState<RelatorioGerado[]>([]);
   const [showHistorico, setShowHistorico] = useState(false);
   const [metasData, setMetasData] = useState<MetaRow[]>([]);
+  const [dadosFinanceiros, setDadosFinanceiros] = useState<DadoFinanceiro[]>([]);
 
   const gridColor = theme === "dark" ? "hsl(0, 0%, 25%)" : "hsl(0, 0%, 85%)";
   const axisColor = theme === "dark" ? "hsl(0, 0%, 55%)" : "hsl(0, 0%, 50%)";
@@ -159,7 +142,34 @@ export default function Relatorios() {
     if (data) setMetasData(data as MetaRow[]);
   }, []);
 
-  useEffect(() => { fetchHistorico(); fetchMetas(); }, [fetchHistorico, fetchMetas]);
+  const fetchFinanceiro = useCallback(async () => {
+    const [fat, cp, cr, dc] = await Promise.all([
+      supabase.from("faturamento").select("cliente,valor,data_emissao,status"),
+      supabase.from("contas_pagar").select("fornecedor,descricao,valor,data_emissao,categoria"),
+      supabase.from("contas_receber").select("cliente,descricao,valor,data_emissao,categoria"),
+      supabase.from("dados_cadastro").select("descricao,valor,data,categoria"),
+    ]);
+    const dados: DadoFinanceiro[] = [];
+    ((fat.data || []) as any[]).forEach((f: any) => dados.push({
+      data: new Date(f.data_emissao).toLocaleDateString("pt-BR"),
+      categoria: "Faturamento", descricao: f.cliente, valor: Number(f.valor),
+    }));
+    ((cp.data || []) as any[]).forEach((c: any) => dados.push({
+      data: new Date(c.data_emissao).toLocaleDateString("pt-BR"),
+      categoria: c.categoria || "Contas a Pagar", descricao: `${c.fornecedor} — ${c.descricao}`, valor: -Number(c.valor),
+    }));
+    ((cr.data || []) as any[]).forEach((c: any) => dados.push({
+      data: new Date(c.data_emissao).toLocaleDateString("pt-BR"),
+      categoria: c.categoria || "Contas a Receber", descricao: `${c.cliente} — ${c.descricao}`, valor: Number(c.valor),
+    }));
+    ((dc.data || []) as any[]).forEach((d: any) => dados.push({
+      data: new Date(d.data).toLocaleDateString("pt-BR"),
+      categoria: d.categoria, descricao: d.descricao, valor: Number(d.valor),
+    }));
+    setDadosFinanceiros(dados);
+  }, []);
+
+  useEffect(() => { fetchHistorico(); fetchMetas(); fetchFinanceiro(); }, [fetchHistorico, fetchMetas, fetchFinanceiro]);
 
   const logRelatorio = async (formato: string, observacoes: string) => {
     if (!user) return;
@@ -178,9 +188,9 @@ export default function Relatorios() {
     toast({ title: "Registro removido" });
   };
 
-  const filteredData = dadosExemplo.filter((d) => {
-    if (tipo === "vendas") return d.categoria === "Vendas";
-    if (tipo === "despesas") return d.categoria === "Despesas" || d.valor < 0;
+  const filteredData = dadosFinanceiros.filter((d) => {
+    if (tipo === "vendas") return d.valor > 0;
+    if (tipo === "despesas") return d.valor < 0;
     return true;
   });
 
@@ -736,7 +746,10 @@ export default function Relatorios() {
                 <Bar dataKey="progresso" fill="hsl(207, 89%, 48%)" radius={[0, 4, 4, 0]} />
               </BarChart>
             ) : (
-              <BarChart data={chartData} layout="vertical">
+              <BarChart data={categorias.map(cat => {
+                const items = filteredData.filter(d => d.categoria === cat);
+                return { cat, valor: Math.abs(items.reduce((s, d) => s + d.valor, 0)) };
+              })} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke={gridColor} horizontal={false} />
                 <XAxis type="number" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} tick={{ fill: axisColor, fontSize: 10 }} axisLine={false} />
                 <YAxis type="category" dataKey="cat" tick={{ fill: axisColor, fontSize: 10 }} axisLine={false} width={70} />

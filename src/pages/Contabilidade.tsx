@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -35,9 +36,16 @@ type TabKey = "faturamento" | "pagar" | "receber";
 export default function Contabilidade() {
   const { theme } = useTheme();
   const { user, userRole } = useAuth();
+  const location = useLocation();
   const canEdit = userRole === "admin" || userRole === "master";
 
-  const [activeTab, setActiveTab] = useState<TabKey>("faturamento");
+  const routeTabMap: Record<string, TabKey> = {
+    "/contabilidade/faturamento": "faturamento",
+    "/contabilidade/pagamentos": "pagar",
+    "/contabilidade/bancario": "receber",
+  };
+  const initialTab = routeTabMap[location.pathname] || "faturamento";
+  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
   const [faturamentos, setFaturamentos] = useState<Faturamento[]>([]);
   const [contasPagar, setContasPagar] = useState<ContaPagar[]>([]);
   const [contasReceber, setContasReceber] = useState<ContaReceber[]>([]);

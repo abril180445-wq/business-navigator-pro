@@ -81,7 +81,8 @@ export default function Auth() {
     loadSetupStatus();
   }, []);
 
-  useEffect(() => { if (user && isAdmin) navigate(nextPath, { replace: true }); }, [user, isAdmin, navigate, nextPath]);
+  const { userRole } = useAuth();
+  useEffect(() => { if (user && userRole) navigate(nextPath, { replace: true }); }, [user, userRole, navigate, nextPath]);
 
   const handleLogin = loginForm.handleSubmit(async (values) => {
     setSubmitting(true);

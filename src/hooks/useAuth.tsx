@@ -39,7 +39,7 @@ async function loadAuthState(session: Session | null) {
     supabase.from("user_roles").select("role").eq("user_id", user.id).maybeSingle(),
   ]);
 
-  const userRole = (roleData?.role as AppRole) ?? "normal";
+  const userRole = (roleData?.role as AppRole) ?? null;
   const isAdmin = userRole === "admin";
   const canEditMetas = userRole === "admin" || userRole === "master";
 
