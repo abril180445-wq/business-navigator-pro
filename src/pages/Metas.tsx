@@ -1122,7 +1122,7 @@ export default function Metas() {
 
       {/* Check-in Dialog */}
       <Dialog open={checkinDialogOpen} onOpenChange={setCheckinDialogOpen}>
-        <DialogContent className="sm:max-w-md" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }}>
+        <DialogContent className="sm:max-w-md" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }} onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="text-[14px]" style={{ color: "hsl(var(--pbi-text-primary))" }}>
               <MessageCircle className="w-4 h-4 inline mr-2" style={{ color: "hsl(262, 52%, 47%)" }} />
