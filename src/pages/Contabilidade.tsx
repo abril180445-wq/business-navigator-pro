@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Plus, Filter, Download, DollarSign, CreditCard, FileText, TrendingUp, ChevronDown, ArrowUpRight } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { useTheme } from "@/hooks/useTheme";
 
 const invoices = [
   { id: "NF-2026-0142", cliente: "Res. Vila Serena — Unid. 302", valor: 385000, status: "pago", data: "15/02/2026", vencimento: "15/03/2026" },
@@ -38,6 +39,17 @@ const fluxoData = [
 ];
 
 export default function Contabilidade() {
+  const { theme } = useTheme();
+  const gridColor = theme === "dark" ? "hsl(0, 0%, 25%)" : "hsl(0, 0%, 85%)";
+  const axisColor = theme === "dark" ? "hsl(0, 0%, 55%)" : "hsl(0, 0%, 50%)";
+  const tooltipStyle = {
+    background: theme === "dark" ? "hsl(0, 0%, 18%)" : "#fff",
+    border: `1px solid ${theme === "dark" ? "hsl(0, 0%, 30%)" : "hsl(0, 0%, 85%)"}`,
+    borderRadius: "6px",
+    fontSize: "11px",
+    color: theme === "dark" ? "#e8e8e8" : "#222",
+  };
+
   return (
     <div className="space-y-4">
       {/* PBI Header */}
@@ -46,14 +58,14 @@ export default function Contabilidade() {
           <DollarSign className="w-5 h-5" style={{ color: "hsl(var(--pbi-yellow))" }} />
           <div>
             <h1 className="text-base font-semibold text-white">Financeiro</h1>
-            <p className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Faturamento, contas e fluxo de caixa</p>
+            <p className="text-[11px]" style={{ color: "hsl(0, 0%, 72%)" }}>Faturamento, contas e fluxo de caixa</p>
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="h-7 text-[11px] border-none gap-1" style={{ background: "hsl(var(--pbi-surface))", color: "hsl(var(--pbi-text-primary))" }}>
+          <Button variant="outline" size="sm" className="h-7 text-[11px] border-none gap-1 bg-secondary text-foreground hover:bg-secondary/80">
             <Filter className="w-3 h-3" /> Filtrar
           </Button>
-          <Button variant="outline" size="sm" className="h-7 text-[11px] border-none gap-1" style={{ background: "hsl(var(--pbi-surface))", color: "hsl(var(--pbi-text-primary))" }}>
+          <Button variant="outline" size="sm" className="h-7 text-[11px] border-none gap-1 bg-secondary text-foreground hover:bg-secondary/80">
             <Download className="w-3 h-3" /> Exportar
           </Button>
           <Button size="sm" className="h-7 text-[11px] font-semibold gap-1" style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}>
@@ -69,10 +81,10 @@ export default function Contabilidade() {
           return (
             <div key={card.title} className="pbi-tile">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] uppercase tracking-wider" style={{ color: "hsl(var(--pbi-text-secondary))" }}>{card.title}</p>
-                <Icon className="w-3.5 h-3.5" style={{ color: "hsl(var(--pbi-text-secondary))" }} />
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{card.title}</p>
+                <Icon className="w-3.5 h-3.5 text-muted-foreground" />
               </div>
-              <p className="text-xl font-bold" style={{ color: "hsl(var(--pbi-text-primary))" }}>{card.value}</p>
+              <p className="text-xl font-bold text-foreground">{card.value}</p>
               <div className="flex items-center gap-1 mt-1">
                 <ArrowUpRight className="w-3 h-3" style={{ color: "hsl(152, 60%, 38%)" }} />
                 <span className="text-[10px]" style={{ color: "hsl(152, 60%, 38%)" }}>{card.change}</span>
@@ -85,13 +97,13 @@ export default function Contabilidade() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Fluxo chart */}
         <div className="pbi-tile">
-          <p className="text-[11px] font-semibold mb-3" style={{ color: "hsl(var(--pbi-text-primary))" }}>Fluxo de Caixa (R$ mil)</p>
+          <p className="text-[11px] font-semibold mb-3 text-foreground">Fluxo de Caixa (R$ mil)</p>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={fluxoData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 25%)" />
-              <XAxis dataKey="month" tick={{ fill: "hsl(220, 15%, 55%)", fontSize: 10 }} axisLine={false} />
-              <YAxis tick={{ fill: "hsl(220, 15%, 55%)", fontSize: 10 }} axisLine={false} />
-              <Tooltip contentStyle={{ background: "hsl(222, 30%, 18%)", border: "1px solid hsl(220, 20%, 30%)", borderRadius: "6px", fontSize: "11px", color: "#fff" }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+              <XAxis dataKey="month" tick={{ fill: axisColor, fontSize: 10 }} axisLine={false} />
+              <YAxis tick={{ fill: axisColor, fontSize: 10 }} axisLine={false} />
+              <Tooltip contentStyle={tooltipStyle} />
               <Area type="monotone" dataKey="entrada" stroke="hsl(152, 60%, 38%)" fill="hsl(152, 60%, 38%)" fillOpacity={0.2} />
               <Area type="monotone" dataKey="saida" stroke="hsl(0, 72%, 51%)" fill="hsl(0, 72%, 51%)" fillOpacity={0.15} />
             </AreaChart>
@@ -100,13 +112,13 @@ export default function Contabilidade() {
 
         {/* Invoice table */}
         <div className="lg:col-span-2 pbi-tile">
-          <p className="text-[11px] font-semibold mb-3" style={{ color: "hsl(var(--pbi-text-primary))" }}>Notas Fiscais e Pagamentos</p>
+          <p className="text-[11px] font-semibold mb-3 text-foreground">Notas Fiscais e Pagamentos</p>
           <div className="overflow-x-auto">
             <table className="w-full text-[11px]">
               <thead>
-                <tr style={{ borderBottom: "1px solid hsl(var(--pbi-border))" }}>
+                <tr className="border-b border-border">
                   {["Número", "Referência", "Emissão", "Vencimento", "Valor", "Status"].map((h) => (
-                    <th key={h} className={`py-2 px-2 font-medium ${h === "Valor" ? "text-right" : "text-left"}`} style={{ color: "hsl(var(--pbi-text-secondary))" }}>{h}</th>
+                    <th key={h} className={`py-2 px-2 font-medium text-muted-foreground ${h === "Valor" ? "text-right" : "text-left"}`}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -114,12 +126,12 @@ export default function Contabilidade() {
                 {invoices.map((inv) => {
                   const st = statusConfig[inv.status];
                   return (
-                    <tr key={inv.id} className="hover:bg-white/5 cursor-pointer transition-colors" style={{ borderBottom: "1px solid hsl(var(--pbi-border) / 0.5)" }}>
+                    <tr key={inv.id} className="pbi-row-hover cursor-pointer transition-colors border-b border-border/50">
                       <td className="py-1.5 px-2 font-medium" style={{ color: "hsl(207, 89%, 48%)" }}>{inv.id}</td>
-                      <td className="py-1.5 px-2" style={{ color: "hsl(var(--pbi-text-primary))" }}>{inv.cliente}</td>
-                      <td className="py-1.5 px-2" style={{ color: "hsl(var(--pbi-text-secondary))" }}>{inv.data}</td>
-                      <td className="py-1.5 px-2" style={{ color: "hsl(var(--pbi-text-secondary))" }}>{inv.vencimento}</td>
-                      <td className="py-1.5 px-2 text-right font-medium" style={{ color: "hsl(var(--pbi-text-primary))" }}>R$ {inv.valor.toLocaleString()}</td>
+                      <td className="py-1.5 px-2 text-foreground">{inv.cliente}</td>
+                      <td className="py-1.5 px-2 text-muted-foreground">{inv.data}</td>
+                      <td className="py-1.5 px-2 text-muted-foreground">{inv.vencimento}</td>
+                      <td className="py-1.5 px-2 text-right font-medium text-foreground">R$ {inv.valor.toLocaleString()}</td>
                       <td className="py-1.5 px-2">
                         <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: st.bg, color: st.color }}>{st.label}</span>
                       </td>

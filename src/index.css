@@ -184,4 +184,18 @@
   .pbi-tabs-scroll > button {
     @apply shrink-0;
   }
+  /* Theme-aware table row hover */
+  .pbi-row-hover:hover {
+    background: hsl(var(--foreground) / 0.05);
+  }
+  /* Theme-aware input bg */
+  .pbi-input-bg {
+    background: hsl(var(--muted));
+    color: hsl(var(--foreground));
+  }
+  /* Theme-aware surface bg */
+  .pbi-surface-bg {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+  }
 }
