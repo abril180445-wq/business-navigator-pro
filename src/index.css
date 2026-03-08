@@ -143,8 +143,11 @@
     background: hsl(var(--pbi-dark));
     @apply flex-wrap gap-2;
   }
+  .dark .pbi-header {
+    background: hsl(0, 0%, 8%);
+  }
   .pbi-canvas {
-    background: hsl(var(--pbi-gray));
+    background: hsl(var(--background));
   }
   .pbi-tile {
     @apply bg-card rounded-sm border border-border p-3 sm:p-4;
