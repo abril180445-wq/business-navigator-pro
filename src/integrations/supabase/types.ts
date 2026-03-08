@@ -110,56 +110,122 @@ export type Database = {
       }
       metas: {
         Row: {
+          aprovador: string | null
           atual: number
           categoria: string
           ciclo: string
           cor: string
           created_at: string
           created_by: string | null
+          custo_atual: number | null
+          data_inicio: string | null
+          departamento: string | null
+          dependencias: string | null
+          descricao: string | null
+          equipe: string | null
+          etapa: string | null
+          fonte_dados: string | null
+          fornecedor: string | null
+          frequencia_checkin: string | null
           id: string
+          impacto: string | null
+          indicador_chave: string | null
+          local_obra: string | null
+          marco_critico: string | null
           nome: string
           objetivo: number
+          observacoes: string | null
+          orcamento: number | null
           parent_id: string | null
+          percentual_concluido: number | null
+          peso: number | null
           prazo: string
           prioridade: string
           responsavel: string
+          risco: string | null
           status: string
+          tags: string[] | null
+          tipo_meta: string | null
           unidade: string
           updated_at: string
         }
         Insert: {
+          aprovador?: string | null
           atual?: number
           categoria?: string
           ciclo?: string
           cor?: string
           created_at?: string
           created_by?: string | null
+          custo_atual?: number | null
+          data_inicio?: string | null
+          departamento?: string | null
+          dependencias?: string | null
+          descricao?: string | null
+          equipe?: string | null
+          etapa?: string | null
+          fonte_dados?: string | null
+          fornecedor?: string | null
+          frequencia_checkin?: string | null
           id?: string
+          impacto?: string | null
+          indicador_chave?: string | null
+          local_obra?: string | null
+          marco_critico?: string | null
           nome: string
           objetivo: number
+          observacoes?: string | null
+          orcamento?: number | null
           parent_id?: string | null
+          percentual_concluido?: number | null
+          peso?: number | null
           prazo?: string
           prioridade?: string
           responsavel?: string
+          risco?: string | null
           status?: string
+          tags?: string[] | null
+          tipo_meta?: string | null
           unidade?: string
           updated_at?: string
         }
         Update: {
+          aprovador?: string | null
           atual?: number
           categoria?: string
           ciclo?: string
           cor?: string
           created_at?: string
           created_by?: string | null
+          custo_atual?: number | null
+          data_inicio?: string | null
+          departamento?: string | null
+          dependencias?: string | null
+          descricao?: string | null
+          equipe?: string | null
+          etapa?: string | null
+          fonte_dados?: string | null
+          fornecedor?: string | null
+          frequencia_checkin?: string | null
           id?: string
+          impacto?: string | null
+          indicador_chave?: string | null
+          local_obra?: string | null
+          marco_critico?: string | null
           nome?: string
           objetivo?: number
+          observacoes?: string | null
+          orcamento?: number | null
           parent_id?: string | null
+          percentual_concluido?: number | null
+          peso?: number | null
           prazo?: string
           prioridade?: string
           responsavel?: string
+          risco?: string | null
           status?: string
+          tags?: string[] | null
+          tipo_meta?: string | null
           unidade?: string
           updated_at?: string
         }
