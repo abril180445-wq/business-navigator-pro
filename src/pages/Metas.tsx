@@ -733,7 +733,9 @@ export default function Metas() {
                 <Input type="date" value={newAcao.prazo} onChange={(e) => setNewAcao({ ...newAcao, prazo: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
               </div>
             </div>
-            <Button onClick={addAcao} className="w-full h-8 text-[12px] font-semibold" style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}>Adicionar Ação</Button>
+            <Button onClick={() => addAcao(canEditMetas ? "acao" : "contribuicao")} className="w-full h-8 text-[12px] font-semibold" style={{ background: canEditMetas ? "hsl(var(--pbi-yellow))" : "hsl(174, 62%, 47%)", color: "hsl(var(--pbi-dark))" }}>
+              {canEditMetas ? "Adicionar Ação" : "Adicionar Minha Contribuição"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
