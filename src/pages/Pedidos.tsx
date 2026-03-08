@@ -42,8 +42,13 @@ export default function Pedidos() {
     "/pedidos/compras": "contratos",
     "/pedidos/estoque": "materiais",
   };
-  const initialTab = routeTabMap[location.pathname] || "empreendimentos";
-  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
+  const [activeTab, setActiveTab] = useState<TabKey>(routeTabMap[location.pathname] || "empreendimentos");
+
+  // Sync tab when route changes (sidebar clicks)
+  useEffect(() => {
+    const mapped = routeTabMap[location.pathname];
+    if (mapped) setActiveTab(mapped);
+  }, [location.pathname]);
   const [empreendimentos, setEmpreendimentos] = useState<Empreendimento[]>([]);
   const [contratos, setContratos] = useState<Contrato[]>([]);
   const [materiais, setMateriais] = useState<Material[]>([]);
