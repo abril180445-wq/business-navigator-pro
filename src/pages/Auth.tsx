@@ -168,9 +168,6 @@ export default function Auth() {
           >
             {/* Title */}
             <div className="mb-10">
-              <p className="text-xs uppercase tracking-[0.4em] font-medium mb-1" style={{ color: "hsl(45, 100%, 51%)" }}>
-                Business Navigator
-              </p>
               <h1 className="text-3xl font-bold text-white tracking-tight">San Remo</h1>
             </div>
 
