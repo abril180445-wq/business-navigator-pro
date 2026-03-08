@@ -256,7 +256,7 @@ export default function Metas() {
       await supabase.from("metas").update({ atual: novoValor, status: st }).eq("id", checkinMetaId);
     }
 
-    setNewCheckin({ valor: "", comentario: "", confianca: "no_prazo" });
+    setNewCheckin({ valor: "", comentario: "", confianca: "no_prazo", imagens: [] });
     setCheckinDialogOpen(false);
     toast({ title: "Check-in registrado!" });
   };
