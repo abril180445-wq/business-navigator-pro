@@ -8,7 +8,7 @@ import {
   ChevronDown, AlertTriangle, BarChart3, Clock, CheckCircle2, XCircle,
   Flame, Trophy, ListChecks, Eye, RefreshCw, Trash2, Users, Zap, MessageSquarePlus,
   History, MessageCircle, ArrowRight, ChevronRight, CircleDot, Activity,
-  Layers, GitBranch,
+  Layers, GitBranch, FileText, FileSpreadsheet,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -22,7 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useRealtimeTable } from "@/hooks/useRealtimeTable";
-import MetaImageUpload from "@/components/MetaImageUpload";
+import MetaFileUpload from "@/components/MetaFileUpload";
 
 interface Meta {
   id: string;
@@ -98,6 +98,32 @@ const PBITile = ({ children, title, className = "", actions }: { children: React
     {children}
   </div>
 );
+
+const FileThumbnail = ({ url }: { url: string }) => {
+  const isPdf = /\.pdf(\?|$)/i.test(url);
+  const isExcel = /\.(xlsx|xls)(\?|$)/i.test(url);
+  const isImg = /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url);
+
+  if (isImg) {
+    return (
+      <a href={url} target="_blank" rel="noopener noreferrer">
+        <img src={url} alt="" className="w-8 h-8 rounded object-cover" style={{ border: "1px solid hsl(var(--pbi-border))" }} />
+      </a>
+    );
+  }
+
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer"
+      className="w-8 h-8 rounded flex items-center justify-center"
+      style={{ border: "1px solid hsl(var(--pbi-border))", background: "hsl(var(--pbi-dark))" }}
+      title={isPdf ? "PDF" : isExcel ? "Excel" : "Arquivo"}
+    >
+      {isPdf ? <FileText className="w-4 h-4" style={{ color: "hsl(0, 72%, 51%)" }} /> :
+       isExcel ? <FileSpreadsheet className="w-4 h-4" style={{ color: "hsl(152, 60%, 38%)" }} /> :
+       <FileText className="w-4 h-4" style={{ color: "hsl(var(--pbi-text-secondary))" }} />}
+    </a>
+  );
+};
 
 export default function Metas() {
   const { toast } = useToast();
@@ -677,11 +703,7 @@ export default function Metas() {
                         <span className={`text-[11px] flex-1 ${acao.concluida ? "line-through text-muted-foreground" : "text-foreground"}`}>{acao.descricao}</span>
                         {acao.imagens && acao.imagens.length > 0 && (
                           <div className="flex gap-1">
-                            {acao.imagens.map((img, i) => (
-                              <a key={i} href={img} target="_blank" rel="noopener noreferrer">
-                                <img src={img} alt="" className="w-8 h-8 rounded object-cover" style={{ border: "1px solid hsl(var(--pbi-border))" }} />
-                              </a>
-                            ))}
+                            {acao.imagens.map((f, i) => <FileThumbnail key={i} url={f} />)}
                           </div>
                         )}
                         {acao.responsavel && <span className="text-[9px] text-muted-foreground hidden sm:inline">{acao.responsavel}</span>}
@@ -713,11 +735,7 @@ export default function Metas() {
                         <span className={`text-[11px] flex-1 ${contrib.concluida ? "line-through text-muted-foreground" : "text-foreground"}`}>{contrib.descricao}</span>
                         {contrib.imagens && contrib.imagens.length > 0 && (
                           <div className="flex gap-1">
-                            {contrib.imagens.map((img, i) => (
-                              <a key={i} href={img} target="_blank" rel="noopener noreferrer">
-                                <img src={img} alt="" className="w-8 h-8 rounded object-cover" style={{ border: "1px solid hsl(var(--pbi-border))" }} />
-                              </a>
-                            ))}
+                            {contrib.imagens.map((f, i) => <FileThumbnail key={i} url={f} />)}
                           </div>
                         )}
                         {contrib.responsavel && <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground hidden sm:inline">{contrib.responsavel}</span>}
@@ -746,11 +764,7 @@ export default function Metas() {
                             {ci.comentario && <p className="text-muted-foreground truncate">{ci.comentario}</p>}
                             {ci.imagens && ci.imagens.length > 0 && (
                               <div className="flex gap-1 mt-1">
-                                {ci.imagens.map((img, i) => (
-                                  <a key={i} href={img} target="_blank" rel="noopener noreferrer">
-                                    <img src={img} alt="" className="w-8 h-8 rounded object-cover" style={{ border: "1px solid hsl(var(--pbi-border))" }} />
-                                  </a>
-                                ))}
+                                {ci.imagens.map((f, i) => <FileThumbnail key={i} url={f} />)}
                               </div>
                             )}
                           </div>
@@ -1034,8 +1048,8 @@ export default function Metas() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Imagens (opcional)</Label>
-              <MetaImageUpload images={newAcao.imagens} onChange={(imgs) => setNewAcao({ ...newAcao, imagens: imgs })} folder="acoes" />
+              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Anexos (opcional)</Label>
+              <MetaFileUpload files={newAcao.imagens} onChange={(imgs) => setNewAcao({ ...newAcao, imagens: imgs })} folder="acoes" />
             </div>
             <Button onClick={() => addAcao(canEditMetas ? "acao" : "contribuicao")} className="w-full h-8 text-[12px] font-semibold" style={{ background: canEditMetas ? "hsl(var(--pbi-yellow))" : "hsl(174, 62%, 47%)", color: "hsl(var(--pbi-dark))" }}>
               {canEditMetas ? "Adicionar Ação" : "Adicionar Minha Contribuição"}
@@ -1112,8 +1126,8 @@ export default function Metas() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Imagens (opcional)</Label>
-              <MetaImageUpload images={newCheckin.imagens} onChange={(imgs) => setNewCheckin({ ...newCheckin, imagens: imgs })} folder="checkins" />
+              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Anexos (opcional)</Label>
+              <MetaFileUpload files={newCheckin.imagens} onChange={(imgs) => setNewCheckin({ ...newCheckin, imagens: imgs })} folder="checkins" />
             </div>
 
             <Button onClick={addCheckin} className="w-full h-8 text-[12px] font-semibold" style={{ background: "hsl(262, 52%, 47%)", color: "white" }}>
