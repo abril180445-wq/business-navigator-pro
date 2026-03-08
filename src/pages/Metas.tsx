@@ -411,10 +411,13 @@ export default function Metas() {
   const rankingMetas = [...metas].sort((a, b) => (b.atual / b.objetivo) - (a.atual / a.objetivo));
 
   const formatVal = (v: number, unidade: string) => {
+    if (unidade === "texto") return "";
     if (unidade === "R$") return `R$ ${v.toLocaleString("pt-BR")}`;
     if (unidade === "%") return `${v}%`;
     return `${v.toLocaleString("pt-BR")} ${unidade}`;
   };
+
+  const isQualitativa = (meta: Meta) => meta.unidade === "texto" || (meta.objetivo <= 1 && meta.atual === 0 && meta.unidade === "texto");
 
   // Parent metas (top-level)
   const parentMetas = metas.filter(m => !m.parent_id);
