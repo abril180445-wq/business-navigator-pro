@@ -104,7 +104,15 @@ const PBITile = ({ children, title, className = "" }: { children: React.ReactNod
 export default function Dashboard() {
   const [periodo, setPeriodo] = useState("2025");
   const { userRole, profile } = useAuth();
+  const { theme } = useTheme();
   const isNormal = userRole === "normal";
+
+  // Theme-adaptive colors
+  const gridColor = theme === "dark" ? "hsl(0, 0%, 25%)" : "hsl(0, 0%, 88%)";
+  const axisColor = theme === "dark" ? "hsl(0, 0%, 45%)" : "hsl(0, 0%, 60%)";
+  const tooltipBg = theme === "dark" ? "hsl(0, 0%, 18%)" : "#fff";
+  const tooltipBorder = theme === "dark" ? "hsl(0, 0%, 30%)" : "hsl(0, 0%, 88%)";
+  const tooltipStyle = { borderRadius: "4px", border: `1px solid ${tooltipBorder}`, fontSize: 12, backgroundColor: tooltipBg, color: theme === "dark" ? "#e8e8e8" : "#222" };
 
   return (
     <div className="space-y-3">
