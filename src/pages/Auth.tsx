@@ -174,28 +174,12 @@ export default function Auth() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7 }}
           >
-            {/* Logo */}
-            <div className="flex items-center gap-4 mb-10">
-              <div className="relative">
-                <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center"
-                  style={{ background: "linear-gradient(135deg, hsl(45, 100%, 51%), hsl(38, 92%, 45%))" }}
-                >
-                  <img src={logoSanRemo} alt="Logo San Remo" className="h-10 w-10 object-contain" />
-                </div>
-                <motion.div
-                  className="absolute -inset-1 rounded-2xl"
-                  style={{ border: "1px solid hsl(45, 100%, 51%, 0.3)" }}
-                  animate={{ opacity: [0.3, 0.7, 0.3] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.4em] font-medium" style={{ color: "hsl(45, 100%, 51%)" }}>
-                  Business Navigator
-                </p>
-                <h1 className="text-3xl font-bold text-white tracking-tight">San Remo</h1>
-              </div>
+            {/* Title */}
+            <div className="mb-10">
+              <p className="text-xs uppercase tracking-[0.4em] font-medium mb-1" style={{ color: "hsl(45, 100%, 51%)" }}>
+                Business Navigator
+              </p>
+              <h1 className="text-3xl font-bold text-white tracking-tight">San Remo</h1>
             </div>
 
             {/* Tagline */}
