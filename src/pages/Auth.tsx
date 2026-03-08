@@ -437,7 +437,7 @@ export default function Auth() {
 
             {/* Footer */}
             <p className="text-center text-[10px] mt-4" style={{ color: "hsl(220, 15%, 28%)" }}>
-              © 2026 San Remo Construtora — Business Navigator Pro
+              © 2026 San Remo Construtora
             </p>
           </motion.div>
         </section>
