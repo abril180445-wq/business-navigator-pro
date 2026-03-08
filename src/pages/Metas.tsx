@@ -40,6 +40,21 @@ interface Meta {
   status: "no_prazo" | "atencao" | "em_risco" | "atingida";
 }
 
+type MetaTipo = "quantitativa" | "qualitativa";
+
+interface FieldToggles {
+  valores: boolean;
+  responsavel: boolean;
+  prazo: boolean;
+  prioridade: boolean;
+  ciclo: boolean;
+  metaPai: boolean;
+  categoria: boolean;
+}
+
+const defaultTogglesQuant: FieldToggles = { valores: true, responsavel: true, prazo: false, prioridade: true, ciclo: true, metaPai: false, categoria: true };
+const defaultTogglesQual: FieldToggles = { valores: false, responsavel: true, prazo: true, prioridade: true, ciclo: false, metaPai: false, categoria: true };
+
 interface AcaoMeta {
   id: string;
   meta_id: string;
