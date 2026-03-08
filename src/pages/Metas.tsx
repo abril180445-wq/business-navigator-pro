@@ -286,7 +286,15 @@ export default function Metas() {
   };
 
   const removeAcao = async (id: string) => {
+    if (!confirm("Excluir esta ação/contribuição?")) return;
     await supabase.from("acoes_meta").delete().eq("id", id);
+    toast({ title: "Ação removida" });
+  };
+
+  const removeCheckin = async (id: string) => {
+    if (!confirm("Excluir este check-in?")) return;
+    await supabase.from("meta_checkins").delete().eq("id", id);
+    toast({ title: "Check-in removido" });
   };
 
   const addCheckin = async () => {
