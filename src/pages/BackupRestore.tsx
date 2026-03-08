@@ -41,10 +41,10 @@ const SCOPES: { value: RestoreScope; label: string; desc: string; icon: any; col
   {
     value: "database",
     label: "Apenas Banco de Dados",
-    desc: "Metas, ações, check-ins e relatórios",
+    desc: "Metas, ações, check-ins, relatórios, financeiro, obras e materiais",
     icon: Database,
     color: "hsl(207, 89%, 48%)",
-    tables: ["Metas", "Ações", "Check-ins", "Relatórios"],
+    tables: ["Metas", "Ações", "Check-ins", "Relatórios", "Dados Cadastro", "Faturamento", "Contas Pagar", "Contas Receber", "Empreendimentos", "Contratos", "Materiais"],
   },
   {
     value: "all",
@@ -52,7 +52,7 @@ const SCOPES: { value: RestoreScope; label: string; desc: string; icon: any; col
     desc: "Restauração completa de todos os dados",
     icon: Layers,
     color: "hsl(152, 60%, 38%)",
-    tables: ["Perfis", "Roles", "Metas", "Ações", "Check-ins", "Relatórios"],
+    tables: ["Perfis", "Roles", "Metas", "Ações", "Check-ins", "Relatórios", "Financeiro", "Obras"],
   },
 ];
 

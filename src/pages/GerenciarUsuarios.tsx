@@ -23,6 +23,7 @@ const roleConfig: Record<string, { label: string; color: string; bg: string; ico
   admin: { label: "Admin", color: "hsl(0, 72%, 51%)", bg: "hsl(0, 72%, 51%, 0.15)", icon: ShieldCheck },
   master: { label: "Master", color: "hsl(45, 100%, 51%)", bg: "hsl(45, 100%, 51%, 0.15)", icon: Shield },
   normal: { label: "Normal", color: "hsl(207, 89%, 48%)", bg: "hsl(207, 89%, 48%, 0.15)", icon: User },
+  none: { label: "Sem Permissão", color: "hsl(220, 15%, 55%)", bg: "hsl(220, 15%, 55%, 0.15)", icon: User },
 };
 
 export default function GerenciarUsuarios() {
