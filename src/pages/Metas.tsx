@@ -457,18 +457,19 @@ export default function Metas() {
       {activeTab === "acoes" && !loading && (
         <div className="space-y-3">
           {!canEditMetas && (
-            <div className="pbi-tile p-4" style={{ borderLeft: "4px solid hsl(207, 89%, 48%)" }}>
+            <div className="pbi-tile p-4" style={{ borderLeft: "4px solid hsl(174, 62%, 47%)" }}>
               <div className="flex items-center gap-2 mb-1">
-                <Eye className="w-4 h-4" style={{ color: "hsl(207, 89%, 48%)" }} />
-                <p className="text-[13px] font-semibold text-foreground">Modo Visualização</p>
+                <ListChecks className="w-4 h-4" style={{ color: "hsl(174, 62%, 47%)" }} />
+                <p className="text-[13px] font-semibold text-foreground">Suas Contribuições</p>
               </div>
-              <p className="text-[11px] text-muted-foreground">Você pode visualizar as metas e o plano de ação. Para editar, solicite acesso ao administrador.</p>
+              <p className="text-[11px] text-muted-foreground">Visualize as metas da empresa e adicione suas contribuições sobre o que você está fazendo para ajudar a cumpri-las.</p>
             </div>
           )}
 
           {filteredMetas.map((meta) => {
             const pct = Math.min(Math.round((meta.atual / meta.objetivo) * 100), 100);
-            const metaAcoes = acoes.filter((a) => a.meta_id === meta.id);
+            const metaAcoes = acoes.filter((a) => a.meta_id === meta.id && a.tipo === "acao");
+            const metaContribs = acoes.filter((a) => a.meta_id === meta.id && a.tipo === "contribuicao");
             const pCfg = prioridadeConfig[meta.prioridade];
             const barColor = pct >= 80 ? "hsl(152, 60%, 38%)" : pct >= 50 ? "hsl(207, 89%, 48%)" : pct >= 30 ? "hsl(45, 100%, 51%)" : "hsl(0, 72%, 51%)";
 
@@ -489,6 +490,12 @@ export default function Metas() {
                         <Plus className="w-3 h-3 inline mr-0.5" /> Ação
                       </button>
                     )}
+                    {/* Normal users can add contributions */}
+                    {!canEditMetas && (
+                      <button onClick={() => { setAcaoMetaId(meta.id); setAcaoDialogOpen(true); }} className="text-[10px] px-2 py-1 rounded font-medium" style={{ background: "hsl(174, 62%, 47%)", color: "hsl(var(--pbi-dark))" }}>
+                        <Plus className="w-3 h-3 inline mr-0.5" /> Minha Contribuição
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div className="h-2 bg-secondary rounded-full overflow-hidden mb-3">
@@ -499,8 +506,9 @@ export default function Metas() {
                   <p className="text-[10px] text-muted-foreground mb-2">Responsável: <span className="text-foreground font-medium">{meta.responsavel}</span></p>
                 )}
 
-                {metaAcoes.length > 0 ? (
-                  <div className="space-y-1.5">
+                {/* Ações definidas pelos editores */}
+                {metaAcoes.length > 0 && (
+                  <div className="space-y-1.5 mb-3">
                     <p className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
                       <ListChecks className="w-3.5 h-3.5" style={{ color: "hsl(var(--pbi-yellow))" }} />
                       O que fazer para cumprir esta meta:
@@ -521,8 +529,31 @@ export default function Metas() {
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <p className="text-[11px] text-muted-foreground italic">Nenhuma ação definida para esta meta ainda.</p>
+                )}
+
+                {/* Contribuições dos usuários comuns */}
+                {metaContribs.length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5" style={{ color: "hsl(174, 62%, 47%)" }} />
+                      Contribuições da equipe:
+                    </p>
+                    {metaContribs.map((contrib) => (
+                      <div key={contrib.id} className="flex items-center gap-2 py-1.5 px-2 rounded" style={{ background: "hsl(174, 62%, 47%, 0.06)", border: "1px solid hsl(174, 62%, 47%, 0.15)" }}>
+                        <Zap className="w-3.5 h-3.5 shrink-0" style={{ color: "hsl(174, 62%, 47%)" }} />
+                        <span className="text-[11px] flex-1 text-foreground">{contrib.descricao}</span>
+                        {contrib.responsavel && <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{contrib.responsavel}</span>}
+                        {contrib.prazo && <span className="text-[9px] text-muted-foreground">{new Date(contrib.prazo).toLocaleDateString("pt-BR")}</span>}
+                        {(canEditMetas || contrib.created_by === user?.id) && (
+                          <button onClick={() => removeAcao(contrib.id)} className="p-0.5 rounded hover:bg-destructive/10 text-muted-foreground"><X className="w-3 h-3" /></button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {metaAcoes.length === 0 && metaContribs.length === 0 && (
+                  <p className="text-[11px] text-muted-foreground italic">Nenhuma ação ou contribuição definida ainda.</p>
                 )}
               </PBITile>
             );
