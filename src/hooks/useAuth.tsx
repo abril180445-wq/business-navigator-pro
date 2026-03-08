@@ -4,12 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
+type AppRole = "admin" | "master" | "normal";
 
 type AuthContextValue = {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
   isAdmin: boolean;
+  userRole: AppRole | null;
+  canEditMetas: boolean;
   loading: boolean;
   refreshAuth: () => Promise<void>;
   signOut: () => Promise<void>;
