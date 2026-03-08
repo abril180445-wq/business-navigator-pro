@@ -401,16 +401,44 @@ export default function ManualUsuario() {
         <div className="lg:col-span-3">
           {currentTopic && currentSection ? (
             <div className="pbi-tile">
-              <div className="flex items-center gap-2 mb-4 pb-3" style={{ borderBottom: "1px solid hsl(var(--pbi-border))" }}>
+              <div className="flex items-center gap-2 mb-4 pb-3 flex-wrap" style={{ borderBottom: "1px solid hsl(var(--pbi-border))" }}>
                 <currentSection.icon className="w-4 h-4" style={{ color: "hsl(var(--pbi-yellow))" }} />
                 <span className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>{currentSection.title}</span>
                 <span style={{ color: "hsl(var(--pbi-text-secondary))" }}>/</span>
                 <span className="text-[11px] font-medium" style={{ color: "hsl(var(--pbi-text-primary))" }}>{currentTopic.title}</span>
+                {currentSection.adminOnly && (
+                  <span className="text-[9px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ml-auto" style={{ background: "hsl(var(--pbi-yellow) / 0.15)", color: "hsl(var(--pbi-yellow))" }}>🔒 Admin</span>
+                )}
+                {currentSection.status === "placeholder" && (
+                  <span className="text-[9px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ml-auto bg-muted text-muted-foreground">🚧 Em desenvolvimento</span>
+                )}
               </div>
               <h2 className="text-[16px] font-bold mb-4" style={{ color: "hsl(var(--pbi-yellow))" }}>{currentTopic.title}</h2>
               <div className="space-y-1">
                 {renderMarkdown(currentTopic.body)}
               </div>
+
+              {/* Implementar agora button for placeholder modules */}
+              {currentSection.status === "placeholder" && (
+                <div className="mt-6 p-4 rounded-lg border border-dashed flex items-center gap-3 flex-wrap" style={{ borderColor: "hsl(var(--pbi-yellow) / 0.3)", background: "hsl(var(--pbi-yellow) / 0.05)" }}>
+                  <Construction className="w-5 h-5 shrink-0" style={{ color: "hsl(var(--pbi-yellow))" }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-semibold" style={{ color: "hsl(var(--pbi-text-primary))" }}>Módulo em desenvolvimento</p>
+                    <p className="text-[11px] text-muted-foreground">Solicite a implementação deste módulo ao administrador do sistema.</p>
+                  </div>
+                  <button
+                    className="flex items-center gap-1.5 h-8 px-4 rounded-md text-[11px] font-semibold transition-all hover:scale-105 shrink-0"
+                    style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}
+                    onClick={() => {
+                      const msg = `Solicitar implementação do módulo "${currentSection.title}"`;
+                      window.alert(msg);
+                    }}
+                  >
+                    <Rocket className="w-3.5 h-3.5" />
+                    Implementar agora
+                  </button>
+                </div>
+              )}
 
               {/* Navigation */}
               <div className="flex justify-between mt-8 pt-4" style={{ borderTop: "1px solid hsl(var(--pbi-border))" }}>
