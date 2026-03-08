@@ -1124,12 +1124,10 @@ export default function Metas() {
               );
             })()}
 
-            {canEditMetas && (
-              <div className="space-y-1.5">
-                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Novo valor (opcional)</Label>
-                <Input type="number" value={newCheckin.valor} onChange={(e) => setNewCheckin({ ...newCheckin, valor: e.target.value })} placeholder={`Atual: ${metas.find(m => m.id === checkinMetaId)?.atual || 0}`} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-              </div>
-            )}
+            <div className="space-y-1.5">
+              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Novo valor (opcional)</Label>
+              <Input type="number" value={newCheckin.valor} onChange={(e) => setNewCheckin({ ...newCheckin, valor: e.target.value })} placeholder={`Atual: ${metas.find(m => m.id === checkinMetaId)?.atual || 0}`} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+            </div>
 
             <div className="space-y-1.5">
               <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Nível de confiança</Label>
