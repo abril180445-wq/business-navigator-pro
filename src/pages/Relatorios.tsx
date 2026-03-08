@@ -13,19 +13,7 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
-// ============ DADOS EXEMPLO (financeiro) ============
-const dadosExemplo = [
-  { data: "01/01/2026", categoria: "Vendas", descricao: "Venda Unid. 302 — Res. Vila Serena", valor: 385000 },
-  { data: "05/01/2026", categoria: "Compras", descricao: "Cimento e aço — Canteiro Monte Carlo", valor: -125000 },
-  { data: "10/01/2026", categoria: "Vendas", descricao: "Venda Lote 15 — Cond. Jardim Real", valor: 180000 },
-  { data: "12/01/2026", categoria: "Despesas", descricao: "Folha de pagamento — Engenharia", valor: -185000 },
-  { data: "15/01/2026", categoria: "Vendas", descricao: "Venda Unid. 1201 — Ed. Monte Carlo", valor: 156000 },
-  { data: "18/01/2026", categoria: "Compras", descricao: "Concreto usinado — Concreteira Central", valor: -92000 },
-  { data: "22/01/2026", categoria: "Receitas", descricao: "Parcela financiamento — Vila Serena", valor: 195000 },
-  { data: "25/01/2026", categoria: "Despesas", descricao: "Aluguel de equipamentos pesados", valor: -48000 },
-  { data: "28/01/2026", categoria: "Vendas", descricao: "Venda Unid. 501 — Res. Vila Serena", valor: 395000 },
-  { data: "30/01/2026", categoria: "Despesas", descricao: "Impostos e encargos trabalhistas", valor: -65000 },
-];
+type DadoFinanceiro = { data: string; categoria: string; descricao: string; valor: number };
 
 const tiposRelatorio = [
   { value: "geral", label: "Relatório Geral" },
