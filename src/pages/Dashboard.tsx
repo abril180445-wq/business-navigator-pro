@@ -125,6 +125,25 @@ export default function Dashboard() {
   const { theme } = useTheme();
   const isNormal = userRole === "normal";
 
+  // Real metas stats
+  const [metaStats, setMetaStats] = useState({ total: 0, atingidas: 0, emRisco: 0 });
+  useEffect(() => {
+    supabase.from("metas").select("status").then(({ data }) => {
+      if (data) {
+        setMetaStats({
+          total: data.length,
+          atingidas: data.filter((m) => m.status === "atingida").length,
+          emRisco: data.filter((m) => m.status === "em_risco").length,
+        });
+      }
+    });
+  }, []);
+
+  const kpis = kpisDefault.map((k) => {
+    if (k.title === "Obras Ativas") return { ...k, value: String(metaStats.total), change: `${metaStats.atingidas} atingidas` };
+    return k;
+  });
+
   // Theme-adaptive colors
   const gridColor = theme === "dark" ? "hsl(0, 0%, 25%)" : "hsl(0, 0%, 88%)";
   const axisColor = theme === "dark" ? "hsl(0, 0%, 45%)" : "hsl(0, 0%, 60%)";
