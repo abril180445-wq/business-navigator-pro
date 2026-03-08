@@ -299,7 +299,7 @@ export default function GerenciarUsuarios() {
                           {!isSelf && (
                             <>
                               <button
-                                onClick={() => setEditingRole({ userId: u.id, role: u.role })}
+                                onClick={() => setEditingRole({ userId: u.id, role: u.role === "none" ? "normal" : u.role })}
                                 className="p-1 rounded hover:bg-primary/20 transition-colors text-muted-foreground"
                                 title="Alterar permissão"
                               >

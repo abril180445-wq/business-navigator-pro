@@ -44,8 +44,13 @@ export default function Contabilidade() {
     "/contabilidade/pagamentos": "pagar",
     "/contabilidade/bancario": "receber",
   };
-  const initialTab = routeTabMap[location.pathname] || "faturamento";
-  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
+  const [activeTab, setActiveTab] = useState<TabKey>(routeTabMap[location.pathname] || "faturamento");
+
+  // Sync tab when route changes (sidebar clicks)
+  useEffect(() => {
+    const mapped = routeTabMap[location.pathname];
+    if (mapped) setActiveTab(mapped);
+  }, [location.pathname]);
   const [faturamentos, setFaturamentos] = useState<Faturamento[]>([]);
   const [contasPagar, setContasPagar] = useState<ContaPagar[]>([]);
   const [contasReceber, setContasReceber] = useState<ContaReceber[]>([]);
