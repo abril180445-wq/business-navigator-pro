@@ -880,9 +880,11 @@ export default function Metas() {
                     )}
                   </div>
                 </div>
-                <div className="h-2 bg-secondary rounded-full overflow-hidden mb-3">
-                  <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: barColor }} />
-                </div>
+                {!qual && (
+                  <div className="h-2 bg-secondary rounded-full overflow-hidden mb-3">
+                    <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: barColor }} />
+                  </div>
+                )}
 
                 {meta.responsavel && (
                   <p className="text-[10px] text-muted-foreground mb-2">Responsável: <span className="text-foreground font-medium">{meta.responsavel}</span></p>
