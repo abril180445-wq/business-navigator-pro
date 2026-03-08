@@ -229,6 +229,7 @@ const sections: ManualSection[] = [
     id: "backup",
     title: "Backup e Restauração",
     icon: HardDrive,
+    adminOnly: true,
     content: [
       {
         title: "Como Realizar um Backup",
