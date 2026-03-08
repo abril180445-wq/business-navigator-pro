@@ -25,6 +25,7 @@ import {
   BarChart3,
   Filter,
   HardDrive,
+  BookOpen,
 } from "lucide-react";
 import logoSanRemo from "@/assets/logo-san-remo.png";
 import { Button } from "@/components/ui/button";
