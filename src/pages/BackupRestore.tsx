@@ -4,6 +4,8 @@ import { HardDrive, Download, Upload, RefreshCw, Shield, Clock, Database, CheckC
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useAuth } from "@/hooks/useAuth";
+import AccessDenied from "@/components/AccessDenied";
 
 interface BackupMeta {
   version: string;
