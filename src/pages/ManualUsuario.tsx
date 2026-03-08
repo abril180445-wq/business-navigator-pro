@@ -81,7 +81,19 @@ const sections: ManualSection[] = [
     content: [
       {
         title: "Acompanhamento de Metas",
-        body: `O módulo de Metas permite definir e acompanhar objetivos da empresa com metodologia OKR.\n\n**Funcionalidades por perfil:**\n\n**Admin e Master:**\n- Criar, editar e excluir metas\n- Fazer check-ins com comentários e nível de confiança\n- Adicionar ações e planos para cada meta\n- Definir metas pai-filho (cascata)\n- Visualizar timeline e heatmap de saúde\n\n**Normal:**\n- Visualizar todas as metas e seu progresso\n- Visualizar timeline de atividades\n- **NÃO pode** criar, editar ou excluir metas\n- **NÃO pode** fazer check-ins`,
+        body: `O módulo de Metas permite definir e acompanhar objetivos da empresa com metodologia OKR.\n\n**Funcionalidades por perfil:**\n\n**Admin e Master:**\n- Criar, editar e excluir metas\n- **Edição completa:** nome, valor atual, objetivo, unidade, categoria, responsável, prioridade, ciclo, prazo e meta pai\n- Fazer check-ins com comentários e nível de confiança\n- Adicionar ações e planos para cada meta\n- Definir metas pai-filho (cascata)\n- Visualizar timeline e heatmap de saúde\n\n**Normal:**\n- Visualizar todas as metas e seu progresso\n- Visualizar timeline de atividades\n- **NÃO pode** criar, editar ou excluir metas\n- **NÃO pode** fazer check-ins`,
+      },
+      {
+        title: "Criando uma Meta",
+        body: `1. Acesse **Metas** no menu lateral\n2. Clique em **"Nova Meta"**\n3. Preencha os campos:\n   - **Nome:** Descrição da meta\n   - **Valor Atual / Objetivo:** Progresso e alvo numérico\n   - **Unidade:** R$, %, unidades, etc.\n   - **Categoria:** Escolha uma pré-definida (Financeiro, Vendas, Operacional, Qualidade, RH, Engenharia) ou selecione **"Outra"** para criar uma categoria personalizada\n   - **Responsável:** Pessoa responsável\n   - **Prioridade:** Alta, Média ou Baixa\n   - **Ciclo:** Q1–Q4 2026 ou Anual\n   - **Meta Pai:** Opcional, para criar hierarquia\n4. Clique em **"Criar Meta"**`,
+      },
+      {
+        title: "Editando uma Meta",
+        body: `1. Na lista de metas, passe o mouse sobre a meta desejada\n2. Clique no ícone de **lápis** (✏️)\n3. O dialog de edição abrirá com **todos os campos editáveis:**\n   - Nome, Valor Atual, Objetivo, Unidade\n   - Categoria (incluindo opção "Outra" personalizada)\n   - Responsável, Prioridade, Ciclo\n   - **Prazo** (opcional — pode adicionar ou remover)\n   - Meta Pai\n4. Clique em **"Salvar Alterações"**\n\n**Observação:** Ao alterar o valor atual, um check-in automático é registrado no histórico.`,
+      },
+      {
+        title: "Categorias Personalizadas",
+        body: `O sistema vem com categorias pré-definidas: Financeiro, Vendas, Operacional, Qualidade, RH e Engenharia.\n\n**Para criar uma nova categoria:**\n1. Ao criar ou editar uma meta, selecione **"✨ Outra (personalizada)"** no campo Categoria\n2. Digite o nome da nova categoria (máximo 40 caracteres)\n3. Salve a meta\n\nA categoria criada aparecerá automaticamente nos filtros, no mapa de saúde e nos gráficos analíticos para todas as metas futuras.`,
       },
     ],
   },
