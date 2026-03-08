@@ -1237,12 +1237,21 @@ export default function Metas() {
                 </select>
               </div>
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Meta Pai (opcional)</Label>
-              <select value={editValues.parent_id} onChange={(e) => setEditValues({ ...editValues, parent_id: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                <option value="">Nenhuma (meta raiz)</option>
-                {metas.filter(m => m.id !== editingId).map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
-              </select>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Prazo (opcional)</Label>
+                <Input type="date" value={editValues.prazo} onChange={(e) => setEditValues({ ...editValues, prazo: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                {editValues.prazo && (
+                  <button onClick={() => setEditValues({ ...editValues, prazo: "" })} className="text-[10px] text-muted-foreground hover:text-destructive transition-colors">✕ Remover prazo</button>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Meta Pai (opcional)</Label>
+                <select value={editValues.parent_id} onChange={(e) => setEditValues({ ...editValues, parent_id: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                  <option value="">Nenhuma (meta raiz)</option>
+                  {metas.filter(m => m.id !== editingId).map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
+                </select>
+              </div>
             </div>
             <div className="flex gap-2">
               <Button onClick={() => { setEditDialogOpen(false); setEditingId(null); }} variant="outline" className="flex-1 h-8 text-[12px]">Cancelar</Button>
