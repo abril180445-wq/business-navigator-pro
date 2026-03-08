@@ -14,7 +14,6 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Verify caller is admin
     const authHeader = req.headers.get("Authorization")!;
     const callerClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global: { headers: { Authorization: authHeader } },
@@ -25,25 +24,33 @@ Deno.serve(async (req) => {
     if (!isAdmin) throw new Error("Not authorized — admin only");
 
     const body = await req.json();
-    const action = body.action; // "export" or "import"
+    const action = body.action;
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     if (action === "export") {
-      // Export all tables
+      // Export ALL tables
       const { data: profiles } = await adminClient.from("profiles").select("*");
       const { data: userRoles } = await adminClient.from("user_roles").select("*");
+      const { data: metas } = await adminClient.from("metas").select("*");
+      const { data: acoesMeta } = await adminClient.from("acoes_meta").select("*");
+      const { data: metaCheckins } = await adminClient.from("meta_checkins").select("*");
+      const { data: relatoriosGerados } = await adminClient.from("relatorios_gerados").select("*");
 
       // Get all users from auth
       const { data: { users } } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
 
       const backup = {
-        version: "1.0",
+        version: "2.0",
         created_at: new Date().toISOString(),
         created_by: caller.email,
         data: {
           profiles: profiles || [],
           user_roles: userRoles || [],
+          metas: metas || [],
+          acoes_meta: acoesMeta || [],
+          meta_checkins: metaCheckins || [],
+          relatorios_gerados: relatoriosGerados || [],
           auth_users: users?.map(u => ({
             id: u.id,
             email: u.email,
@@ -55,6 +62,10 @@ Deno.serve(async (req) => {
           total_profiles: profiles?.length || 0,
           total_roles: userRoles?.length || 0,
           total_users: users?.length || 0,
+          total_metas: metas?.length || 0,
+          total_acoes: acoesMeta?.length || 0,
+          total_checkins: metaCheckins?.length || 0,
+          total_relatorios: relatoriosGerados?.length || 0,
         },
       };
 
@@ -67,21 +78,50 @@ Deno.serve(async (req) => {
       const backupData = body.backup;
       if (!backupData?.data) throw new Error("Invalid backup format");
 
-      let restored = { profiles: 0, user_roles: 0 };
+      const restored: Record<string, number> = {
+        profiles: 0, user_roles: 0, metas: 0, acoes_meta: 0, meta_checkins: 0, relatorios_gerados: 0,
+      };
 
-      // Restore profiles
+      // Restore in order (respecting foreign keys): profiles → user_roles → metas → acoes_meta → meta_checkins → relatorios_gerados
       if (backupData.data.profiles?.length > 0) {
-        for (const profile of backupData.data.profiles) {
-          await adminClient.from("profiles").upsert(profile, { onConflict: "id" });
+        for (const row of backupData.data.profiles) {
+          await adminClient.from("profiles").upsert(row, { onConflict: "id" });
           restored.profiles++;
         }
       }
 
-      // Restore user_roles
       if (backupData.data.user_roles?.length > 0) {
-        for (const role of backupData.data.user_roles) {
-          await adminClient.from("user_roles").upsert(role, { onConflict: "id" });
+        for (const row of backupData.data.user_roles) {
+          await adminClient.from("user_roles").upsert(row, { onConflict: "id" });
           restored.user_roles++;
+        }
+      }
+
+      if (backupData.data.metas?.length > 0) {
+        for (const row of backupData.data.metas) {
+          await adminClient.from("metas").upsert(row, { onConflict: "id" });
+          restored.metas++;
+        }
+      }
+
+      if (backupData.data.acoes_meta?.length > 0) {
+        for (const row of backupData.data.acoes_meta) {
+          await adminClient.from("acoes_meta").upsert(row, { onConflict: "id" });
+          restored.acoes_meta++;
+        }
+      }
+
+      if (backupData.data.meta_checkins?.length > 0) {
+        for (const row of backupData.data.meta_checkins) {
+          await adminClient.from("meta_checkins").upsert(row, { onConflict: "id" });
+          restored.meta_checkins++;
+        }
+      }
+
+      if (backupData.data.relatorios_gerados?.length > 0) {
+        for (const row of backupData.data.relatorios_gerados) {
+          await adminClient.from("relatorios_gerados").upsert(row, { onConflict: "id" });
+          restored.relatorios_gerados++;
         }
       }
 
