@@ -886,7 +886,17 @@ export default function Metas() {
                             💬 {ci.comentario}
                           </p>
                         )}
+                        {ci.imagens && ci.imagens.length > 0 && (
+                          <div className="flex gap-1 mt-1">
+                            {ci.imagens.map((f, i) => <FileThumbnail key={i} url={f} />)}
+                          </div>
+                        )}
                       </div>
+                      {(canEditMetas || ci.user_id === user?.id) && (
+                        <button onClick={() => removeCheckin(ci.id)} className="p-1 rounded hover:bg-destructive/10 text-muted-foreground shrink-0 self-start" title="Excluir check-in">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                   );
                 })}
