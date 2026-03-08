@@ -49,6 +49,7 @@ interface AcaoMeta {
   prazo: string | null;
   tipo: "acao" | "contribuicao";
   created_by: string | null;
+  imagens: string[];
 }
 
 interface CheckIn {
