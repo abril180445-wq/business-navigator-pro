@@ -12,6 +12,12 @@ import {
   Calendar,
   Filter,
   ChevronDown,
+  Rocket,
+  Construction,
+  Landmark,
+  FolderKanban,
+  Headphones,
+  Truck,
 } from "lucide-react";
 import {
   AreaChart,
@@ -101,9 +107,20 @@ const PBITile = ({ children, title, className = "" }: { children: React.ReactNod
   </div>
 );
 
+const pendingModules = [
+  { title: "Financeiro", description: "Faturamento, Contas a Pagar/Receber, Impostos", icon: DollarSign, color: "hsl(207, 89%, 48%)" },
+  { title: "Obras", description: "Empreendimentos, Contratos, Materiais, Clientes", icon: Building2, color: "hsl(45, 100%, 51%)" },
+  { title: "Engenharia", description: "Ordens de Serviço, Cronogramas, Planejamento", icon: HardHat, color: "hsl(28, 87%, 55%)" },
+  { title: "Patrimônio", description: "Cadastro de bens, Depreciação, Inventário", icon: Landmark, color: "hsl(174, 62%, 47%)" },
+  { title: "Projetos", description: "Kanban, Cronograma, Alocação de recursos", icon: FolderKanban, color: "hsl(262, 60%, 55%)" },
+  { title: "RH", description: "Funcionários, Ponto, Férias, Folha de Pagamento", icon: Users, color: "hsl(152, 60%, 38%)" },
+  { title: "Suporte", description: "Chamados, SLA, Base de conhecimento", icon: Headphones, color: "hsl(340, 65%, 50%)" },
+  { title: "Logística", description: "Entregas, Frota, Rastreamento, Roteirização", icon: Truck, color: "hsl(15, 75%, 50%)" },
+];
+
 export default function Dashboard() {
   const [periodo, setPeriodo] = useState("2025");
-  const { userRole, profile } = useAuth();
+  const { userRole, profile, isAdmin } = useAuth();
   const { theme } = useTheme();
   const isNormal = userRole === "normal";
 
@@ -282,6 +299,49 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </PBITile>
       </div>
+
+      {/* Admin: Modules to implement */}
+      {isAdmin && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Construction className="w-4 h-4 text-muted-foreground" />
+            <h3 className="text-[13px] font-semibold text-foreground">Módulos para Implementar</h3>
+            <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider" style={{ background: "hsl(var(--pbi-yellow) / 0.15)", color: "hsl(var(--pbi-yellow))" }}>Admin</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {pendingModules.map((mod) => {
+              const Icon = mod.icon;
+              return (
+                <div key={mod.title} className="pbi-tile flex flex-col gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg shrink-0" style={{ backgroundColor: `${mod.color}15` }}>
+                      <Icon className="w-4 h-4" style={{ color: mod.color }} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-semibold text-foreground">{mod.title}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">{mod.description}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-auto">
+                    <div className="flex-1 h-1.5 rounded-full overflow-hidden bg-secondary">
+                      <div className="h-full rounded-full w-0" style={{ background: mod.color }} />
+                    </div>
+                    <span className="text-[9px] text-muted-foreground font-medium">0%</span>
+                  </div>
+                  <button
+                    onClick={() => window.alert(`Solicitar implementação do módulo "${mod.title}"`)}
+                    className="flex items-center justify-center gap-1.5 w-full h-8 rounded-md text-[11px] font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}
+                  >
+                    <Rocket className="w-3.5 h-3.5" />
+                    Implementar agora
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
