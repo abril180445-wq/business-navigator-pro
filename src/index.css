@@ -58,7 +58,7 @@
     --info: 205 80% 50%;
     --info-foreground: 0 0% 100%;
 
-    /* Power BI palette */
+    /* Power BI palette — light mode */
     --pbi-yellow: 45 100% 51%;
     --pbi-dark: 0 0% 15%;
     --pbi-darker: 0 0% 10%;
@@ -69,6 +69,8 @@
     --pbi-red: 0 72% 51%;
     --pbi-purple: 262 52% 47%;
     --pbi-green: 152 60% 38%;
+    --pbi-surface: 0 0% 100%;
+    --pbi-border: 0 0% 88%;
 
     --chart-1: 207 89% 48%;
     --chart-2: 45 100% 51%;
