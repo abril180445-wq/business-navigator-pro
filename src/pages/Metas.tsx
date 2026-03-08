@@ -245,6 +245,7 @@ export default function Metas() {
       user_name: profile?.full_name || user?.email || "—",
       valor_anterior: meta.atual, valor_novo: novoValor,
       comentario: newCheckin.comentario, confianca: newCheckin.confianca,
+      imagens: newCheckin.imagens,
     });
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
 
