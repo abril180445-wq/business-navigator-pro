@@ -71,8 +71,18 @@ const coresMeta = [
   "hsl(270, 60%, 55%)", "hsl(330, 70%, 50%)",
 ];
 
-const categoriasBase = ["Financeiro", "Vendas", "Operacional", "Qualidade", "RH", "Engenharia"];
+const categoriasBase = ["Financeiro", "Vendas", "Operacional", "Qualidade", "RH", "Engenharia", "Construção", "Projetos"];
 const ciclosDisponiveis = ["Q1 2026", "Q2 2026", "Q3 2026", "Q4 2026", "Anual 2026"];
+const unidadesPreset = [
+  { value: "R$", label: "R$ (Reais)" },
+  { value: "%", label: "% (Percentual)" },
+  { value: "dias", label: "Dias" },
+  { value: "un", label: "Unidades" },
+  { value: "horas", label: "Horas" },
+  { value: "m²", label: "m² (Metros²)" },
+  { value: "kg", label: "Kg" },
+  { value: "tarefas", label: "Tarefas" },
+];
 
 const prioridadeConfig = {
   alta: { label: "Alta", color: "hsl(0, 72%, 51%)", bg: "hsl(0, 72%, 51%, 0.12)", icon: Flame },
