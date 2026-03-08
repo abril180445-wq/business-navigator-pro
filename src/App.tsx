@@ -13,6 +13,7 @@ import Relatorios from "@/pages/Relatorios";
 import ImportacaoExcel from "@/pages/ImportacaoExcel";
 import Contabilidade from "@/pages/Contabilidade";
 import Pedidos from "@/pages/Pedidos";
+import GerenciarUsuarios from "@/pages/GerenciarUsuarios";
 import ModulePlaceholder from "@/pages/ModulePlaceholder";
 import Auth from "@/pages/Auth";
 import ResetPassword from "@/pages/ResetPassword";
