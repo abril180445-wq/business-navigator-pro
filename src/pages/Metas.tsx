@@ -260,8 +260,227 @@ const FileThumbnail = ({ url }: { url: string }) => {
     </a>
   );
 };
+// Helper to render all dynamic fields based on toggles
+const inputStyle = { background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" };
+const labelStyle = { color: "hsl(var(--pbi-text-secondary))" };
 
-export default function Metas() {
+function renderDynamicFields(
+  toggles: FieldToggles,
+  values: Record<string, string>,
+  setValues: (v: Record<string, string>) => void,
+  categorias: string[],
+  metas: Meta[],
+  editingId: string | null,
+) {
+  const set = (key: string, val: string) => setValues({ ...values, [key]: val });
+  const fields: React.ReactNode[] = [];
+
+  // Row 1: Gestão
+  const gestaoFields: React.ReactNode[] = [];
+  if (toggles.responsavel) gestaoFields.push(
+    <div key="resp" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Responsável</Label>
+      <Input value={values.responsavel} onChange={(e) => set("responsavel", e.target.value)} placeholder="Nome" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.aprovador) gestaoFields.push(
+    <div key="aprov" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Aprovador</Label>
+      <Input value={values.aprovador} onChange={(e) => set("aprovador", e.target.value)} placeholder="Quem aprova" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.equipe) gestaoFields.push(
+    <div key="equipe" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Equipe</Label>
+      <Input value={values.equipe} onChange={(e) => set("equipe", e.target.value)} placeholder="Membros da equipe" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.departamento) gestaoFields.push(
+    <div key="depto" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Departamento</Label>
+      <Input value={values.departamento} onChange={(e) => set("departamento", e.target.value)} placeholder="Setor" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (gestaoFields.length > 0) fields.push(
+    <div key="gestao" className="grid grid-cols-1 sm:grid-cols-3 gap-3">{gestaoFields}</div>
+  );
+
+  // Row 2: Config (prioridade, categoria, ciclo)
+  const cfgFields: React.ReactNode[] = [];
+  if (toggles.prioridade) cfgFields.push(
+    <div key="prio" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Prioridade</Label>
+      <select value={values.prioridade} onChange={(e) => set("prioridade", e.target.value)} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={inputStyle}>
+        <option value="alta">🔴 Alta</option><option value="media">🟡 Média</option><option value="baixa">🔵 Baixa</option>
+      </select>
+    </div>
+  );
+  if (toggles.categoria) cfgFields.push(
+    <div key="cat" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Categoria</Label>
+      <select value={values.categoria} onChange={(e) => setValues({ ...values, categoria: e.target.value, categoriaCustom: "" })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={inputStyle}>
+        {categorias.map((c) => <option key={c} value={c}>{c}</option>)}
+        <option value="__outra__">✨ Outra</option>
+      </select>
+      {values.categoria === "__outra__" && (
+        <Input value={values.categoriaCustom} onChange={(e) => set("categoriaCustom", e.target.value)} placeholder="Nova categoria..." maxLength={40} className="h-7 text-[11px] border-none mt-1" style={inputStyle} />
+      )}
+    </div>
+  );
+  if (toggles.ciclo) cfgFields.push(
+    <div key="ciclo" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Ciclo</Label>
+      <select value={values.ciclo} onChange={(e) => set("ciclo", e.target.value)} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={inputStyle}>
+        {ciclosDisponiveis.map((c) => <option key={c} value={c}>{c}</option>)}
+      </select>
+    </div>
+  );
+  if (cfgFields.length > 0) fields.push(
+    <div key="cfg" className="grid grid-cols-1 sm:grid-cols-3 gap-3">{cfgFields}</div>
+  );
+
+  // Row 3: Tempo
+  const tempoFields: React.ReactNode[] = [];
+  if (toggles.data_inicio) tempoFields.push(
+    <div key="di" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Data Início</Label>
+      <Input type="date" value={values.data_inicio} onChange={(e) => set("data_inicio", e.target.value)} className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.prazo) tempoFields.push(
+    <div key="prazo" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Prazo Final</Label>
+      <Input type="date" value={values.prazo} onChange={(e) => set("prazo", e.target.value)} className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.frequencia_checkin) tempoFields.push(
+    <div key="freq" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Frequência Check-in</Label>
+      <select value={values.frequencia_checkin} onChange={(e) => set("frequencia_checkin", e.target.value)} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={inputStyle}>
+        {frequenciasCheckin.map((f) => <option key={f} value={f}>{f.charAt(0).toUpperCase() + f.slice(1)}</option>)}
+      </select>
+    </div>
+  );
+  if (tempoFields.length > 0) fields.push(
+    <div key="tempo" className="grid grid-cols-1 sm:grid-cols-3 gap-3">{tempoFields}</div>
+  );
+
+  // Row 4: Financeiro
+  if (toggles.orcamento) fields.push(
+    <div key="fin" className="grid grid-cols-2 gap-3">
+      <div className="space-y-1.5">
+        <Label className="text-[11px]" style={labelStyle}>Orçamento (R$)</Label>
+        <Input type="number" value={values.orcamento} onChange={(e) => set("orcamento", e.target.value)} placeholder="0" className="h-8 text-[12px] border-none" style={inputStyle} />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="text-[11px]" style={labelStyle}>Custo Atual (R$)</Label>
+        <Input type="number" value={values.custo_atual} onChange={(e) => set("custo_atual", e.target.value)} placeholder="0" className="h-8 text-[12px] border-none" style={inputStyle} />
+      </div>
+    </div>
+  );
+
+  // Row 5: Obra/Projeto
+  const obraFields: React.ReactNode[] = [];
+  if (toggles.local_obra) obraFields.push(
+    <div key="local" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Local / Obra</Label>
+      <Input value={values.local_obra} onChange={(e) => set("local_obra", e.target.value)} placeholder="Endereço ou nome da obra" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.etapa) obraFields.push(
+    <div key="etapa" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Etapa / Fase</Label>
+      <select value={values.etapa} onChange={(e) => set("etapa", e.target.value)} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={inputStyle}>
+        <option value="">Selecione...</option>
+        {etapasPreset.map((e) => <option key={e} value={e}>{e}</option>)}
+      </select>
+    </div>
+  );
+  if (toggles.fornecedor) obraFields.push(
+    <div key="forn" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Fornecedor</Label>
+      <Input value={values.fornecedor} onChange={(e) => set("fornecedor", e.target.value)} placeholder="Nome do fornecedor" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.marco_critico) obraFields.push(
+    <div key="marco" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Marco Crítico</Label>
+      <Input value={values.marco_critico} onChange={(e) => set("marco_critico", e.target.value)} placeholder="Próximo marco importante" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (obraFields.length > 0) fields.push(
+    <div key="obra" className="grid grid-cols-1 sm:grid-cols-2 gap-3">{obraFields}</div>
+  );
+
+  // Row 6: Textos longos
+  if (toggles.observacoes) fields.push(
+    <div key="obs" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Observações</Label>
+      <Textarea value={values.observacoes} onChange={(e) => set("observacoes", e.target.value)} placeholder="Notas adicionais..." className="resize-none h-14 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.risco) fields.push(
+    <div key="risco" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Riscos</Label>
+      <Textarea value={values.risco} onChange={(e) => set("risco", e.target.value)} placeholder="Riscos identificados..." className="resize-none h-14 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.impacto) fields.push(
+    <div key="impacto" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Impacto</Label>
+      <Input value={values.impacto} onChange={(e) => set("impacto", e.target.value)} placeholder="Impacto esperado" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.dependencias) fields.push(
+    <div key="dep" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Dependências</Label>
+      <Input value={values.dependencias} onChange={(e) => set("dependencias", e.target.value)} placeholder="O que depende disso?" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+
+  // Row 7: Avançados
+  const advFields: React.ReactNode[] = [];
+  if (toggles.peso) advFields.push(
+    <div key="peso" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Peso (0-100)</Label>
+      <Input type="number" value={values.peso} onChange={(e) => set("peso", e.target.value)} placeholder="0" min="0" max="100" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.tags) advFields.push(
+    <div key="tags" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Tags (separadas por vírgula)</Label>
+      <Input value={values.tags} onChange={(e) => set("tags", e.target.value)} placeholder="urgente, fase1, obra-sp" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.indicador_chave) advFields.push(
+    <div key="kpi" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Indicador-Chave (KPI)</Label>
+      <Input value={values.indicador_chave} onChange={(e) => set("indicador_chave", e.target.value)} placeholder="Ex: NPS, ROI, CAC" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.fonte_dados) advFields.push(
+    <div key="fonte" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Fonte de Dados</Label>
+      <Input value={values.fonte_dados} onChange={(e) => set("fonte_dados", e.target.value)} placeholder="De onde vem a informação" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.metaPai) advFields.push(
+    <div key="pai" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Meta Pai (cascata)</Label>
+      <select value={values.parent_id} onChange={(e) => set("parent_id", e.target.value)} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={inputStyle}>
+        <option value="">Nenhuma (meta raiz)</option>
+        {metas.filter(m => m.id !== editingId && !m.parent_id).map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
+      </select>
+    </div>
+  );
+  if (advFields.length > 0) fields.push(
+    <div key="adv" className="grid grid-cols-1 sm:grid-cols-2 gap-3">{advFields}</div>
+  );
+
+  return <>{fields}</>;
+}
+
+
   const { toast } = useToast();
   const { user, profile, canEditMetas, userRole } = useAuth();
   const [metas, setMetas] = useState<Meta[]>([]);
