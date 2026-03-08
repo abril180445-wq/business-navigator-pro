@@ -259,38 +259,41 @@ export default function Metas() {
 
   const saveEdit = async (id: string) => {
     const meta = metas.find(m => m.id === id);
-    const novoValor = parseFloat(editValues.atual) || 0;
-    const novoObj = parseFloat(editValues.objetivo) || 1;
-    const categoriaFinal = editValues.categoria === "__outra__" ? editValues.categoriaCustom.trim() : editValues.categoria;
-    if (!categoriaFinal) {
+    const isQual = editMetaTipo === "qualitativa" || !editMetaToggles.valores;
+    const novoValor = isQual ? 0 : (parseFloat(editValues.atual) || 0);
+    const novoObj = isQual ? 1 : (parseFloat(editValues.objetivo) || 1);
+    const categoriaFinal = !editMetaToggles.categoria ? (meta?.categoria || "Geral") : editValues.categoria === "__outra__" ? editValues.categoriaCustom.trim() : editValues.categoria;
+    if (editMetaToggles.categoria && !categoriaFinal) {
       toast({ title: "Informe a categoria", variant: "destructive" });
       return;
     }
     
     // Auto-calculate status
-    const pct = (novoValor / novoObj) * 100;
+    const pct = isQual ? 0 : (novoValor / novoObj) * 100;
     let newStatus: Meta["status"] = "no_prazo";
-    if (pct >= 100) newStatus = "atingida";
-    else if (pct < 30) newStatus = "em_risco";
-    else if (pct < 60) newStatus = "atencao";
+    if (!isQual) {
+      if (pct >= 100) newStatus = "atingida";
+      else if (pct < 30) newStatus = "em_risco";
+      else if (pct < 60) newStatus = "atencao";
+    }
 
     const { error } = await supabase.from("metas").update({
       nome: editValues.nome,
       atual: novoValor,
       objetivo: novoObj,
-      unidade: editValues.unidade,
-      categoria: categoriaFinal,
-      responsavel: editValues.responsavel,
-      prioridade: editValues.prioridade,
-      ciclo: editValues.ciclo,
-      parent_id: editValues.parent_id || null,
-      prazo: editValues.prazo || null,
+      unidade: isQual ? "texto" : editValues.unidade,
+      categoria: categoriaFinal || "Geral",
+      responsavel: editMetaToggles.responsavel ? editValues.responsavel : "",
+      prioridade: editMetaToggles.prioridade ? editValues.prioridade : "media",
+      ciclo: editMetaToggles.ciclo ? editValues.ciclo : meta?.ciclo || "Q1 2026",
+      parent_id: editMetaToggles.metaPai ? (editValues.parent_id || null) : null,
+      prazo: editMetaToggles.prazo ? (editValues.prazo || null) : null,
       status: newStatus,
     }).eq("id", id);
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
 
-    // Auto check-in when editor updates value
-    if (meta && novoValor !== meta.atual) {
+    // Auto check-in when editor updates value (only for quantitative)
+    if (!isQual && meta && novoValor !== meta.atual) {
       await supabase.from("meta_checkins").insert({
         meta_id: id, user_id: user!.id,
         user_name: profile?.full_name || user?.email || "—",
