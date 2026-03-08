@@ -19,7 +19,12 @@ interface BackupMeta {
 }
 
 export default function BackupRestore() {
+  const { isAdmin } = useAuth();
   const { toast } = useToast();
+
+  if (!isAdmin) return <AccessDenied requiredRole="Administrador" />;
+
+  const [exporting, setExporting] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
   const [lastBackup, setLastBackup] = useState<BackupMeta | null>(null);

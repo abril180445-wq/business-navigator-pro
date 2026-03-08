@@ -27,7 +27,11 @@ const roleConfig: Record<string, { label: string; color: string; bg: string; ico
 
 export default function GerenciarUsuarios() {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  
+  if (!isAdmin) return <AccessDenied requiredRole="Administrador" />;
+
+  const [users, setUsers] = useState<UserEntry[]>([]);
   const [users, setUsers] = useState<UserEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
