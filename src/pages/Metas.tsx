@@ -251,7 +251,7 @@ export default function Metas() {
   return (
     <div className="space-y-3">
       {/* Header with role badge */}
-      <div className="pbi-filter-bar rounded-sm px-4 py-2.5 flex items-center gap-3 flex-wrap">
+      <div className="pbi-filter-bar rounded-sm px-3 sm:px-4 py-2.5 flex items-center gap-2 sm:gap-3 flex-wrap">
         <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
           <Filter className="w-3.5 h-3.5" />
           <span className="font-medium">Filtros</span>
