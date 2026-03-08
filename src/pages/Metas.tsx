@@ -615,25 +615,23 @@ export default function Metas() {
                           )}
                         </div>
                         <div className="flex items-center gap-1.5">
-                          {isEditing ? (
-                            <>
-                              <Input type="number" value={editValues.atual} onChange={(e) => setEditValues({ ...editValues, atual: e.target.value })} className="h-6 w-16 sm:w-20 text-[11px] px-1.5" />
-                              <span className="text-[11px] text-muted-foreground">/</span>
-                              <Input type="number" value={editValues.objetivo} onChange={(e) => setEditValues({ ...editValues, objetivo: e.target.value })} className="h-6 w-16 sm:w-20 text-[11px] px-1.5" />
-                              <button onClick={() => saveEdit(meta.id)} className="p-1 rounded hover:bg-success/10 text-success"><Check className="w-3 h-3" /></button>
-                              <button onClick={() => setEditingId(null)} className="p-1 rounded hover:bg-muted text-muted-foreground"><X className="w-3 h-3" /></button>
-                            </>
-                          ) : (
-                            <>
                               <span className="text-[10px] text-muted-foreground hidden sm:inline">{meta.responsavel}</span>
                               <span className="text-[11px] text-muted-foreground">{formatVal(meta.atual, meta.unidade)} / {formatVal(meta.objetivo, meta.unidade)}</span>
                               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: `${meta.cor}18`, color: meta.cor }}>{pct}%</span>
                               <button onClick={() => { setCheckinMetaId(meta.id); setCheckinDialogOpen(true); }} className="p-1 rounded hover:bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" title="Check-in"><MessageCircle className="w-3 h-3" /></button>
-                              <button onClick={() => { setEditingId(meta.id); setEditValues({ atual: meta.atual.toString(), objetivo: meta.objetivo.toString() }); }} className="p-1 rounded hover:bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"><Pencil className="w-3 h-3" /></button>
+                              <button onClick={() => {
+                                setEditingId(meta.id);
+                                setEditValues({
+                                  nome: meta.nome, atual: meta.atual.toString(), objetivo: meta.objetivo.toString(),
+                                  unidade: meta.unidade, categoria: categorias.includes(meta.categoria) ? meta.categoria : "__outra__",
+                                  categoriaCustom: categorias.includes(meta.categoria) ? "" : meta.categoria,
+                                  responsavel: meta.responsavel, prioridade: meta.prioridade,
+                                  ciclo: meta.ciclo, parent_id: meta.parent_id || "",
+                                });
+                                setEditDialogOpen(true);
+                              }} className="p-1 rounded hover:bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" title="Editar meta"><Pencil className="w-3 h-3" /></button>
                               <button onClick={() => { setAcaoMetaId(meta.id); setAcaoDialogOpen(true); }} className="p-1 rounded hover:bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" title="Adicionar ação"><ListChecks className="w-3 h-3" /></button>
                               <button onClick={() => removeMeta(meta.id)} className="p-1 rounded hover:bg-destructive/10 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-3 h-3" /></button>
-                            </>
-                          )}
                         </div>
                       </div>
                       <div className="h-2 bg-secondary rounded-full overflow-hidden">
