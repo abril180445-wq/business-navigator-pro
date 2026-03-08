@@ -137,7 +137,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               {section}
             </p>
             <div className="space-y-px">
-              {modules
+              {visibleModules
                 .filter((m) => m.section === section)
                 .map((mod) => {
                   const Icon = mod.icon;
