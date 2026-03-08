@@ -106,6 +106,8 @@ export default function GerenciarUsuarios() {
 
   const counts = { admin: users.filter((u) => u.role === "admin").length, master: users.filter((u) => u.role === "master").length, normal: users.filter((u) => u.role === "normal").length };
 
+  if (!isAdmin) return <AccessDenied requiredRole="Administrador" />;
+
   return (
     <div className="space-y-4">
       {/* PBI Header */}

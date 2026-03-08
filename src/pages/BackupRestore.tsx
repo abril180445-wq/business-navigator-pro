@@ -99,6 +99,8 @@ export default function BackupRestore() {
     }
   };
 
+  if (!isAdmin) return <AccessDenied requiredRole="Administrador" />;
+
   return (
     <div className="space-y-4">
       {/* PBI Header */}
