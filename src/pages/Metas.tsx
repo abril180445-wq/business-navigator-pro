@@ -1730,16 +1730,16 @@ export default function Metas() {
 
       {/* ========== EDIT META DIALOG ========== */}
       <Dialog open={editDialogOpen} onOpenChange={(open) => { setEditDialogOpen(open); if (!open) setEditingId(null); }}>
-        <DialogContent className="pbi-tile border-border max-w-lg" style={{ background: "hsl(var(--pbi-surface))" }} onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="pbi-tile border-border sm:max-w-2xl max-h-[90vh] overflow-y-auto" style={{ background: "hsl(var(--pbi-surface))" }} onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="text-[14px] font-bold text-foreground flex items-center gap-2">
-              <Pencil className="w-4 h-4" style={{ color: "hsl(var(--pbi-yellow))" }} /> Editar Meta
+              <Pencil className="w-4 h-4" style={{ color: "hsl(var(--pbi-yellow))" }} /> 🛠️ Editar Meta — Editor Avançado
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             {/* Tipo de Meta */}
             <div className="space-y-1.5">
-              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Tipo de Meta</Label>
+              <Label className="text-[11px] font-semibold" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Tipo de Meta</Label>
               <div className="grid grid-cols-2 gap-2">
                 {([
                   { key: "quantitativa" as MetaTipo, label: "📊 Quantitativa", desc: "Com valores numéricos" },
@@ -1763,38 +1763,49 @@ export default function Metas() {
               </div>
             </div>
 
-            {/* Field toggles */}
-            <div className="space-y-1.5">
-              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Campos ativos</Label>
-              <div className="flex flex-wrap gap-1.5">
-                {([
-                  { key: "valores" as keyof FieldToggles, label: "Valores/Progresso", hidden: editMetaTipo === "qualitativa" },
-                  { key: "responsavel" as keyof FieldToggles, label: "Responsável" },
-                  { key: "prioridade" as keyof FieldToggles, label: "Prioridade" },
-                  { key: "categoria" as keyof FieldToggles, label: "Categoria" },
-                  { key: "ciclo" as keyof FieldToggles, label: "Ciclo" },
-                  { key: "prazo" as keyof FieldToggles, label: "Prazo" },
-                  { key: "metaPai" as keyof FieldToggles, label: "Meta Pai" },
-                ] as { key: keyof FieldToggles; label: string; hidden?: boolean }[]).filter(f => !f.hidden).map((f) => (
-                  <button key={f.key} type="button" onClick={() => setEditMetaToggles({ ...editMetaToggles, [f.key]: !editMetaToggles[f.key] })}
-                    className="text-[9px] px-2 py-1 rounded font-medium transition-all"
-                    style={{
-                      background: editMetaToggles[f.key] ? "hsl(152, 60%, 38%, 0.15)" : "hsl(var(--pbi-dark))",
-                      color: editMetaToggles[f.key] ? "hsl(152, 60%, 38%)" : "hsl(var(--pbi-text-secondary))",
-                      border: `1px solid ${editMetaToggles[f.key] ? "hsl(152, 60%, 38%, 0.4)" : "hsl(var(--pbi-border))"}`,
-                    }}
-                  >
-                    {editMetaToggles[f.key] ? "✓ " : ""}{f.label}
-                  </button>
-                ))}
-              </div>
+            {/* Field toggles — POR SEÇÃO */}
+            <div className="space-y-2">
+              <Label className="text-[11px] font-semibold" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Campos ativos (clique para ativar/desativar)</Label>
+              {fieldSections.map((section) => {
+                const visibleFields = section.fields.filter(f => !(f as any).quantOnly || editMetaTipo === "quantitativa");
+                if (visibleFields.length === 0) return null;
+                return (
+                  <div key={section.section}>
+                    <p className="text-[10px] text-muted-foreground mb-1">{section.section}</p>
+                    <div className="flex flex-wrap gap-1">
+                      {visibleFields.map((f) => (
+                        <button key={f.key} type="button" onClick={() => setEditMetaToggles({ ...editMetaToggles, [f.key]: !editMetaToggles[f.key] })}
+                          className="text-[9px] px-2 py-1 rounded font-medium transition-all"
+                          style={{
+                            background: editMetaToggles[f.key] ? "hsl(152, 60%, 38%, 0.15)" : "hsl(var(--pbi-dark))",
+                            color: editMetaToggles[f.key] ? "hsl(152, 60%, 38%)" : "hsl(var(--pbi-text-secondary))",
+                            border: `1px solid ${editMetaToggles[f.key] ? "hsl(152, 60%, 38%, 0.4)" : "hsl(var(--pbi-border))"}`,
+                          }}
+                        >
+                          {editMetaToggles[f.key] ? "✓ " : ""}{f.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
+            {/* Nome */}
             <div className="space-y-1.5">
               <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Nome da Meta</Label>
               <Input value={editValues.nome} onChange={(e) => setEditValues({ ...editValues, nome: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
             </div>
 
+            {/* Descrição */}
+            {editMetaToggles.descricao && (
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Descrição</Label>
+                <Textarea value={editValues.descricao} onChange={(e) => setEditValues({ ...editValues, descricao: e.target.value })} placeholder="Descreva a meta em detalhes..." className="resize-none h-16 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+              </div>
+            )}
+
+            {/* Valores/Progresso */}
             {editMetaToggles.valores && (
               <>
                 <div className="space-y-1.5">
@@ -1811,7 +1822,7 @@ export default function Metas() {
                       >{u.label}</button>
                     ))}
                   </div>
-                  <Input value={editValues.unidade} onChange={(e) => setEditValues({ ...editValues, unidade: e.target.value })} placeholder="Ou personalizada..." className="h-7 text-[11px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                  <Input value={editValues.unidade} onChange={(e) => setEditValues({ ...editValues, unidade: e.target.value })} placeholder="Personalizada..." className="h-7 text-[11px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
@@ -1826,65 +1837,8 @@ export default function Metas() {
               </>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {editMetaToggles.responsavel && (
-                <div className="space-y-1.5">
-                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Responsável</Label>
-                  <Input value={editValues.responsavel} onChange={(e) => setEditValues({ ...editValues, responsavel: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-                </div>
-              )}
-              {editMetaToggles.categoria && (
-                <div className="space-y-1.5">
-                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Categoria</Label>
-                  <select value={editValues.categoria} onChange={(e) => setEditValues({ ...editValues, categoria: e.target.value, categoriaCustom: "" })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                    {categorias.map((c) => <option key={c} value={c}>{c}</option>)}
-                    <option value="__outra__">✨ Outra</option>
-                  </select>
-                  {editValues.categoria === "__outra__" && (
-                    <Input value={editValues.categoriaCustom} onChange={(e) => setEditValues({ ...editValues, categoriaCustom: e.target.value })} placeholder="Nova categoria..." maxLength={40} className="h-8 text-[12px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-                  )}
-                </div>
-              )}
-              {editMetaToggles.prioridade && (
-                <div className="space-y-1.5">
-                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Prioridade</Label>
-                  <select value={editValues.prioridade} onChange={(e) => setEditValues({ ...editValues, prioridade: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                    <option value="alta">Alta</option>
-                    <option value="media">Média</option>
-                    <option value="baixa">Baixa</option>
-                  </select>
-                </div>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {editMetaToggles.ciclo && (
-                <div className="space-y-1.5">
-                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Ciclo</Label>
-                  <select value={editValues.ciclo} onChange={(e) => setEditValues({ ...editValues, ciclo: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                    {ciclosDisponiveis.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-              )}
-              {editMetaToggles.prazo && (
-                <div className="space-y-1.5">
-                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Prazo</Label>
-                  <Input type="date" value={editValues.prazo} onChange={(e) => setEditValues({ ...editValues, prazo: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-                  {editValues.prazo && (
-                    <button onClick={() => setEditValues({ ...editValues, prazo: "" })} className="text-[10px] text-muted-foreground hover:text-destructive transition-colors">✕ Remover prazo</button>
-                  )}
-                </div>
-              )}
-              {editMetaToggles.metaPai && (
-                <div className="space-y-1.5">
-                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Meta Pai</Label>
-                  <select value={editValues.parent_id} onChange={(e) => setEditValues({ ...editValues, parent_id: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                    <option value="">Nenhuma (meta raiz)</option>
-                    {metas.filter(m => m.id !== editingId).map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
-                  </select>
-                </div>
-              )}
-            </div>
+            {/* Dynamic fields */}
+            {renderDynamicFields(editMetaToggles, editValues, (v) => setEditValues(v), categorias, metas, editingId)}
 
             <div className="flex gap-2">
               <Button onClick={() => { setEditDialogOpen(false); setEditingId(null); }} variant="outline" className="flex-1 h-8 text-[12px]">Cancelar</Button>
