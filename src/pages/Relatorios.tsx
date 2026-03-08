@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { FileText, Download, Filter, ArrowUpRight, ArrowDownRight, BarChart3, FileSpreadsheet, History, User, Calendar, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 import { supabase } from "@/integrations/supabase/client";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -17,7 +18,7 @@ const dadosExemplo = [
   { data: "05/01/2026", categoria: "Compras", descricao: "Cimento e aço — Canteiro Monte Carlo", valor: -125000 },
   { data: "10/01/2026", categoria: "Vendas", descricao: "Venda Lote 15 — Cond. Jardim Real", valor: 180000 },
   { data: "12/01/2026", categoria: "Despesas", descricao: "Folha de pagamento — Engenharia", valor: -185000 },
-  { data: "15/01/2026", categoria: "Vendas", descricao: "Sinal Unid. 1201 — Ed. Monte Carlo", valor: 156000 },
+  { data: "15/01/2026", categoria: "Vendas", descricao: "Venda Unid. 1201 — Ed. Monte Carlo", valor: 156000 },
   { data: "18/01/2026", categoria: "Compras", descricao: "Concreto usinado — Concreteira Central", valor: -92000 },
   { data: "22/01/2026", categoria: "Receitas", descricao: "Parcela financiamento — Vila Serena", valor: 195000 },
   { data: "25/01/2026", categoria: "Despesas", descricao: "Aluguel de equipamentos pesados", valor: -48000 },
@@ -55,11 +56,26 @@ type RelatorioGerado = {
 export default function Relatorios() {
   const { toast } = useToast();
   const { user, profile, isAdmin } = useAuth();
+  const { theme } = useTheme();
   const [tipo, setTipo] = useState("geral");
   const [dataInicio, setDataInicio] = useState("2026-01-01");
   const [dataFim, setDataFim] = useState("2026-01-31");
   const [historico, setHistorico] = useState<RelatorioGerado[]>([]);
   const [showHistorico, setShowHistorico] = useState(false);
+
+  // Theme-adaptive colors
+  const gridColor = theme === "dark" ? "hsl(0, 0%, 25%)" : "hsl(0, 0%, 85%)";
+  const axisColor = theme === "dark" ? "hsl(0, 0%, 55%)" : "hsl(0, 0%, 50%)";
+  const tooltipStyle = {
+    background: theme === "dark" ? "hsl(0, 0%, 18%)" : "#fff",
+    border: `1px solid ${theme === "dark" ? "hsl(0, 0%, 30%)" : "hsl(0, 0%, 85%)"}`,
+    borderRadius: "6px",
+    fontSize: "11px",
+    color: theme === "dark" ? "#e8e8e8" : "#222",
+  };
+  const filterBg = theme === "dark" ? "hsl(0, 0%, 18%)" : "hsl(0, 0%, 100%)";
+  const filterInputBg = theme === "dark" ? "hsl(0, 0%, 12%)" : "hsl(0, 0%, 96%)";
+  const hoverRowClass = theme === "dark" ? "hover:bg-white/5" : "hover:bg-black/5";
 
   const fetchHistorico = async () => {
     const { data } = await supabase
@@ -105,6 +121,10 @@ export default function Relatorios() {
   const totalReceitas = filteredData.filter((d) => d.valor > 0).reduce((a, d) => a + d.valor, 0);
   const totalDespesas = filteredData.filter((d) => d.valor < 0).reduce((a, d) => a + Math.abs(d.valor), 0);
   const saldo = totalReceitas - totalDespesas;
+  const prevReceitas = totalReceitas * 0.87; // simulated previous period
+  const prevDespesas = totalDespesas * 0.94;
+  const receitaChange = prevReceitas > 0 ? (((totalReceitas - prevReceitas) / prevReceitas) * 100).toFixed(1) : "0";
+  const despesaChange = prevDespesas > 0 ? (((totalDespesas - prevDespesas) / prevDespesas) * 100).toFixed(1) : "0";
 
   const categorias = [...new Set(filteredData.map(d => d.categoria))];
 
@@ -121,7 +141,6 @@ export default function Relatorios() {
     doc.text(tipoLabel, 14, 25);
     doc.text(`Período: ${dataInicio} a ${dataFim}`, 14, 31);
 
-    // Add who generated
     doc.setFontSize(9);
     doc.setTextColor(120, 120, 140);
     doc.text(`Gerado por: ${profile?.full_name || user?.email || "—"}`, 120, 25);
@@ -154,7 +173,6 @@ export default function Relatorios() {
     const wb = XLSX.utils.book_new();
     const geradoPor = profile?.full_name || user?.email || "—";
 
-    // === SHEET 1: Cover / Summary ===
     const coverData = [
       [""],
       ["SAN REMO CONSTRUTORA"],
@@ -200,7 +218,6 @@ export default function Relatorios() {
     ];
     XLSX.utils.book_append_sheet(wb, wsCover, "Resumo");
 
-    // === SHEET 2: Detailed Data ===
     const detailHeader = [
       ["SAN REMO CONSTRUTORA — DETALHAMENTO DE LANÇAMENTOS"],
       [tipoLabel + ` | Período: ${dataInicio} a ${dataFim} | Gerado por: ${geradoPor}`],
@@ -225,7 +242,6 @@ export default function Relatorios() {
     if (totalCell) totalCell.z = '#,##0.00';
     XLSX.utils.book_append_sheet(wb, wsDetail, "Detalhamento");
 
-    // === SHEET 3: Category Analysis ===
     const catHeader = [
       ["SAN REMO CONSTRUTORA — ANÁLISE POR CATEGORIA"],
       [`Período: ${dataInicio} a ${dataFim}`],
@@ -249,7 +265,6 @@ export default function Relatorios() {
     ];
     XLSX.utils.book_append_sheet(wb, wsCat, "Por Categoria");
 
-    // === SHEET 4: Monthly Summary ===
     const monthHeader = [
       ["SAN REMO CONSTRUTORA — RESUMO MENSAL"],
       [`Período: ${dataInicio} a ${dataFim}`],
@@ -289,7 +304,7 @@ export default function Relatorios() {
           <BarChart3 className="w-5 h-5" style={{ color: "hsl(var(--pbi-yellow))" }} />
           <div>
             <h1 className="text-base font-semibold text-white">Relatórios</h1>
-            <p className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Gere e exporte relatórios analíticos em PDF e Excel</p>
+            <p className="text-[11px]" style={{ color: "hsl(0, 0%, 72%)" }}>Gere e exporte relatórios analíticos em PDF e Excel</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -297,7 +312,7 @@ export default function Relatorios() {
             onClick={() => setShowHistorico(!showHistorico)}
             variant="outline"
             className="h-8 text-[12px] font-semibold gap-1.5 border-none"
-            style={{ background: showHistorico ? "hsl(var(--pbi-yellow) / 0.2)" : "hsl(var(--pbi-surface))", color: "hsl(var(--pbi-text-primary))" }}
+            style={{ background: showHistorico ? "hsl(45, 100%, 51%, 0.2)" : "hsl(var(--secondary))", color: "hsl(var(--foreground))" }}
           >
             <History className="w-3.5 h-3.5" /> Histórico
           </Button>
@@ -315,45 +330,45 @@ export default function Relatorios() {
         <div className="pbi-tile space-y-3" style={{ borderLeft: "3px solid hsl(var(--pbi-yellow))" }}>
           <div className="flex items-center gap-2 mb-2">
             <History className="w-4 h-4" style={{ color: "hsl(var(--pbi-yellow))" }} />
-            <p className="text-[12px] font-semibold" style={{ color: "hsl(var(--pbi-text-primary))" }}>Histórico de Relatórios Gerados</p>
+            <p className="text-[12px] font-semibold text-foreground">Histórico de Relatórios Gerados</p>
           </div>
 
           {historico.length === 0 ? (
-            <p className="text-[11px] py-4 text-center" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
+            <p className="text-[11px] py-4 text-center text-muted-foreground">
               Nenhum relatório gerado ainda. Exporte um PDF ou Excel para registrar no histórico.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-[11px]">
                 <thead>
-                  <tr style={{ borderBottom: "1px solid hsl(var(--pbi-border))" }}>
-                    <th className="text-left py-2 px-2 font-medium" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Data/Hora</th>
-                    <th className="text-left py-2 px-2 font-medium" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Gerado por</th>
-                    <th className="text-left py-2 px-2 font-medium" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Tipo</th>
-                    <th className="text-left py-2 px-2 font-medium" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Formato</th>
-                    <th className="text-left py-2 px-2 font-medium" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Período</th>
-                    <th className="text-center py-2 px-2 font-medium" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Registros</th>
-                    <th className="text-left py-2 px-2 font-medium" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Observações</th>
-                    {isAdmin && <th className="text-center py-2 px-2 font-medium" style={{ color: "hsl(var(--pbi-text-secondary))" }}></th>}
+                  <tr className="border-b border-border">
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Data/Hora</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Gerado por</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Tipo</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Formato</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Período</th>
+                    <th className="text-center py-2 px-2 font-medium text-muted-foreground">Registros</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Observações</th>
+                    {isAdmin && <th className="text-center py-2 px-2 font-medium text-muted-foreground"></th>}
                   </tr>
                 </thead>
                 <tbody>
                   {historico.map((r) => (
-                    <tr key={r.id} className="hover:bg-white/5 transition-colors" style={{ borderBottom: "1px solid hsl(var(--pbi-border) / 0.5)" }}>
-                      <td className="py-1.5 px-2" style={{ color: "hsl(var(--pbi-text-primary))" }}>
+                    <tr key={r.id} className={`${hoverRowClass} transition-colors border-b border-border/50`}>
+                      <td className="py-1.5 px-2 text-foreground">
                         <div className="flex items-center gap-1.5">
-                          <Calendar className="w-3 h-3 shrink-0" style={{ color: "hsl(var(--pbi-text-secondary))" }} />
+                          <Calendar className="w-3 h-3 shrink-0 text-muted-foreground" />
                           {new Date(r.created_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                         </div>
                       </td>
-                      <td className="py-1.5 px-2" style={{ color: "hsl(var(--pbi-text-primary))" }}>
+                      <td className="py-1.5 px-2 text-foreground">
                         <div className="flex items-center gap-1.5">
                           <User className="w-3 h-3 shrink-0" style={{ color: "hsl(var(--pbi-yellow))" }} />
                           {r.user_name}
                         </div>
                       </td>
                       <td className="py-1.5 px-2">
-                        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "hsl(var(--pbi-yellow) / 0.15)", color: "hsl(var(--pbi-yellow))" }}>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "hsl(45, 100%, 51%, 0.15)", color: "hsl(var(--pbi-yellow))" }}>
                           {r.tipo}
                         </span>
                       </td>
@@ -368,13 +383,13 @@ export default function Relatorios() {
                           {r.formato}
                         </span>
                       </td>
-                      <td className="py-1.5 px-2 text-[10px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
+                      <td className="py-1.5 px-2 text-[10px] text-muted-foreground">
                         {r.periodo_inicio} → {r.periodo_fim}
                       </td>
-                      <td className="py-1.5 px-2 text-center font-semibold" style={{ color: "hsl(var(--pbi-text-primary))" }}>
+                      <td className="py-1.5 px-2 text-center font-semibold text-foreground">
                         {r.registros}
                       </td>
-                      <td className="py-1.5 px-2 text-[10px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
+                      <td className="py-1.5 px-2 text-[10px] text-muted-foreground">
                         {r.observacoes || "—"}
                       </td>
                       {isAdmin && (
@@ -394,12 +409,12 @@ export default function Relatorios() {
       )}
 
       {/* Filter bar */}
-      <div className="flex items-center gap-3 flex-wrap" style={{ background: "hsl(var(--pbi-surface))", borderRadius: "6px", padding: "8px 12px", border: "1px solid hsl(var(--pbi-border))" }}>
-        <Filter className="w-3.5 h-3.5" style={{ color: "hsl(var(--pbi-text-secondary))" }} />
+      <div className="flex items-center gap-3 flex-wrap rounded-md p-2 px-3 bg-card border border-border">
+        <Filter className="w-3.5 h-3.5 text-muted-foreground" />
         <div className="flex items-center gap-2">
-          <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Tipo:</Label>
+          <Label className="text-[11px] text-muted-foreground">Tipo:</Label>
           <Select value={tipo} onValueChange={setTipo}>
-            <SelectTrigger className="h-7 text-[11px] w-[160px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+            <SelectTrigger className="h-7 text-[11px] w-[160px] border-none" style={{ background: filterInputBg }}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -408,12 +423,12 @@ export default function Relatorios() {
           </Select>
         </div>
         <div className="flex items-center gap-2">
-          <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>De:</Label>
-          <Input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} className="h-7 text-[11px] w-[130px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+          <Label className="text-[11px] text-muted-foreground">De:</Label>
+          <Input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} className="h-7 text-[11px] w-[130px] border-none" style={{ background: filterInputBg }} />
         </div>
         <div className="flex items-center gap-2">
-          <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Até:</Label>
-          <Input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} className="h-7 text-[11px] w-[130px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+          <Label className="text-[11px] text-muted-foreground">Até:</Label>
+          <Input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} className="h-7 text-[11px] w-[130px] border-none" style={{ background: filterInputBg }} />
         </div>
       </div>
 
@@ -421,8 +436,8 @@ export default function Relatorios() {
       <div className="pbi-tile flex items-center gap-4" style={{ borderLeft: "3px solid hsl(152, 60%, 38%)" }}>
         <FileSpreadsheet className="w-5 h-5 shrink-0" style={{ color: "hsl(152, 60%, 38%)" }} />
         <div className="flex-1">
-          <p className="text-[12px] font-semibold" style={{ color: "hsl(var(--pbi-text-primary))" }}>Relatório Excel Profissional</p>
-          <p className="text-[10px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>4 abas: Resumo Executivo · Detalhamento Completo · Análise por Categoria · Resumo Mensal</p>
+          <p className="text-[12px] font-semibold text-foreground">Relatório Excel Profissional</p>
+          <p className="text-[10px] text-muted-foreground">4 abas: Resumo Executivo · Detalhamento Completo · Análise por Categoria · Resumo Mensal</p>
         </div>
         <div className="flex gap-4 text-center">
           {[
@@ -431,8 +446,8 @@ export default function Relatorios() {
             { label: "Abas", value: 4 },
           ].map((s) => (
             <div key={s.label}>
-              <p className="text-lg font-bold" style={{ color: "hsl(var(--pbi-text-primary))" }}>{s.value}</p>
-              <p className="text-[9px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>{s.label}</p>
+              <p className="text-lg font-bold text-foreground">{s.value}</p>
+              <p className="text-[9px] text-muted-foreground">{s.label}</p>
             </div>
           ))}
         </div>
@@ -441,27 +456,27 @@ export default function Relatorios() {
       {/* KPI tiles */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="pbi-tile">
-          <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Receitas</p>
+          <p className="text-[10px] uppercase tracking-wider mb-1 text-muted-foreground">Receitas</p>
           <p className="text-xl font-bold" style={{ color: "hsl(152, 60%, 38%)" }}>R$ {(totalReceitas / 1000).toFixed(0)}k</p>
           <div className="flex items-center gap-1 mt-1">
             <ArrowUpRight className="w-3 h-3" style={{ color: "hsl(152, 60%, 38%)" }} />
-            <span className="text-[10px]" style={{ color: "hsl(152, 60%, 38%)" }}>+14.8%</span>
+            <span className="text-[10px]" style={{ color: "hsl(152, 60%, 38%)" }}>+{receitaChange}%</span>
           </div>
         </div>
         <div className="pbi-tile">
-          <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Despesas</p>
+          <p className="text-[10px] uppercase tracking-wider mb-1 text-muted-foreground">Despesas</p>
           <p className="text-xl font-bold" style={{ color: "hsl(0, 72%, 51%)" }}>R$ {(totalDespesas / 1000).toFixed(0)}k</p>
           <div className="flex items-center gap-1 mt-1">
             <ArrowDownRight className="w-3 h-3" style={{ color: "hsl(0, 72%, 51%)" }} />
-            <span className="text-[10px]" style={{ color: "hsl(0, 72%, 51%)" }}>+6.2%</span>
+            <span className="text-[10px]" style={{ color: "hsl(0, 72%, 51%)" }}>+{despesaChange}%</span>
           </div>
         </div>
         <div className="pbi-tile">
-          <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Saldo</p>
+          <p className="text-[10px] uppercase tracking-wider mb-1 text-muted-foreground">Saldo</p>
           <p className="text-xl font-bold" style={{ color: "hsl(var(--pbi-yellow))" }}>R$ {(saldo / 1000).toFixed(0)}k</p>
           <div className="flex items-center gap-1 mt-1">
             <ArrowUpRight className="w-3 h-3" style={{ color: "hsl(var(--pbi-yellow))" }} />
-            <span className="text-[10px]" style={{ color: "hsl(var(--pbi-yellow))" }}>Positivo</span>
+            <span className="text-[10px]" style={{ color: "hsl(var(--pbi-yellow))" }}>{saldo >= 0 ? "Positivo" : "Negativo"}</span>
           </div>
         </div>
       </div>
@@ -469,13 +484,13 @@ export default function Relatorios() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Chart */}
         <div className="pbi-tile">
-          <p className="text-[11px] font-semibold mb-3" style={{ color: "hsl(var(--pbi-text-primary))" }}>Distribuição por Categoria</p>
+          <p className="text-[11px] font-semibold mb-3 text-foreground">Distribuição por Categoria</p>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={chartData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 20%, 25%)" horizontal={false} />
-              <XAxis type="number" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} tick={{ fill: "hsl(220, 15%, 55%)", fontSize: 10 }} axisLine={false} />
-              <YAxis type="category" dataKey="cat" tick={{ fill: "hsl(220, 15%, 70%)", fontSize: 10 }} axisLine={false} width={70} />
-              <Tooltip formatter={(v: number) => `R$ ${v.toLocaleString("pt-BR")}`} contentStyle={{ background: "hsl(222, 30%, 18%)", border: "1px solid hsl(220, 20%, 30%)", borderRadius: "6px", fontSize: "11px", color: "#fff" }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} horizontal={false} />
+              <XAxis type="number" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} tick={{ fill: axisColor, fontSize: 10 }} axisLine={false} />
+              <YAxis type="category" dataKey="cat" tick={{ fill: axisColor, fontSize: 10 }} axisLine={false} width={70} />
+              <Tooltip formatter={(v: number) => `R$ ${v.toLocaleString("pt-BR")}`} contentStyle={tooltipStyle} />
               <Bar dataKey="valor" fill="hsl(207, 89%, 48%)" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -483,27 +498,27 @@ export default function Relatorios() {
 
         {/* Table */}
         <div className="lg:col-span-2 pbi-tile">
-          <p className="text-[11px] font-semibold mb-3" style={{ color: "hsl(var(--pbi-text-primary))" }}>Detalhamento</p>
+          <p className="text-[11px] font-semibold mb-3 text-foreground">Detalhamento</p>
           <div className="overflow-x-auto">
             <table className="w-full text-[11px]">
               <thead>
-                <tr style={{ borderBottom: "1px solid hsl(var(--pbi-border))" }}>
-                  <th className="text-left py-2 px-2 font-medium" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Data</th>
-                  <th className="text-left py-2 px-2 font-medium" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Categoria</th>
-                  <th className="text-left py-2 px-2 font-medium" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Descrição</th>
-                  <th className="text-right py-2 px-2 font-medium" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Valor</th>
+                <tr className="border-b border-border">
+                  <th className="text-left py-2 px-2 font-medium text-muted-foreground">Data</th>
+                  <th className="text-left py-2 px-2 font-medium text-muted-foreground">Categoria</th>
+                  <th className="text-left py-2 px-2 font-medium text-muted-foreground">Descrição</th>
+                  <th className="text-right py-2 px-2 font-medium text-muted-foreground">Valor</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredData.map((d, i) => (
-                  <tr key={i} className="hover:bg-white/5 transition-colors" style={{ borderBottom: "1px solid hsl(var(--pbi-border) / 0.5)" }}>
-                    <td className="py-1.5 px-2" style={{ color: "hsl(var(--pbi-text-primary))" }}>{d.data}</td>
+                  <tr key={i} className={`${hoverRowClass} transition-colors border-b border-border/50`}>
+                    <td className="py-1.5 px-2 text-foreground">{d.data}</td>
                     <td className="py-1.5 px-2">
-                      <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "hsl(var(--pbi-yellow) / 0.15)", color: "hsl(var(--pbi-yellow))" }}>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "hsl(45, 100%, 51%, 0.15)", color: "hsl(var(--pbi-yellow))" }}>
                         {d.categoria}
                       </span>
                     </td>
-                    <td className="py-1.5 px-2" style={{ color: "hsl(var(--pbi-text-primary))" }}>{d.descricao}</td>
+                    <td className="py-1.5 px-2 text-foreground">{d.descricao}</td>
                     <td className="py-1.5 px-2 text-right font-semibold" style={{ color: d.valor >= 0 ? "hsl(152, 60%, 38%)" : "hsl(0, 72%, 51%)" }}>
                       R$ {Math.abs(d.valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                     </td>
