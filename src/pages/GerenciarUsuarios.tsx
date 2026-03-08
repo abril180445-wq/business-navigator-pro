@@ -108,7 +108,7 @@ export default function GerenciarUsuarios() {
   return (
     <div className="space-y-4">
       {/* PBI Header */}
-      <div className="pbi-header flex items-center justify-between">
+      <div className="pbi-header flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-3">
           <Users className="w-5 h-5" style={{ color: "hsl(var(--pbi-yellow))" }} />
           <div>
