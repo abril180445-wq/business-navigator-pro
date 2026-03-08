@@ -88,6 +88,7 @@ const modules: ModuleItem[] = [
   { label: "Logística", icon: Truck, path: "/pdv", section: "Módulos" },
   { label: "Usuários", icon: Users, path: "/usuarios", section: "Admin" },
   { label: "Backup", icon: HardDrive, path: "/backup", section: "Admin" },
+  { label: "Manual", icon: BookOpen, path: "/manual", section: "Ajuda" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

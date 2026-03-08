@@ -50,7 +50,10 @@ export default function GerenciarUsuarios() {
     }
   };
 
+  const stableFetch = useCallback(() => { fetchUsers(); }, []);
   useEffect(() => { fetchUsers(); }, []);
+  useRealtimeTable("profiles", stableFetch);
+  useRealtimeTable("user_roles", stableFetch);
 
   const handleCreate = async () => {
     if (!form.full_name || !form.email || !form.password) {

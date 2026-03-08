@@ -38,6 +38,7 @@ const ProtectedApp = () => (
         <Route path="/pedidos/*" element={<Pedidos />} />
         <Route path="/usuarios" element={<GerenciarUsuarios />} />
         <Route path="/backup" element={<BackupRestore />} />
+        <Route path="/manual" element={<ManualUsuario />} />
         <Route path="/manufatura/*" element={<ModulePlaceholder />} />
         <Route path="/manufatura" element={<ModulePlaceholder />} />
         <Route path="/ativos" element={<ModulePlaceholder />} />
