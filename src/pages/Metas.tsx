@@ -1034,8 +1034,8 @@ export default function Metas() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Imagens (opcional)</Label>
-              <MetaImageUpload images={newAcao.imagens} onChange={(imgs) => setNewAcao({ ...newAcao, imagens: imgs })} folder="acoes" />
+              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Anexos (opcional)</Label>
+              <MetaFileUpload files={newAcao.imagens} onChange={(imgs) => setNewAcao({ ...newAcao, imagens: imgs })} folder="acoes" />
             </div>
             <Button onClick={() => addAcao(canEditMetas ? "acao" : "contribuicao")} className="w-full h-8 text-[12px] font-semibold" style={{ background: canEditMetas ? "hsl(var(--pbi-yellow))" : "hsl(174, 62%, 47%)", color: "hsl(var(--pbi-dark))" }}>
               {canEditMetas ? "Adicionar Ação" : "Adicionar Minha Contribuição"}
