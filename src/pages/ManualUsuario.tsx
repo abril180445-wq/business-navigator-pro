@@ -59,7 +59,7 @@ const sections: ManualSection[] = [
     content: [
       {
         title: "Visão Geral do Dashboard",
-        body: `O Dashboard é a tela principal do sistema e apresenta uma visão consolidada de todos os indicadores-chave da empresa.\n\n**Elementos do Dashboard:**\n- **KPIs (Indicadores):** Faturamento, Obras Ativas, Unidades Vendidas e Clientes Ativos\n- **Gráfico de Faturamento vs Custos:** Comparativo mensal em gráfico combinado (barras + linha)\n- **Obras por Status:** Gráfico de pizza mostrando distribuição das obras\n- **Vendas por Empreendimento:** Comparativo de vendas realizadas vs meta\n- **Progresso das Obras:** Barras de progresso percentual de cada obra\n- **Unidades Vendidas/Mês:** Gráfico de área com evolução mensal`,
+        body: `O Dashboard é a tela principal do sistema e apresenta uma visão consolidada dos indicadores da empresa.\n\n**O que cada perfil vê:**\n\n**Admin e Master:**\n- KPIs completos: Faturamento, Obras Ativas, Unidades Vendidas e Clientes Ativos\n- Gráfico de Faturamento vs Custos\n- Obras por Status (pizza)\n- Vendas por Empreendimento\n- Progresso das Obras\n- Unidades Vendidas/Mês\n\n**Normal:**\n- KPIs operacionais (Obras Ativas, Unidades Vendidas, Clientes)\n- Banner informativo de modo visualização\n- Progresso das Obras e Vendas por Empreendimento\n- **Dados financeiros detalhados são ocultos** (Faturamento vs Custos)`,
       },
       {
         title: "Filtros do Dashboard",
