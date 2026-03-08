@@ -35,8 +35,15 @@ type TabKey = "empreendimentos" | "contratos" | "materiais";
 
 export default function Pedidos() {
   const { user, userRole } = useAuth();
+  const location = useLocation();
   const canEdit = userRole === "admin" || userRole === "master";
-  const [activeTab, setActiveTab] = useState<TabKey>("empreendimentos");
+  const routeTabMap: Record<string, TabKey> = {
+    "/pedidos/vendas": "empreendimentos",
+    "/pedidos/compras": "contratos",
+    "/pedidos/estoque": "materiais",
+  };
+  const initialTab = routeTabMap[location.pathname] || "empreendimentos";
+  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
   const [empreendimentos, setEmpreendimentos] = useState<Empreendimento[]>([]);
   const [contratos, setContratos] = useState<Contrato[]>([]);
   const [materiais, setMateriais] = useState<Material[]>([]);
