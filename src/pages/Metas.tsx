@@ -406,7 +406,7 @@ export default function Metas() {
       marco_critico: newMetaToggles.marco_critico ? newMeta.marco_critico : "",
     });
     if (error) { toast({ title: "Erro ao criar meta", description: error.message, variant: "destructive" }); return; }
-    setNewMeta({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "", descricao: "" });
+    setNewMeta({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "", descricao: "", local_obra: "", orcamento: "", custo_atual: "", equipe: "", fornecedor: "", etapa: "", peso: "", tags: "", data_inicio: "", frequencia_checkin: "semanal", risco: "", observacoes: "", aprovador: "", departamento: "", indicador_chave: "", fonte_dados: "", impacto: "", dependencias: "", marco_critico: "" });
     setDialogOpen(false);
     toast({ title: "Meta criada!" });
   };
