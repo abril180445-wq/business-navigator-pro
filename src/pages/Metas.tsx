@@ -38,22 +38,133 @@ interface Meta {
   parent_id: string | null;
   ciclo: string;
   status: "no_prazo" | "atencao" | "em_risco" | "atingida";
+  // New extended fields
+  descricao: string;
+  local_obra: string;
+  orcamento: number;
+  custo_atual: number;
+  equipe: string;
+  fornecedor: string;
+  etapa: string;
+  peso: number;
+  tags: string[];
+  data_inicio: string | null;
+  frequencia_checkin: string;
+  risco: string;
+  observacoes: string;
+  aprovador: string;
+  departamento: string;
+  tipo_meta: string;
+  indicador_chave: string;
+  fonte_dados: string;
+  impacto: string;
+  dependencias: string;
+  marco_critico: string;
+  percentual_concluido: number;
 }
 
 type MetaTipo = "quantitativa" | "qualitativa";
 
+// All possible toggleable fields organized by section
 interface FieldToggles {
+  // Progresso
   valores: boolean;
+  // Gestão
   responsavel: boolean;
+  aprovador: boolean;
+  equipe: boolean;
+  departamento: boolean;
+  // Tempo
   prazo: boolean;
-  prioridade: boolean;
+  data_inicio: boolean;
   ciclo: boolean;
-  metaPai: boolean;
+  frequencia_checkin: boolean;
+  // Financeiro
+  orcamento: boolean;
+  // Obra/Projeto
+  local_obra: boolean;
+  etapa: boolean;
+  fornecedor: boolean;
+  marco_critico: boolean;
+  // Detalhes
+  descricao: boolean;
+  observacoes: boolean;
+  risco: boolean;
+  impacto: boolean;
+  dependencias: boolean;
+  // Configuração
+  prioridade: boolean;
+  peso: boolean;
+  tags: boolean;
+  indicador_chave: boolean;
+  fonte_dados: boolean;
   categoria: boolean;
+  metaPai: boolean;
 }
 
-const defaultTogglesQuant: FieldToggles = { valores: true, responsavel: true, prazo: false, prioridade: true, ciclo: true, metaPai: false, categoria: true };
-const defaultTogglesQual: FieldToggles = { valores: false, responsavel: true, prazo: true, prioridade: true, ciclo: false, metaPai: false, categoria: true };
+const defaultTogglesQuant: FieldToggles = {
+  valores: true, responsavel: true, aprovador: false, equipe: false, departamento: false,
+  prazo: false, data_inicio: false, ciclo: true, frequencia_checkin: false,
+  orcamento: false, local_obra: false, etapa: false, fornecedor: false, marco_critico: false,
+  descricao: false, observacoes: false, risco: false, impacto: false, dependencias: false,
+  prioridade: true, peso: false, tags: false, indicador_chave: false, fonte_dados: false,
+  categoria: true, metaPai: false,
+};
+const defaultTogglesQual: FieldToggles = {
+  valores: false, responsavel: true, aprovador: false, equipe: false, departamento: false,
+  prazo: true, data_inicio: false, ciclo: false, frequencia_checkin: false,
+  orcamento: false, local_obra: false, etapa: false, fornecedor: false, marco_critico: false,
+  descricao: true, observacoes: false, risco: false, impacto: false, dependencias: false,
+  prioridade: true, peso: false, tags: false, indicador_chave: false, fonte_dados: false,
+  categoria: true, metaPai: false,
+};
+
+// Field definitions for the toggle UI, organized by section
+const fieldSections = [
+  { section: "📊 Progresso", fields: [
+    { key: "valores" as keyof FieldToggles, label: "Valores/Progresso", quantOnly: true },
+  ]},
+  { section: "👤 Gestão", fields: [
+    { key: "responsavel" as keyof FieldToggles, label: "Responsável" },
+    { key: "aprovador" as keyof FieldToggles, label: "Aprovador" },
+    { key: "equipe" as keyof FieldToggles, label: "Equipe" },
+    { key: "departamento" as keyof FieldToggles, label: "Departamento" },
+  ]},
+  { section: "📅 Tempo", fields: [
+    { key: "prazo" as keyof FieldToggles, label: "Prazo Final" },
+    { key: "data_inicio" as keyof FieldToggles, label: "Data Início" },
+    { key: "ciclo" as keyof FieldToggles, label: "Ciclo" },
+    { key: "frequencia_checkin" as keyof FieldToggles, label: "Freq. Check-in" },
+  ]},
+  { section: "💰 Financeiro", fields: [
+    { key: "orcamento" as keyof FieldToggles, label: "Orçamento/Custo" },
+  ]},
+  { section: "🏗️ Obra/Projeto", fields: [
+    { key: "local_obra" as keyof FieldToggles, label: "Local/Obra" },
+    { key: "etapa" as keyof FieldToggles, label: "Etapa/Fase" },
+    { key: "fornecedor" as keyof FieldToggles, label: "Fornecedor" },
+    { key: "marco_critico" as keyof FieldToggles, label: "Marco Crítico" },
+  ]},
+  { section: "📋 Detalhes", fields: [
+    { key: "descricao" as keyof FieldToggles, label: "Descrição" },
+    { key: "observacoes" as keyof FieldToggles, label: "Observações" },
+    { key: "risco" as keyof FieldToggles, label: "Riscos" },
+    { key: "impacto" as keyof FieldToggles, label: "Impacto" },
+    { key: "dependencias" as keyof FieldToggles, label: "Dependências" },
+  ]},
+  { section: "⚙️ Configuração", fields: [
+    { key: "prioridade" as keyof FieldToggles, label: "Prioridade" },
+    { key: "peso" as keyof FieldToggles, label: "Peso" },
+    { key: "tags" as keyof FieldToggles, label: "Tags" },
+    { key: "indicador_chave" as keyof FieldToggles, label: "Indicador-Chave" },
+    { key: "fonte_dados" as keyof FieldToggles, label: "Fonte de Dados" },
+    { key: "categoria" as keyof FieldToggles, label: "Categoria" },
+    { key: "metaPai" as keyof FieldToggles, label: "Meta Pai" },
+  ]},
+];
+
+const frequenciasCheckin = ["diário", "semanal", "quinzenal", "mensal"];
+const etapasPreset = ["Planejamento", "Fundação", "Estrutura", "Alvenaria", "Elétrica", "Hidráulica", "Acabamento", "Entrega", "Em andamento", "Concluído"];
 
 interface AcaoMeta {
   id: string;
