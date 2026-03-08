@@ -242,6 +242,7 @@ export default function Metas() {
       prioridade: editValues.prioridade,
       ciclo: editValues.ciclo,
       parent_id: editValues.parent_id || null,
+      prazo: editValues.prazo || null,
       status: newStatus,
     }).eq("id", id);
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
