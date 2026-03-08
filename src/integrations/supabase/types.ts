@@ -61,6 +61,134 @@ export type Database = {
           },
         ]
       }
+      contas_pagar: {
+        Row: {
+          categoria: string
+          created_at: string
+          created_by: string
+          data_emissao: string
+          data_vencimento: string
+          descricao: string
+          fornecedor: string
+          id: string
+          status: string
+          valor: number
+        }
+        Insert: {
+          categoria?: string
+          created_at?: string
+          created_by: string
+          data_emissao?: string
+          data_vencimento?: string
+          descricao?: string
+          fornecedor?: string
+          id?: string
+          status?: string
+          valor?: number
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          created_by?: string
+          data_emissao?: string
+          data_vencimento?: string
+          descricao?: string
+          fornecedor?: string
+          id?: string
+          status?: string
+          valor?: number
+        }
+        Relationships: []
+      }
+      contas_receber: {
+        Row: {
+          categoria: string
+          cliente: string
+          created_at: string
+          created_by: string
+          data_emissao: string
+          data_vencimento: string
+          descricao: string
+          id: string
+          status: string
+          valor: number
+        }
+        Insert: {
+          categoria?: string
+          cliente?: string
+          created_at?: string
+          created_by: string
+          data_emissao?: string
+          data_vencimento?: string
+          descricao?: string
+          id?: string
+          status?: string
+          valor?: number
+        }
+        Update: {
+          categoria?: string
+          cliente?: string
+          created_at?: string
+          created_by?: string
+          data_emissao?: string
+          data_vencimento?: string
+          descricao?: string
+          id?: string
+          status?: string
+          valor?: number
+        }
+        Relationships: []
+      }
+      contratos: {
+        Row: {
+          created_at: string
+          created_by: string
+          data_fim: string | null
+          data_inicio: string
+          empreendimento_id: string | null
+          fornecedor: string
+          id: string
+          numero: string
+          objeto: string
+          status: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          data_fim?: string | null
+          data_inicio?: string
+          empreendimento_id?: string | null
+          fornecedor?: string
+          id?: string
+          numero?: string
+          objeto?: string
+          status?: string
+          valor?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          data_fim?: string | null
+          data_inicio?: string
+          empreendimento_id?: string | null
+          fornecedor?: string
+          id?: string
+          numero?: string
+          objeto?: string
+          status?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contratos_empreendimento_id_fkey"
+            columns: ["empreendimento_id"]
+            isOneToOne: false
+            referencedRelation: "empreendimentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dados_cadastro: {
         Row: {
           categoria: string
@@ -91,6 +219,123 @@ export type Database = {
           id?: string
           responsavel?: string | null
           valor?: number
+        }
+        Relationships: []
+      }
+      empreendimentos: {
+        Row: {
+          codigo: string
+          created_at: string
+          created_by: string
+          endereco: string | null
+          fase: string
+          id: string
+          nome: string
+          previsao: string | null
+          status: string
+          unidades: number
+          vendidas: number
+        }
+        Insert: {
+          codigo?: string
+          created_at?: string
+          created_by: string
+          endereco?: string | null
+          fase?: string
+          id?: string
+          nome?: string
+          previsao?: string | null
+          status?: string
+          unidades?: number
+          vendidas?: number
+        }
+        Update: {
+          codigo?: string
+          created_at?: string
+          created_by?: string
+          endereco?: string | null
+          fase?: string
+          id?: string
+          nome?: string
+          previsao?: string | null
+          status?: string
+          unidades?: number
+          vendidas?: number
+        }
+        Relationships: []
+      }
+      faturamento: {
+        Row: {
+          cliente: string
+          created_at: string
+          created_by: string
+          data_emissao: string
+          data_vencimento: string
+          id: string
+          numero: string
+          observacoes: string | null
+          status: string
+          valor: number
+        }
+        Insert: {
+          cliente?: string
+          created_at?: string
+          created_by: string
+          data_emissao?: string
+          data_vencimento?: string
+          id?: string
+          numero?: string
+          observacoes?: string | null
+          status?: string
+          valor?: number
+        }
+        Update: {
+          cliente?: string
+          created_at?: string
+          created_by?: string
+          data_emissao?: string
+          data_vencimento?: string
+          id?: string
+          numero?: string
+          observacoes?: string | null
+          status?: string
+          valor?: number
+        }
+        Relationships: []
+      }
+      materiais: {
+        Row: {
+          canteiro: string
+          codigo: string
+          created_at: string
+          created_by: string
+          id: string
+          minimo: number
+          nome: string
+          quantidade: number
+          unidade: string
+        }
+        Insert: {
+          canteiro?: string
+          codigo?: string
+          created_at?: string
+          created_by: string
+          id?: string
+          minimo?: number
+          nome?: string
+          quantidade?: number
+          unidade?: string
+        }
+        Update: {
+          canteiro?: string
+          codigo?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          minimo?: number
+          nome?: string
+          quantidade?: number
+          unidade?: string
         }
         Relationships: []
       }
