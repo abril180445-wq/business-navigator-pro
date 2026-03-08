@@ -107,9 +107,20 @@ const PBITile = ({ children, title, className = "" }: { children: React.ReactNod
   </div>
 );
 
+const pendingModules = [
+  { title: "Financeiro", description: "Faturamento, Contas a Pagar/Receber, Impostos", icon: DollarSign, color: "hsl(207, 89%, 48%)" },
+  { title: "Obras", description: "Empreendimentos, Contratos, Materiais, Clientes", icon: Building2, color: "hsl(45, 100%, 51%)" },
+  { title: "Engenharia", description: "Ordens de Serviço, Cronogramas, Planejamento", icon: HardHat, color: "hsl(28, 87%, 55%)" },
+  { title: "Patrimônio", description: "Cadastro de bens, Depreciação, Inventário", icon: Landmark, color: "hsl(174, 62%, 47%)" },
+  { title: "Projetos", description: "Kanban, Cronograma, Alocação de recursos", icon: FolderKanban, color: "hsl(262, 60%, 55%)" },
+  { title: "RH", description: "Funcionários, Ponto, Férias, Folha de Pagamento", icon: Users, color: "hsl(152, 60%, 38%)" },
+  { title: "Suporte", description: "Chamados, SLA, Base de conhecimento", icon: Headphones, color: "hsl(340, 65%, 50%)" },
+  { title: "Logística", description: "Entregas, Frota, Rastreamento, Roteirização", icon: Truck, color: "hsl(15, 75%, 50%)" },
+];
+
 export default function Dashboard() {
   const [periodo, setPeriodo] = useState("2025");
-  const { userRole, profile } = useAuth();
+  const { userRole, profile, isAdmin } = useAuth();
   const { theme } = useTheme();
   const isNormal = userRole === "normal";
 
