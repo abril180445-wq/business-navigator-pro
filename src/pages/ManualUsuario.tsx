@@ -209,6 +209,7 @@ const sections: ManualSection[] = [
     id: "usuarios",
     title: "Gerenciamento de Usuários",
     icon: Users,
+    adminOnly: true,
     content: [
       {
         title: "Como Criar um Novo Usuário",
