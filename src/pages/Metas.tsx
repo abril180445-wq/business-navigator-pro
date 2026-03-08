@@ -215,10 +215,10 @@ export default function Metas() {
     const { error } = await supabase.from("acoes_meta").insert({
       meta_id: acaoMetaId, descricao: newAcao.descricao,
       responsavel: newAcao.responsavel || null, prazo: newAcao.prazo || null,
-      tipo, created_by: user?.id,
+      tipo, created_by: user?.id, imagens: newAcao.imagens,
     });
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
-    setNewAcao({ descricao: "", responsavel: "", prazo: "" });
+    setNewAcao({ descricao: "", responsavel: "", prazo: "", imagens: [] });
     setAcaoDialogOpen(false);
     toast({ title: tipo === "contribuicao" ? "Contribuição adicionada!" : "Ação adicionada!" });
   };
