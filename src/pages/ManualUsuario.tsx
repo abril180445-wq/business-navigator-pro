@@ -198,6 +198,7 @@ const sections: ManualSection[] = [
 ];
 
 export default function ManualUsuario() {
+  const { theme } = useTheme();
   const [expandedSections, setExpandedSections] = useState<string[]>(["inicio"]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTopic, setSelectedTopic] = useState<{ sectionId: string; topicIndex: number } | null>({ sectionId: "inicio", topicIndex: 0 });
