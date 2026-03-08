@@ -139,7 +139,12 @@ export default function Metas() {
   const [acaoMetaId, setAcaoMetaId] = useState<string | null>(null);
   const [checkinMetaId, setCheckinMetaId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editValues, setEditValues] = useState({ atual: "", objetivo: "" });
+  const [editValues, setEditValues] = useState<{
+    nome: string; atual: string; objetivo: string; unidade: string;
+    categoria: string; categoriaCustom: string; responsavel: string;
+    prioridade: string; ciclo: string; parent_id: string;
+  }>({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "" });
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [newMeta, setNewMeta] = useState({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media" as Meta["prioridade"], ciclo: "Q1 2026", parent_id: "" });
 
   // Dynamic categories: base + any custom ones from existing metas
