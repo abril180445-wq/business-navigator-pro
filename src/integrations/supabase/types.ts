@@ -21,6 +21,7 @@ export type Database = {
           created_by: string | null
           descricao: string
           id: string
+          imagens: string[] | null
           meta_id: string
           prazo: string | null
           responsavel: string | null
@@ -32,6 +33,7 @@ export type Database = {
           created_by?: string | null
           descricao: string
           id?: string
+          imagens?: string[] | null
           meta_id: string
           prazo?: string | null
           responsavel?: string | null
@@ -43,6 +45,7 @@ export type Database = {
           created_by?: string | null
           descricao?: string
           id?: string
+          imagens?: string[] | null
           meta_id?: string
           prazo?: string | null
           responsavel?: string | null
@@ -64,6 +67,7 @@ export type Database = {
           confianca: string
           created_at: string
           id: string
+          imagens: string[] | null
           meta_id: string
           user_id: string
           user_name: string
@@ -75,6 +79,7 @@ export type Database = {
           confianca?: string
           created_at?: string
           id?: string
+          imagens?: string[] | null
           meta_id: string
           user_id: string
           user_name?: string
@@ -86,6 +91,7 @@ export type Database = {
           confianca?: string
           created_at?: string
           id?: string
+          imagens?: string[] | null
           meta_id?: string
           user_id?: string
           user_name?: string
