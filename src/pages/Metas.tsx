@@ -139,7 +139,12 @@ export default function Metas() {
   const [acaoMetaId, setAcaoMetaId] = useState<string | null>(null);
   const [checkinMetaId, setCheckinMetaId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editValues, setEditValues] = useState({ atual: "", objetivo: "" });
+  const [editValues, setEditValues] = useState<{
+    nome: string; atual: string; objetivo: string; unidade: string;
+    categoria: string; categoriaCustom: string; responsavel: string;
+    prioridade: string; ciclo: string; parent_id: string;
+  }>({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "" });
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [newMeta, setNewMeta] = useState({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media" as Meta["prioridade"], ciclo: "Q1 2026", parent_id: "" });
 
   // Dynamic categories: base + any custom ones from existing metas
@@ -214,6 +219,11 @@ export default function Metas() {
     const meta = metas.find(m => m.id === id);
     const novoValor = parseFloat(editValues.atual) || 0;
     const novoObj = parseFloat(editValues.objetivo) || 1;
+    const categoriaFinal = editValues.categoria === "__outra__" ? editValues.categoriaCustom.trim() : editValues.categoria;
+    if (!categoriaFinal) {
+      toast({ title: "Informe a categoria", variant: "destructive" });
+      return;
+    }
     
     // Auto-calculate status
     const pct = (novoValor / novoObj) * 100;
@@ -223,7 +233,16 @@ export default function Metas() {
     else if (pct < 60) newStatus = "atencao";
 
     const { error } = await supabase.from("metas").update({
-      atual: novoValor, objetivo: novoObj, status: newStatus,
+      nome: editValues.nome,
+      atual: novoValor,
+      objetivo: novoObj,
+      unidade: editValues.unidade,
+      categoria: categoriaFinal,
+      responsavel: editValues.responsavel,
+      prioridade: editValues.prioridade,
+      ciclo: editValues.ciclo,
+      parent_id: editValues.parent_id || null,
+      status: newStatus,
     }).eq("id", id);
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
 
@@ -238,6 +257,7 @@ export default function Metas() {
       });
     }
     setEditingId(null);
+    setEditDialogOpen(false);
     toast({ title: "Meta atualizada!" });
   };
 
@@ -595,25 +615,23 @@ export default function Metas() {
                           )}
                         </div>
                         <div className="flex items-center gap-1.5">
-                          {isEditing ? (
-                            <>
-                              <Input type="number" value={editValues.atual} onChange={(e) => setEditValues({ ...editValues, atual: e.target.value })} className="h-6 w-16 sm:w-20 text-[11px] px-1.5" />
-                              <span className="text-[11px] text-muted-foreground">/</span>
-                              <Input type="number" value={editValues.objetivo} onChange={(e) => setEditValues({ ...editValues, objetivo: e.target.value })} className="h-6 w-16 sm:w-20 text-[11px] px-1.5" />
-                              <button onClick={() => saveEdit(meta.id)} className="p-1 rounded hover:bg-success/10 text-success"><Check className="w-3 h-3" /></button>
-                              <button onClick={() => setEditingId(null)} className="p-1 rounded hover:bg-muted text-muted-foreground"><X className="w-3 h-3" /></button>
-                            </>
-                          ) : (
-                            <>
                               <span className="text-[10px] text-muted-foreground hidden sm:inline">{meta.responsavel}</span>
                               <span className="text-[11px] text-muted-foreground">{formatVal(meta.atual, meta.unidade)} / {formatVal(meta.objetivo, meta.unidade)}</span>
                               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: `${meta.cor}18`, color: meta.cor }}>{pct}%</span>
                               <button onClick={() => { setCheckinMetaId(meta.id); setCheckinDialogOpen(true); }} className="p-1 rounded hover:bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" title="Check-in"><MessageCircle className="w-3 h-3" /></button>
-                              <button onClick={() => { setEditingId(meta.id); setEditValues({ atual: meta.atual.toString(), objetivo: meta.objetivo.toString() }); }} className="p-1 rounded hover:bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"><Pencil className="w-3 h-3" /></button>
+                              <button onClick={() => {
+                                setEditingId(meta.id);
+                                setEditValues({
+                                  nome: meta.nome, atual: meta.atual.toString(), objetivo: meta.objetivo.toString(),
+                                  unidade: meta.unidade, categoria: categorias.includes(meta.categoria) ? meta.categoria : "__outra__",
+                                  categoriaCustom: categorias.includes(meta.categoria) ? "" : meta.categoria,
+                                  responsavel: meta.responsavel, prioridade: meta.prioridade,
+                                  ciclo: meta.ciclo, parent_id: meta.parent_id || "",
+                                });
+                                setEditDialogOpen(true);
+                              }} className="p-1 rounded hover:bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" title="Editar meta"><Pencil className="w-3 h-3" /></button>
                               <button onClick={() => { setAcaoMetaId(meta.id); setAcaoDialogOpen(true); }} className="p-1 rounded hover:bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" title="Adicionar ação"><ListChecks className="w-3 h-3" /></button>
                               <button onClick={() => removeMeta(meta.id)} className="p-1 rounded hover:bg-destructive/10 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-3 h-3" /></button>
-                            </>
-                          )}
                         </div>
                       </div>
                       <div className="h-2 bg-secondary rounded-full overflow-hidden">
@@ -1155,6 +1173,82 @@ export default function Metas() {
             <Button onClick={addCheckin} className="w-full h-8 text-[12px] font-semibold" style={{ background: "hsl(262, 52%, 47%)", color: "white" }}>
               <MessageCircle className="w-3.5 h-3.5 mr-1.5" /> Registrar Check-in
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========== EDIT META DIALOG ========== */}
+      <Dialog open={editDialogOpen} onOpenChange={(open) => { setEditDialogOpen(open); if (!open) setEditingId(null); }}>
+        <DialogContent className="pbi-tile border-border max-w-lg" style={{ background: "hsl(var(--pbi-surface))" }}>
+          <DialogHeader>
+            <DialogTitle className="text-[14px] font-bold text-foreground flex items-center gap-2">
+              <Pencil className="w-4 h-4" style={{ color: "hsl(var(--pbi-yellow))" }} /> Editar Meta
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Nome da Meta</Label>
+              <Input value={editValues.nome} onChange={(e) => setEditValues({ ...editValues, nome: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Valor Atual</Label>
+                <Input type="number" value={editValues.atual} onChange={(e) => setEditValues({ ...editValues, atual: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Objetivo</Label>
+                <Input type="number" value={editValues.objetivo} onChange={(e) => setEditValues({ ...editValues, objetivo: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Unidade</Label>
+                <Input value={editValues.unidade} onChange={(e) => setEditValues({ ...editValues, unidade: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Responsável</Label>
+                <Input value={editValues.responsavel} onChange={(e) => setEditValues({ ...editValues, responsavel: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Categoria</Label>
+                <select value={editValues.categoria} onChange={(e) => setEditValues({ ...editValues, categoria: e.target.value, categoriaCustom: "" })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                  {categorias.map((c) => <option key={c} value={c}>{c}</option>)}
+                  <option value="__outra__">✨ Outra</option>
+                </select>
+                {editValues.categoria === "__outra__" && (
+                  <Input value={editValues.categoriaCustom} onChange={(e) => setEditValues({ ...editValues, categoriaCustom: e.target.value })} placeholder="Nova categoria..." maxLength={40} className="h-8 text-[12px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Prioridade</Label>
+                <select value={editValues.prioridade} onChange={(e) => setEditValues({ ...editValues, prioridade: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                  <option value="alta">Alta</option>
+                  <option value="media">Média</option>
+                  <option value="baixa">Baixa</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Ciclo</Label>
+                <select value={editValues.ciclo} onChange={(e) => setEditValues({ ...editValues, ciclo: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                  {ciclosDisponiveis.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Meta Pai (opcional)</Label>
+              <select value={editValues.parent_id} onChange={(e) => setEditValues({ ...editValues, parent_id: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                <option value="">Nenhuma (meta raiz)</option>
+                {metas.filter(m => m.id !== editingId).map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
+              </select>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={() => { setEditDialogOpen(false); setEditingId(null); }} variant="outline" className="flex-1 h-8 text-[12px]">Cancelar</Button>
+              <Button onClick={() => editingId && saveEdit(editingId)} className="flex-1 h-8 text-[12px] font-semibold bg-primary text-primary-foreground">
+                <Check className="w-3.5 h-3.5 mr-1.5" /> Salvar Alterações
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
