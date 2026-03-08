@@ -457,7 +457,7 @@ export default function Metas() {
       {activeTab === "acoes" && !loading && (
         <div className="space-y-3">
           {!canEditMetas && (
-            <div className="pbi-tile p-4" style={{ borderLeft: "4px solid hsl(174, 62%, 47%)" }}>
+            <div className="pbi-tile" style={{ borderLeft: "4px solid hsl(174, 62%, 47%)" }}>
               <div className="flex items-center gap-2 mb-1">
                 <ListChecks className="w-4 h-4" style={{ color: "hsl(174, 62%, 47%)" }} />
                 <p className="text-[13px] font-semibold text-foreground">Suas Contribuições</p>
