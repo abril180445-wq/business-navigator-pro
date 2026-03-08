@@ -1176,6 +1176,82 @@ export default function Metas() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ========== EDIT META DIALOG ========== */}
+      <Dialog open={editDialogOpen} onOpenChange={(open) => { setEditDialogOpen(open); if (!open) setEditingId(null); }}>
+        <DialogContent className="pbi-tile border-border max-w-lg" style={{ background: "hsl(var(--pbi-surface))" }}>
+          <DialogHeader>
+            <DialogTitle className="text-[14px] font-bold text-foreground flex items-center gap-2">
+              <Pencil className="w-4 h-4" style={{ color: "hsl(var(--pbi-yellow))" }} /> Editar Meta
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Nome da Meta</Label>
+              <Input value={editValues.nome} onChange={(e) => setEditValues({ ...editValues, nome: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Valor Atual</Label>
+                <Input type="number" value={editValues.atual} onChange={(e) => setEditValues({ ...editValues, atual: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Objetivo</Label>
+                <Input type="number" value={editValues.objetivo} onChange={(e) => setEditValues({ ...editValues, objetivo: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Unidade</Label>
+                <Input value={editValues.unidade} onChange={(e) => setEditValues({ ...editValues, unidade: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Responsável</Label>
+                <Input value={editValues.responsavel} onChange={(e) => setEditValues({ ...editValues, responsavel: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Categoria</Label>
+                <select value={editValues.categoria} onChange={(e) => setEditValues({ ...editValues, categoria: e.target.value, categoriaCustom: "" })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                  {categorias.map((c) => <option key={c} value={c}>{c}</option>)}
+                  <option value="__outra__">✨ Outra</option>
+                </select>
+                {editValues.categoria === "__outra__" && (
+                  <Input value={editValues.categoriaCustom} onChange={(e) => setEditValues({ ...editValues, categoriaCustom: e.target.value })} placeholder="Nova categoria..." maxLength={40} className="h-8 text-[12px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Prioridade</Label>
+                <select value={editValues.prioridade} onChange={(e) => setEditValues({ ...editValues, prioridade: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                  <option value="alta">Alta</option>
+                  <option value="media">Média</option>
+                  <option value="baixa">Baixa</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Ciclo</Label>
+                <select value={editValues.ciclo} onChange={(e) => setEditValues({ ...editValues, ciclo: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                  {ciclosDisponiveis.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Meta Pai (opcional)</Label>
+              <select value={editValues.parent_id} onChange={(e) => setEditValues({ ...editValues, parent_id: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                <option value="">Nenhuma (meta raiz)</option>
+                {metas.filter(m => m.id !== editingId).map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
+              </select>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={() => { setEditDialogOpen(false); setEditingId(null); }} variant="outline" className="flex-1 h-8 text-[12px]">Cancelar</Button>
+              <Button onClick={() => editingId && saveEdit(editingId)} className="flex-1 h-8 text-[12px] font-semibold bg-primary text-primary-foreground">
+                <Check className="w-3.5 h-3.5 mr-1.5" /> Salvar Alterações
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
