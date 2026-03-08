@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   AlertCircle, ArrowRight, KeyRound, ShieldCheck,
-  BarChart3, TrendingUp, Building2, DollarSign, Users, Target,
+  BarChart3, TrendingUp, Building2, Target,
   Lock, Mail, User, Eye, EyeOff, Sparkles,
 } from "lucide-react";
 
