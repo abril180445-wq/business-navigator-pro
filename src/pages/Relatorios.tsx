@@ -187,9 +187,9 @@ export default function Relatorios() {
     toast({ title: "Registro removido" });
   };
 
-  const filteredData = dadosExemplo.filter((d) => {
-    if (tipo === "vendas") return d.categoria === "Vendas";
-    if (tipo === "despesas") return d.categoria === "Despesas" || d.valor < 0;
+  const filteredData = dadosFinanceiros.filter((d) => {
+    if (tipo === "vendas") return d.valor > 0;
+    if (tipo === "despesas") return d.valor < 0;
     return true;
   });
 
