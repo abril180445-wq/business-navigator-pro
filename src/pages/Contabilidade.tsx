@@ -1,19 +1,27 @@
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Filter, Download, DollarSign, CreditCard, FileText, TrendingUp, ChevronDown, ArrowUpRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Plus, Filter, Download, DollarSign, CreditCard, FileText, TrendingUp, ArrowUpRight, Trash2, Pencil } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
-const invoices = [
-  { id: "NF-2026-0142", cliente: "Res. Vila Serena — Unid. 302", valor: 385000, status: "pago", data: "15/02/2026", vencimento: "15/03/2026" },
-  { id: "NF-2026-0141", cliente: "Ed. Monte Carlo — Unid. 1201", valor: 520000, status: "pendente", data: "14/02/2026", vencimento: "14/03/2026" },
-  { id: "NF-2026-0140", cliente: "Cond. Jardim Real — Lote 15", valor: 180000, status: "atrasado", data: "10/02/2026", vencimento: "10/03/2026" },
-  { id: "NF-2026-0139", cliente: "Res. Vila Serena — Unid. 501", valor: 395000, status: "pago", data: "08/02/2026", vencimento: "08/03/2026" },
-  { id: "NF-2026-0138", cliente: "Concreteira Central — CT-042", valor: 145000, status: "pendente", data: "05/02/2026", vencimento: "05/03/2026" },
-  { id: "NF-2026-0137", cliente: "Aço Forte Ltda — CT-041", valor: 278000, status: "pago", data: "03/02/2026", vencimento: "03/03/2026" },
-  { id: "NF-2026-0136", cliente: "Ed. Torre Dourada — Sinal", valor: 85000, status: "cancelado", data: "01/02/2026", vencimento: "01/03/2026" },
-];
+type Faturamento = {
+  id: string; numero: string; cliente: string; valor: number; status: string;
+  data_emissao: string; data_vencimento: string; observacoes: string; created_by: string; created_at: string;
+};
+type ContaPagar = {
+  id: string; fornecedor: string; descricao: string; valor: number; status: string;
+  data_emissao: string; data_vencimento: string; categoria: string; created_by: string; created_at: string;
+};
+type ContaReceber = {
+  id: string; cliente: string; descricao: string; valor: number; status: string;
+  data_emissao: string; data_vencimento: string; categoria: string; created_by: string; created_at: string;
+};
 
 const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
   pago: { label: "Pago", color: "hsl(152, 60%, 38%)", bg: "hsl(152, 60%, 38%, 0.15)" },
@@ -22,56 +30,211 @@ const statusConfig: Record<string, { label: string; color: string; bg: string }>
   cancelado: { label: "Cancelado", color: "hsl(220, 15%, 55%)", bg: "hsl(220, 15%, 55%, 0.15)" },
 };
 
-const summaryCards = [
-  { title: "Faturamento Mensal", value: "R$ 2,1M", icon: DollarSign, change: "+14.8%", positive: true },
-  { title: "Contas a Receber", value: "R$ 1,85M", icon: CreditCard, change: "+8.2%", positive: true },
-  { title: "Notas Emitidas", value: "67", icon: FileText, change: "+15%", positive: true },
-  { title: "Margem de Obra", value: "28.4%", icon: TrendingUp, change: "+1.6%", positive: true },
-];
-
-const fluxoData = [
-  { month: "Jan", entrada: 1200, saida: 850 },
-  { month: "Fev", entrada: 1450, saida: 920 },
-  { month: "Mar", entrada: 980, saida: 780 },
-  { month: "Abr", entrada: 1600, saida: 1050 },
-  { month: "Mai", entrada: 1350, saida: 900 },
-  { month: "Jun", entrada: 1800, saida: 1100 },
-];
+type TabKey = "faturamento" | "pagar" | "receber";
 
 export default function Contabilidade() {
   const { theme } = useTheme();
+  const { user, userRole } = useAuth();
+  const canEdit = userRole === "admin" || userRole === "master";
+
+  const [activeTab, setActiveTab] = useState<TabKey>("faturamento");
+  const [faturamentos, setFaturamentos] = useState<Faturamento[]>([]);
+  const [contasPagar, setContasPagar] = useState<ContaPagar[]>([]);
+  const [contasReceber, setContasReceber] = useState<ContaReceber[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Form states
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState<Record<string, string>>({});
+
+  const loadData = async () => {
+    setLoading(true);
+    const [f, cp, cr] = await Promise.all([
+      supabase.from("faturamento").select("*").order("created_at", { ascending: false }),
+      supabase.from("contas_pagar").select("*").order("created_at", { ascending: false }),
+      supabase.from("contas_receber").select("*").order("created_at", { ascending: false }),
+    ]);
+    if (f.data) setFaturamentos(f.data as any);
+    if (cp.data) setContasPagar(cp.data as any);
+    if (cr.data) setContasReceber(cr.data as any);
+    setLoading(false);
+  };
+
+  useEffect(() => { loadData(); }, []);
+
+  const handleAdd = async () => {
+    if (!user) return;
+    try {
+      if (activeTab === "faturamento") {
+        const { error } = await supabase.from("faturamento").insert({
+          numero: formData.numero || "",
+          cliente: formData.cliente || "",
+          valor: parseFloat(formData.valor || "0"),
+          status: formData.status || "pendente",
+          data_emissao: formData.data_emissao || new Date().toISOString().split("T")[0],
+          data_vencimento: formData.data_vencimento || new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
+          observacoes: formData.observacoes || "",
+          created_by: user.id,
+        } as any);
+        if (error) throw error;
+      } else if (activeTab === "pagar") {
+        const { error } = await supabase.from("contas_pagar").insert({
+          fornecedor: formData.fornecedor || "",
+          descricao: formData.descricao || "",
+          valor: parseFloat(formData.valor || "0"),
+          status: formData.status || "pendente",
+          data_emissao: formData.data_emissao || new Date().toISOString().split("T")[0],
+          data_vencimento: formData.data_vencimento || new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
+          categoria: formData.categoria || "outros",
+          created_by: user.id,
+        } as any);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("contas_receber").insert({
+          cliente: formData.cliente || "",
+          descricao: formData.descricao || "",
+          valor: parseFloat(formData.valor || "0"),
+          status: formData.status || "pendente",
+          data_emissao: formData.data_emissao || new Date().toISOString().split("T")[0],
+          data_vencimento: formData.data_vencimento || new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
+          categoria: formData.categoria || "outros",
+          created_by: user.id,
+        } as any);
+        if (error) throw error;
+      }
+      toast.success("Registro adicionado!");
+      setFormData({});
+      setShowForm(false);
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleDelete = async (table: string, id: string) => {
+    const { error } = await supabase.from(table as any).delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success("Removido!"); loadData(); }
+  };
+
+  // KPI calculations
+  const totalFaturamento = faturamentos.reduce((s, f) => s + Number(f.valor), 0);
+  const totalReceber = contasReceber.filter(c => c.status === "pendente").reduce((s, c) => s + Number(c.valor), 0);
+  const totalPagar = contasPagar.filter(c => c.status === "pendente").reduce((s, c) => s + Number(c.valor), 0);
+  const notasEmitidas = faturamentos.length;
+
+  const summaryCards = [
+    { title: "Faturamento Total", value: `R$ ${(totalFaturamento / 1000).toFixed(0)}k`, icon: DollarSign },
+    { title: "A Receber", value: `R$ ${(totalReceber / 1000).toFixed(0)}k`, icon: CreditCard },
+    { title: "A Pagar", value: `R$ ${(totalPagar / 1000).toFixed(0)}k`, icon: TrendingUp },
+    { title: "Notas Emitidas", value: String(notasEmitidas), icon: FileText },
+  ];
+
+  // Fluxo chart from real data
+  const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+  const fluxoMap: Record<string, { entrada: number; saida: number }> = {};
+  faturamentos.forEach(f => {
+    const m = monthNames[new Date(f.data_emissao).getMonth()];
+    if (!fluxoMap[m]) fluxoMap[m] = { entrada: 0, saida: 0 };
+    fluxoMap[m].entrada += Number(f.valor) / 1000;
+  });
+  contasPagar.forEach(c => {
+    const m = monthNames[new Date(c.data_emissao).getMonth()];
+    if (!fluxoMap[m]) fluxoMap[m] = { entrada: 0, saida: 0 };
+    fluxoMap[m].saida += Number(c.valor) / 1000;
+  });
+  const fluxoData = monthNames.filter(m => fluxoMap[m]).map(m => ({ month: m, ...fluxoMap[m] }));
+
   const gridColor = theme === "dark" ? "hsl(0, 0%, 25%)" : "hsl(0, 0%, 85%)";
   const axisColor = theme === "dark" ? "hsl(0, 0%, 55%)" : "hsl(0, 0%, 50%)";
   const tooltipStyle = {
     background: theme === "dark" ? "hsl(0, 0%, 18%)" : "#fff",
     border: `1px solid ${theme === "dark" ? "hsl(0, 0%, 30%)" : "hsl(0, 0%, 85%)"}`,
-    borderRadius: "6px",
-    fontSize: "11px",
+    borderRadius: "6px", fontSize: "11px",
     color: theme === "dark" ? "#e8e8e8" : "#222",
   };
 
+  const tabLabels: { key: TabKey; label: string }[] = [
+    { key: "faturamento", label: "Faturamento" },
+    { key: "pagar", label: "Contas a Pagar" },
+    { key: "receber", label: "Contas a Receber" },
+  ];
+
+  const formTitle = activeTab === "faturamento" ? "Nova Nota Fiscal" : activeTab === "pagar" ? "Nova Conta a Pagar" : "Nova Conta a Receber";
+
   return (
     <div className="space-y-4">
-      {/* PBI Header */}
       <div className="pbi-header flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-3">
           <DollarSign className="w-5 h-5" style={{ color: "hsl(var(--pbi-yellow))" }} />
           <div>
             <h1 className="text-base font-semibold text-white">Financeiro</h1>
-            <p className="text-[11px]" style={{ color: "hsl(0, 0%, 72%)" }}>Faturamento, contas e fluxo de caixa</p>
+            <p className="text-[11px]" style={{ color: "hsl(0, 0%, 72%)" }}>Faturamento, contas a pagar e a receber</p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="h-7 text-[11px] border-none gap-1 bg-secondary text-foreground hover:bg-secondary/80">
-            <Filter className="w-3 h-3" /> Filtrar
-          </Button>
-          <Button variant="outline" size="sm" className="h-7 text-[11px] border-none gap-1 bg-secondary text-foreground hover:bg-secondary/80">
-            <Download className="w-3 h-3" /> Exportar
-          </Button>
-          <Button size="sm" className="h-7 text-[11px] font-semibold gap-1" style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}>
-            <Plus className="w-3 h-3" /> Nova NF
-          </Button>
-        </div>
+        {canEdit && (
+          <Dialog open={showForm} onOpenChange={setShowForm}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="h-7 text-[11px] font-semibold gap-1" style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}>
+                <Plus className="w-3 h-3" /> {formTitle}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>{formTitle}</DialogTitle></DialogHeader>
+              <div className="space-y-3">
+                {activeTab === "faturamento" ? (
+                  <>
+                    <Input placeholder="Número da NF" value={formData.numero || ""} onChange={e => setFormData(p => ({ ...p, numero: e.target.value }))} />
+                    <Input placeholder="Cliente" value={formData.cliente || ""} onChange={e => setFormData(p => ({ ...p, cliente: e.target.value }))} />
+                    <Input type="number" placeholder="Valor" value={formData.valor || ""} onChange={e => setFormData(p => ({ ...p, valor: e.target.value }))} />
+                    <Input type="date" value={formData.data_emissao || ""} onChange={e => setFormData(p => ({ ...p, data_emissao: e.target.value }))} />
+                    <Input type="date" value={formData.data_vencimento || ""} onChange={e => setFormData(p => ({ ...p, data_vencimento: e.target.value }))} />
+                    <Select value={formData.status || "pendente"} onValueChange={v => setFormData(p => ({ ...p, status: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pendente">Pendente</SelectItem>
+                        <SelectItem value="pago">Pago</SelectItem>
+                        <SelectItem value="atrasado">Atrasado</SelectItem>
+                        <SelectItem value="cancelado">Cancelado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </>
+                ) : activeTab === "pagar" ? (
+                  <>
+                    <Input placeholder="Fornecedor" value={formData.fornecedor || ""} onChange={e => setFormData(p => ({ ...p, fornecedor: e.target.value }))} />
+                    <Input placeholder="Descrição" value={formData.descricao || ""} onChange={e => setFormData(p => ({ ...p, descricao: e.target.value }))} />
+                    <Input type="number" placeholder="Valor" value={formData.valor || ""} onChange={e => setFormData(p => ({ ...p, valor: e.target.value }))} />
+                    <Input type="date" value={formData.data_vencimento || ""} onChange={e => setFormData(p => ({ ...p, data_vencimento: e.target.value }))} />
+                    <Select value={formData.status || "pendente"} onValueChange={v => setFormData(p => ({ ...p, status: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pendente">Pendente</SelectItem>
+                        <SelectItem value="pago">Pago</SelectItem>
+                        <SelectItem value="atrasado">Atrasado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </>
+                ) : (
+                  <>
+                    <Input placeholder="Cliente" value={formData.cliente || ""} onChange={e => setFormData(p => ({ ...p, cliente: e.target.value }))} />
+                    <Input placeholder="Descrição" value={formData.descricao || ""} onChange={e => setFormData(p => ({ ...p, descricao: e.target.value }))} />
+                    <Input type="number" placeholder="Valor" value={formData.valor || ""} onChange={e => setFormData(p => ({ ...p, valor: e.target.value }))} />
+                    <Input type="date" value={formData.data_vencimento || ""} onChange={e => setFormData(p => ({ ...p, data_vencimento: e.target.value }))} />
+                    <Select value={formData.status || "pendente"} onValueChange={v => setFormData(p => ({ ...p, status: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pendente">Pendente</SelectItem>
+                        <SelectItem value="pago">Pago (Recebido)</SelectItem>
+                        <SelectItem value="atrasado">Atrasado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </>
+                )}
+                <Button onClick={handleAdd} className="w-full">Salvar</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       {/* KPI tiles */}
@@ -85,17 +248,13 @@ export default function Contabilidade() {
                 <Icon className="w-3.5 h-3.5 text-muted-foreground" />
               </div>
               <p className="text-xl font-bold text-foreground">{card.value}</p>
-              <div className="flex items-center gap-1 mt-1">
-                <ArrowUpRight className="w-3 h-3" style={{ color: "hsl(152, 60%, 38%)" }} />
-                <span className="text-[10px]" style={{ color: "hsl(152, 60%, 38%)" }}>{card.change}</span>
-              </div>
             </div>
           );
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Fluxo chart */}
+      {/* Fluxo chart */}
+      {fluxoData.length > 0 && (
         <div className="pbi-tile">
           <p className="text-[11px] font-semibold mb-3 text-foreground">Fluxo de Caixa (R$ mil)</p>
           <ResponsiveContainer width="100%" height={200}>
@@ -109,39 +268,147 @@ export default function Contabilidade() {
             </AreaChart>
           </ResponsiveContainer>
         </div>
+      )}
 
-        {/* Invoice table */}
-        <div className="lg:col-span-2 pbi-tile">
-          <p className="text-[11px] font-semibold mb-3 text-foreground">Notas Fiscais e Pagamentos</p>
-          <div className="overflow-x-auto">
-            <table className="w-full text-[11px]">
-              <thead>
-                <tr className="border-b border-border">
-                  {["Número", "Referência", "Emissão", "Vencimento", "Valor", "Status"].map((h) => (
-                    <th key={h} className={`py-2 px-2 font-medium text-muted-foreground ${h === "Valor" ? "text-right" : "text-left"}`}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {invoices.map((inv) => {
-                  const st = statusConfig[inv.status];
-                  return (
-                    <tr key={inv.id} className="pbi-row-hover cursor-pointer transition-colors border-b border-border/50">
-                      <td className="py-1.5 px-2 font-medium" style={{ color: "hsl(207, 89%, 48%)" }}>{inv.id}</td>
-                      <td className="py-1.5 px-2 text-foreground">{inv.cliente}</td>
-                      <td className="py-1.5 px-2 text-muted-foreground">{inv.data}</td>
-                      <td className="py-1.5 px-2 text-muted-foreground">{inv.vencimento}</td>
-                      <td className="py-1.5 px-2 text-right font-medium text-foreground">R$ {inv.valor.toLocaleString()}</td>
-                      <td className="py-1.5 px-2">
-                        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: st.bg, color: st.color }}>{st.label}</span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+      {/* Tabs */}
+      <div className="pbi-tabs-scroll bg-card border border-border rounded-md">
+        {tabLabels.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className="px-4 py-1.5 rounded text-[11px] font-medium transition-colors"
+            style={{
+              background: activeTab === tab.key ? "hsl(var(--pbi-yellow))" : "transparent",
+              color: activeTab === tab.key ? "hsl(var(--pbi-dark))" : undefined,
+            }}
+          >
+            <span className={activeTab !== tab.key ? "text-muted-foreground" : ""}>{tab.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Table content */}
+      <div className="pbi-tile">
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <div className="w-8 h-8 rounded-full border-4 border-muted border-t-primary animate-spin" />
           </div>
-        </div>
+        ) : activeTab === "faturamento" ? (
+          <>
+            <p className="text-[11px] font-semibold mb-3 text-foreground">Notas Fiscais ({faturamentos.length})</p>
+            {faturamentos.length === 0 ? (
+              <p className="text-[11px] text-muted-foreground py-4 text-center">Nenhuma nota fiscal cadastrada.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-[11px]">
+                  <thead>
+                    <tr className="border-b border-border">
+                      {["Número", "Cliente", "Emissão", "Vencimento", "Valor", "Status", ""].map((h) => (
+                        <th key={h} className={`py-2 px-2 font-medium text-muted-foreground ${h === "Valor" ? "text-right" : "text-left"}`}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {faturamentos.map((inv) => {
+                      const st = statusConfig[inv.status] || statusConfig.pendente;
+                      return (
+                        <tr key={inv.id} className="pbi-row-hover transition-colors border-b border-border/50">
+                          <td className="py-1.5 px-2 font-medium" style={{ color: "hsl(207, 89%, 48%)" }}>{inv.numero}</td>
+                          <td className="py-1.5 px-2 text-foreground">{inv.cliente}</td>
+                          <td className="py-1.5 px-2 text-muted-foreground">{new Date(inv.data_emissao).toLocaleDateString("pt-BR")}</td>
+                          <td className="py-1.5 px-2 text-muted-foreground">{new Date(inv.data_vencimento).toLocaleDateString("pt-BR")}</td>
+                          <td className="py-1.5 px-2 text-right font-medium text-foreground">R$ {Number(inv.valor).toLocaleString("pt-BR")}</td>
+                          <td className="py-1.5 px-2">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: st.bg, color: st.color }}>{st.label}</span>
+                          </td>
+                          <td className="py-1.5 px-2">
+                            {canEdit && <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => handleDelete("faturamento", inv.id)}><Trash2 className="w-3 h-3 text-destructive" /></Button>}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        ) : activeTab === "pagar" ? (
+          <>
+            <p className="text-[11px] font-semibold mb-3 text-foreground">Contas a Pagar ({contasPagar.length})</p>
+            {contasPagar.length === 0 ? (
+              <p className="text-[11px] text-muted-foreground py-4 text-center">Nenhuma conta a pagar cadastrada.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-[11px]">
+                  <thead>
+                    <tr className="border-b border-border">
+                      {["Fornecedor", "Descrição", "Vencimento", "Valor", "Status", ""].map((h) => (
+                        <th key={h} className={`py-2 px-2 font-medium text-muted-foreground ${h === "Valor" ? "text-right" : "text-left"}`}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {contasPagar.map((c) => {
+                      const st = statusConfig[c.status] || statusConfig.pendente;
+                      return (
+                        <tr key={c.id} className="pbi-row-hover transition-colors border-b border-border/50">
+                          <td className="py-1.5 px-2 font-medium text-foreground">{c.fornecedor}</td>
+                          <td className="py-1.5 px-2 text-muted-foreground">{c.descricao}</td>
+                          <td className="py-1.5 px-2 text-muted-foreground">{new Date(c.data_vencimento).toLocaleDateString("pt-BR")}</td>
+                          <td className="py-1.5 px-2 text-right font-medium text-foreground">R$ {Number(c.valor).toLocaleString("pt-BR")}</td>
+                          <td className="py-1.5 px-2">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: st.bg, color: st.color }}>{st.label}</span>
+                          </td>
+                          <td className="py-1.5 px-2">
+                            {canEdit && <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => handleDelete("contas_pagar", c.id)}><Trash2 className="w-3 h-3 text-destructive" /></Button>}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <p className="text-[11px] font-semibold mb-3 text-foreground">Contas a Receber ({contasReceber.length})</p>
+            {contasReceber.length === 0 ? (
+              <p className="text-[11px] text-muted-foreground py-4 text-center">Nenhuma conta a receber cadastrada.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-[11px]">
+                  <thead>
+                    <tr className="border-b border-border">
+                      {["Cliente", "Descrição", "Vencimento", "Valor", "Status", ""].map((h) => (
+                        <th key={h} className={`py-2 px-2 font-medium text-muted-foreground ${h === "Valor" ? "text-right" : "text-left"}`}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {contasReceber.map((c) => {
+                      const st = statusConfig[c.status] || statusConfig.pendente;
+                      return (
+                        <tr key={c.id} className="pbi-row-hover transition-colors border-b border-border/50">
+                          <td className="py-1.5 px-2 font-medium text-foreground">{c.cliente}</td>
+                          <td className="py-1.5 px-2 text-muted-foreground">{c.descricao}</td>
+                          <td className="py-1.5 px-2 text-muted-foreground">{new Date(c.data_vencimento).toLocaleDateString("pt-BR")}</td>
+                          <td className="py-1.5 px-2 text-right font-medium text-foreground">R$ {Number(c.valor).toLocaleString("pt-BR")}</td>
+                          <td className="py-1.5 px-2">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: st.bg, color: st.color }}>{st.label}</span>
+                          </td>
+                          <td className="py-1.5 px-2">
+                            {canEdit && <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => handleDelete("contas_receber", c.id)}><Trash2 className="w-3 h-3 text-destructive" /></Button>}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
