@@ -447,7 +447,7 @@ export default function Metas() {
                 <Plus className="w-3 h-3 mr-1" /> Nova Meta
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }}>
+            <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }} onInteractOutside={(e) => e.preventDefault()}>
               <DialogHeader>
                 <DialogTitle className="text-[14px]" style={{ color: "hsl(var(--pbi-text-primary))" }}>Criar Nova Meta</DialogTitle>
               </DialogHeader>
