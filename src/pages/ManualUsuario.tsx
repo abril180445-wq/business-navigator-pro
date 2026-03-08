@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useTheme } from "@/hooks/useTheme";
-import { BookOpen, ChevronDown, ChevronRight, Search, Shield, LayoutDashboard, Target, FileText, Users, HardDrive, FileSpreadsheet, DollarSign, Building2, HardHat, Download } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronRight, Search, Shield, LayoutDashboard, Target, FileText, Users, HardDrive, FileSpreadsheet, DollarSign, Building2, HardHat, Download, Construction, Landmark, FolderKanban, Headphones, Truck, Rocket } from "lucide-react";
 
 interface ManualSection {
   id: string;
   title: string;
   icon: React.ElementType;
   content: ManualTopic[];
+  status?: "active" | "placeholder";
+  adminOnly?: boolean;
 }
 
 interface ManualTopic {
