@@ -33,6 +33,11 @@ export default function BackupRestore() {
   const [pendingFile, setPendingFile] = useState<any>(null);
   const [pendingMeta, setPendingMeta] = useState<BackupMeta | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const updateFileRef = useRef<HTMLInputElement>(null);
+  const [updating, setUpdating] = useState(false);
+  const [confirmUpdate, setConfirmUpdate] = useState(false);
+  const [updateFile, setUpdateFile] = useState<any>(null);
+  const [updateMeta, setUpdateMeta] = useState<BackupMeta | null>(null);
 
   const handleExport = async () => {
     setExporting(true);
