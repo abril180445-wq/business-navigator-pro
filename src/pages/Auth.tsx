@@ -8,7 +8,7 @@ import {
   BarChart3, TrendingUp, Building2, DollarSign, Users, Target,
   Lock, Mail, User, Eye, EyeOff, Sparkles,
 } from "lucide-react";
-import logoSanRemo from "@/assets/logo-san-remo.png";
+
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
