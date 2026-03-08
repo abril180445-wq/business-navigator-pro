@@ -78,7 +78,7 @@ const sections: ManualSection[] = [
     content: [
       {
         title: "Acompanhamento de Metas",
-        body: `O módulo de Metas permite definir e acompanhar objetivos da empresa.\n\n**Funcionalidades:**\n- Visualização de metas por período\n- Indicadores de progresso com cores (verde, amarelo, vermelho)\n- Comparativo meta vs realizado\n- Histórico de desempenho`,
+        body: `O módulo de Metas permite definir e acompanhar objetivos da empresa com metodologia OKR.\n\n**Funcionalidades por perfil:**\n\n**Admin e Master:**\n- Criar, editar e excluir metas\n- Fazer check-ins com comentários e nível de confiança\n- Adicionar ações e planos para cada meta\n- Definir metas pai-filho (cascata)\n- Visualizar timeline e heatmap de saúde\n\n**Normal:**\n- Visualizar todas as metas e seu progresso\n- Visualizar timeline de atividades\n- **NÃO pode** criar, editar ou excluir metas\n- **NÃO pode** fazer check-ins`,
       },
     ],
   },
