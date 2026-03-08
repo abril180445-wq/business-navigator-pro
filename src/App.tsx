@@ -40,13 +40,6 @@ const ProtectedApp = () => (
         <Route path="/usuarios" element={<GerenciarUsuarios />} />
         <Route path="/backup" element={<BackupRestore />} />
         <Route path="/manual" element={<ManualUsuario />} />
-        <Route path="/manufatura/*" element={<ModulePlaceholder />} />
-        <Route path="/manufatura" element={<ModulePlaceholder />} />
-        <Route path="/ativos" element={<ModulePlaceholder />} />
-        <Route path="/projetos" element={<ModulePlaceholder />} />
-        <Route path="/rh" element={<ModulePlaceholder />} />
-        <Route path="/helpdesk" element={<ModulePlaceholder />} />
-        <Route path="/pdv" element={<ModulePlaceholder />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
