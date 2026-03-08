@@ -1,11 +1,12 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { HardDrive, Download, Upload, RefreshCw, Shield, Clock, Database, CheckCircle2, AlertTriangle, FileJson, Target, ListChecks, BarChart3, FileText, Users } from "lucide-react";
+import { HardDrive, Download, Upload, RefreshCw, Shield, Clock, Database, CheckCircle2, AlertTriangle, FileJson, Target, ListChecks, BarChart3, FileText, Users, FileArchive } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import AccessDenied from "@/components/AccessDenied";
+import JSZip from "jszip";
 
 interface BackupMeta {
   version: string;
@@ -47,16 +48,70 @@ export default function BackupRestore() {
       const backup = res.data;
       setLastBackup({ version: backup.version, created_at: backup.created_at, created_by: backup.created_by, metadata: backup.metadata });
 
-      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+      // Create ZIP with all data
+      const zip = new JSZip();
+      const dateStr = new Date().toISOString().split("T")[0];
+
+      // Full backup JSON
+      zip.file("backup_completo.json", JSON.stringify(backup, null, 2));
+
+      // Individual table CSVs for easy viewing
+      const tables = ["profiles", "user_roles", "metas", "acoes_meta", "meta_checkins", "relatorios_gerados", "auth_users"];
+      for (const table of tables) {
+        const rows = backup.data[table];
+        if (rows && rows.length > 0) {
+          // JSON per table
+          zip.file(`tabelas/${table}.json`, JSON.stringify(rows, null, 2));
+          // CSV per table
+          const headers = Object.keys(rows[0]);
+          const csvLines = [
+            headers.join(";"),
+            ...rows.map((row: any) => headers.map(h => {
+              const val = row[h];
+              if (val === null || val === undefined) return "";
+              if (typeof val === "object") return JSON.stringify(val).replace(/"/g, '""');
+              return String(val).replace(/"/g, '""');
+            }).join(";"))
+          ];
+          zip.file(`tabelas/${table}.csv`, csvLines.join("\n"));
+        }
+      }
+
+      // Metadata file
+      zip.file("LEIAME.txt", [
+        `=== BACKUP COMPLETO SAN REMO ===`,
+        `Versão: ${backup.version}`,
+        `Data: ${new Date(backup.created_at).toLocaleString("pt-BR")}`,
+        `Criado por: ${backup.created_by}`,
+        ``,
+        `=== RESUMO ===`,
+        `Perfis: ${backup.metadata.total_profiles}`,
+        `Roles: ${backup.metadata.total_roles}`,
+        `Usuários Auth: ${backup.metadata.total_users}`,
+        `Metas: ${backup.metadata.total_metas}`,
+        `Ações: ${backup.metadata.total_acoes}`,
+        `Check-ins: ${backup.metadata.total_checkins}`,
+        `Relatórios: ${backup.metadata.total_relatorios}`,
+        ``,
+        `=== ARQUIVOS ===`,
+        `backup_completo.json - Backup completo (usar para restauração)`,
+        `tabelas/*.json - Tabelas individuais em JSON`,
+        `tabelas/*.csv - Tabelas individuais em CSV (abrir no Excel)`,
+        ``,
+        `=== RESTAURAÇÃO ===`,
+        `Para restaurar, importe o arquivo .zip na tela de Backup & Restauração.`,
+      ].join("\n"));
+
+      const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 9 } });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `backup_completo_sanremo_${new Date().toISOString().split("T")[0]}.json`;
+      a.download = `backup_completo_sanremo_${dateStr}.zip`;
       a.click();
       URL.revokeObjectURL(url);
 
-      const total = (backup.metadata.total_profiles || 0) + (backup.metadata.total_metas || 0) + (backup.metadata.total_acoes || 0) + (backup.metadata.total_checkins || 0) + (backup.metadata.total_relatorios || 0) + (backup.metadata.total_roles || 0);
-      toast({ title: "Backup completo exportado!", description: `${total} registros em 6 tabelas` });
+      const total = Object.values(backup.metadata).reduce((a: number, b: any) => a + (Number(b) || 0), 0);
+      toast({ title: "Backup ZIP exportado!", description: `${total} registros em 6 tabelas + CSVs` });
     } catch (err: any) {
       toast({ title: "Erro ao exportar", description: err.message, variant: "destructive" });
     } finally {
@@ -68,9 +123,22 @@ export default function BackupRestore() {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const text = await file.text();
-      const backup = JSON.parse(text);
-      if (!backup.data || !backup.version) throw new Error("Formato inválido");
+      let backup: any;
+
+      if (file.name.endsWith(".zip")) {
+        const zip = await JSZip.loadAsync(file);
+        const jsonFile = zip.file("backup_completo.json");
+        if (!jsonFile) throw new Error("Arquivo backup_completo.json não encontrado no ZIP");
+        const text = await jsonFile.async("string");
+        backup = JSON.parse(text);
+      } else if (file.name.endsWith(".json")) {
+        const text = await file.text();
+        backup = JSON.parse(text);
+      } else {
+        throw new Error("Formato não suportado. Use .zip ou .json");
+      }
+
+      if (!backup.data || !backup.version) throw new Error("Formato de backup inválido");
       setPendingFile(backup);
       setPendingMeta({ version: backup.version, created_at: backup.created_at, created_by: backup.created_by, metadata: backup.metadata });
       setConfirmRestore(true);
@@ -93,8 +161,8 @@ export default function BackupRestore() {
       if (res.data.error) throw new Error(res.data.error);
 
       const r = res.data.restored;
-      const total = (r.profiles || 0) + (r.user_roles || 0) + (r.metas || 0) + (r.acoes_meta || 0) + (r.meta_checkins || 0) + (r.relatorios_gerados || 0);
-      toast({ title: "Restauração concluída!", description: `${total} registros restaurados em 6 tabelas` });
+      const total = Object.values(r).reduce((a: number, b: any) => a + (Number(b) || 0), 0);
+      toast({ title: "Restauração concluída!", description: `${total} registros restaurados no banco de dados` });
       setConfirmRestore(false);
       setPendingFile(null);
       setPendingMeta(null);
@@ -122,27 +190,26 @@ export default function BackupRestore() {
         <div className="flex items-center gap-3">
           <HardDrive className="w-5 h-5" style={{ color: "hsl(var(--pbi-yellow))" }} />
           <div>
-            <h1 className="text-base font-semibold text-white">Backup Completo do Banco de Dados</h1>
-            <p className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Exporte e restaure TODOS os dados do sistema (6 tabelas)</p>
+            <h1 className="text-base font-semibold text-white">Backup Completo — Sistema & Banco de Dados</h1>
+            <p className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Exporta ZIP com todas as tabelas (JSON + CSV) • Restauração atualiza o banco automaticamente</p>
           </div>
         </div>
       </div>
 
-      {/* Info tiles */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="pbi-tile">
           <div className="flex items-center gap-2 mb-2">
-            <Shield className="w-4 h-4" style={{ color: "hsl(207, 89%, 48%)" }} />
-            <span className="text-[10px] uppercase tracking-wider" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Segurança</span>
+            <FileArchive className="w-4 h-4" style={{ color: "hsl(207, 89%, 48%)" }} />
+            <span className="text-[10px] uppercase tracking-wider" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Formato</span>
           </div>
-          <p className="text-[12px]" style={{ color: "hsl(var(--pbi-text-primary))" }}>Apenas administradores podem realizar backup e restauração</p>
+          <p className="text-[12px]" style={{ color: "hsl(var(--pbi-text-primary))" }}>ZIP compactado com JSON completo + CSVs individuais por tabela</p>
         </div>
         <div className="pbi-tile">
           <div className="flex items-center gap-2 mb-2">
             <Database className="w-4 h-4" style={{ color: "hsl(45, 100%, 51%)" }} />
-            <span className="text-[10px] uppercase tracking-wider" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Dados Incluídos</span>
+            <span className="text-[10px] uppercase tracking-wider" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Tabelas</span>
           </div>
-          <p className="text-[12px]" style={{ color: "hsl(var(--pbi-text-primary))" }}>Perfis, roles, metas, ações, check-ins e relatórios</p>
+          <p className="text-[12px]" style={{ color: "hsl(var(--pbi-text-primary))" }}>6 tabelas: perfis, roles, metas, ações, check-ins, relatórios</p>
         </div>
         <div className="pbi-tile">
           <div className="flex items-center gap-2 mb-2">
@@ -155,25 +222,24 @@ export default function BackupRestore() {
         </div>
       </div>
 
-      {/* Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Export */}
         <div className="pbi-tile">
           <div className="flex items-center gap-2 mb-4">
             <Download className="w-4 h-4" style={{ color: "hsl(152, 60%, 38%)" }} />
-            <span className="text-[12px] font-semibold" style={{ color: "hsl(var(--pbi-text-primary))" }}>Exportar Backup Completo</span>
+            <span className="text-[12px] font-semibold" style={{ color: "hsl(var(--pbi-text-primary))" }}>Exportar Backup Completo (ZIP)</span>
           </div>
           <p className="text-[11px] mb-4" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
-            Gera um arquivo JSON com TODOS os dados do banco: perfis, roles, metas, ações, check-ins e relatórios.
+            Baixa um arquivo ZIP contendo o backup completo do banco + CSVs individuais para abrir no Excel.
           </p>
           <div className="space-y-2">
             {[
-              "Perfis de usuários e autenticação",
-              "Roles e permissões",
-              "Metas (OKRs) completas",
-              "Plano de ações das metas",
-              "Check-ins e histórico de progresso",
-              "Relatórios gerados",
+              "backup_completo.json — para restauração",
+              "tabelas/*.csv — abrir no Excel",
+              "tabelas/*.json — dados por tabela",
+              "LEIAME.txt — resumo do backup",
+              "Perfis, roles, metas, ações, check-ins, relatórios",
+              "Dados de autenticação dos usuários",
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2 text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
                 <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "hsl(152, 60%, 38%)" }} />
@@ -183,7 +249,7 @@ export default function BackupRestore() {
           </div>
           <Button onClick={handleExport} disabled={exporting} className="w-full h-9 text-[12px] font-semibold mt-5 gap-2"
             style={{ background: "hsl(152, 60%, 38%)", color: "white" }}>
-            {exporting ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Exportando...</> : <><Download className="w-3.5 h-3.5" /> Exportar Backup Completo</>}
+            {exporting ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Exportando...</> : <><FileArchive className="w-3.5 h-3.5" /> Exportar Backup ZIP</>}
           </Button>
 
           {lastBackup && (
@@ -213,30 +279,30 @@ export default function BackupRestore() {
         <div className="pbi-tile">
           <div className="flex items-center gap-2 mb-4">
             <Upload className="w-4 h-4" style={{ color: "hsl(45, 100%, 51%)" }} />
-            <span className="text-[12px] font-semibold" style={{ color: "hsl(var(--pbi-text-primary))" }}>Restaurar Backup</span>
+            <span className="text-[12px] font-semibold" style={{ color: "hsl(var(--pbi-text-primary))" }}>Restaurar Backup (atualiza o banco)</span>
           </div>
           <p className="text-[11px] mb-4" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
-            Selecione um arquivo de backup JSON para restaurar TODOS os dados. Os registros existentes serão atualizados (upsert).
+            Importe um arquivo ZIP ou JSON de backup. Todos os dados serão restaurados e o banco de dados será atualizado automaticamente.
           </p>
           <div className="space-y-3 mb-5">
             <div className="flex items-center gap-2 text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
               <AlertTriangle className="w-3.5 h-3.5" style={{ color: "hsl(45, 100%, 51%)" }} />
-              <span>Registros existentes serão sobrescritos</span>
+              <span>Registros existentes serão sobrescritos no banco</span>
             </div>
             <div className="flex items-center gap-2 text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
               <AlertTriangle className="w-3.5 h-3.5" style={{ color: "hsl(45, 100%, 51%)" }} />
-              <span>Faça backup antes de restaurar</span>
+              <span>Faça um backup antes de restaurar</span>
             </div>
             <div className="flex items-center gap-2 text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
               <CheckCircle2 className="w-3.5 h-3.5" style={{ color: "hsl(152, 60%, 38%)" }} />
-              <span>Compatível com backups v1.0 e v2.0</span>
+              <span>Aceita .zip e .json — compatível com v1.0 e v2.0</span>
             </div>
           </div>
 
-          <input ref={fileRef} type="file" accept=".json" onChange={handleFileSelect} className="hidden" />
+          <input ref={fileRef} type="file" accept=".zip,.json" onChange={handleFileSelect} className="hidden" />
           <Button onClick={() => fileRef.current?.click()} className="w-full h-9 text-[12px] font-semibold gap-2"
             style={{ background: "hsl(45, 100%, 51%)", color: "hsl(var(--pbi-dark))" }}>
-            <Upload className="w-3.5 h-3.5" /> Selecionar Arquivo de Backup
+            <Upload className="w-3.5 h-3.5" /> Selecionar Arquivo (.zip ou .json)
           </Button>
         </div>
       </div>
@@ -253,12 +319,13 @@ export default function BackupRestore() {
           {pendingMeta && (
             <div className="space-y-4 mt-2">
               <p className="text-[12px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
-                Você está prestes a restaurar um backup completo. Os dados atuais serão sobrescritos.
+                O banco de dados será atualizado com todos os dados do backup. Registros existentes serão sobrescritos.
               </p>
               <div className="p-3 rounded-md space-y-2" style={{ background: "hsl(var(--pbi-dark))", border: "1px solid hsl(var(--pbi-border))" }}>
                 <div className="grid grid-cols-2 gap-2 text-[11px]">
                   <div><span style={{ color: "hsl(var(--pbi-text-secondary))" }}>Criado em:</span><br/><span style={{ color: "hsl(var(--pbi-text-primary))" }}>{new Date(pendingMeta.created_at).toLocaleString("pt-BR")}</span></div>
                   <div><span style={{ color: "hsl(var(--pbi-text-secondary))" }}>Por:</span><br/><span style={{ color: "hsl(var(--pbi-text-primary))" }}>{pendingMeta.created_by}</span></div>
+                  <div><span style={{ color: "hsl(var(--pbi-text-secondary))" }}>Versão:</span><br/><span style={{ color: "hsl(var(--pbi-text-primary))" }}>{pendingMeta.version}</span></div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-[10px] pt-2" style={{ borderTop: "1px solid hsl(var(--pbi-border))" }}>
                   {metaStats.map(s => (
