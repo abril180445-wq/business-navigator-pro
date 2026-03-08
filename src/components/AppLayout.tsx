@@ -24,6 +24,7 @@ import {
   MoreVertical,
   BarChart3,
   Filter,
+  HardDrive,
 } from "lucide-react";
 import logoSanRemo from "@/assets/logo-san-remo.png";
 import { Button } from "@/components/ui/button";
