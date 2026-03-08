@@ -249,18 +249,10 @@ export default function Auth() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="w-full max-w-[420px]"
           >
-            {/* Mobile logo */}
-            <div className="flex items-center gap-3 mb-8 lg:hidden">
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, hsl(45, 100%, 51%), hsl(38, 92%, 45%))" }}
-              >
-                <img src={logoSanRemo} alt="Logo San Remo" className="h-8 w-8 object-contain" />
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.3em]" style={{ color: "hsl(45, 100%, 51%)" }}>ERP</p>
-                <h1 className="text-xl font-bold text-white">San Remo</h1>
-              </div>
+            {/* Mobile title */}
+            <div className="mb-8 lg:hidden">
+              <p className="text-[10px] uppercase tracking-[0.3em]" style={{ color: "hsl(45, 100%, 51%)" }}>Business Navigator</p>
+              <h1 className="text-xl font-bold text-white">San Remo</h1>
             </div>
 
             {/* Card */}
