@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   AlertCircle, ArrowRight, KeyRound, ShieldCheck,
-  BarChart3, TrendingUp, Building2, DollarSign, Users, Target,
+  BarChart3, TrendingUp, Building2, Target,
   Lock, Mail, User, Eye, EyeOff, Sparkles,
 } from "lucide-react";
 
@@ -44,14 +44,6 @@ const FloatingParticle = ({ delay, size, x, y, duration }: { delay: number; size
     transition={{ duration, delay, repeat: Infinity, ease: "easeInOut" }}
   />
 );
-
-// KPI data
-const kpis = [
-  { label: "Faturamento", value: "R$ 2,1M", change: "+14.8%", icon: DollarSign, color: "hsl(152, 60%, 38%)" },
-  { label: "Obras Ativas", value: "8", change: "+2", icon: Building2, color: "hsl(207, 89%, 48%)" },
-  { label: "Unidades", value: "145", change: "+23%", icon: TrendingUp, color: "hsl(45, 100%, 51%)" },
-  { label: "Equipe", value: "312", change: "+28", icon: Users, color: "hsl(174, 62%, 47%)" },
-];
 
 const features = [
   { icon: BarChart3, title: "Dashboard em Tempo Real", desc: "Visualize KPIs e métricas atualizados instantaneamente" },
@@ -221,23 +213,6 @@ export default function Auth() {
               })}
             </div>
 
-            {/* KPI preview strip */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.8 }}
-              className="mt-8 flex gap-6"
-            >
-              {kpis.map((kpi) => (
-                <div key={kpi.label} className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-white">{kpi.value}</span>
-                  <div>
-                    <span className="text-[10px] block" style={{ color: "hsl(220, 15%, 50%)" }}>{kpi.label}</span>
-                    <span className="text-xs font-semibold" style={{ color: kpi.color }}>{kpi.change}</span>
-                  </div>
-                </div>
-              ))}
-            </motion.div>
           </motion.div>
         </section>
 
