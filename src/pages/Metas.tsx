@@ -464,20 +464,41 @@ export default function Metas() {
               <div className="space-y-3 pt-2">
                 <div className="space-y-1.5">
                   <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Nome da Meta *</Label>
-                  <Input value={newMeta.nome} onChange={(e) => setNewMeta({ ...newMeta, nome: e.target.value })} placeholder="Ex: Faturamento Mensal" className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                  <Input value={newMeta.nome} onChange={(e) => setNewMeta({ ...newMeta, nome: e.target.value })} placeholder="Ex: Construir muro, Faturamento Mensal, Treinar equipe..." className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Unidade de Medida</Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {unidadesPreset.map((u) => (
+                      <button
+                        key={u.value}
+                        type="button"
+                        onClick={() => setNewMeta({ ...newMeta, unidade: u.value })}
+                        className="text-[10px] px-2.5 py-1.5 rounded font-medium transition-all"
+                        style={{
+                          background: newMeta.unidade === u.value ? "hsl(var(--pbi-yellow))" : "hsl(var(--pbi-dark))",
+                          color: newMeta.unidade === u.value ? "hsl(var(--pbi-dark))" : "hsl(var(--pbi-text-secondary))",
+                          border: `1px solid ${newMeta.unidade === u.value ? "hsl(var(--pbi-yellow))" : "hsl(var(--pbi-border))"}`,
+                        }}
+                      >
+                        {u.label}
+                      </button>
+                    ))}
+                  </div>
+                  <Input value={newMeta.unidade} onChange={(e) => setNewMeta({ ...newMeta, unidade: e.target.value })} placeholder="Ou digite uma personalizada..." className="h-7 text-[11px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Valor Atual</Label>
+                    <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
+                      {newMeta.unidade === "%" ? "Progresso Atual (%)" : newMeta.unidade === "dias" ? "Dias Transcorridos" : `Valor Atual (${newMeta.unidade})`}
+                    </Label>
                     <Input type="number" value={newMeta.atual} onChange={(e) => setNewMeta({ ...newMeta, atual: e.target.value })} placeholder="0" className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Objetivo *</Label>
-                    <Input type="number" value={newMeta.objetivo} onChange={(e) => setNewMeta({ ...newMeta, objetivo: e.target.value })} placeholder="100" className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Unidade</Label>
-                    <Input value={newMeta.unidade} onChange={(e) => setNewMeta({ ...newMeta, unidade: e.target.value })} placeholder="R$" className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                    <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
+                      {newMeta.unidade === "%" ? "Meta (%) *" : newMeta.unidade === "dias" ? "Total de Dias *" : `Objetivo (${newMeta.unidade}) *`}
+                    </Label>
+                    <Input type="number" value={newMeta.objetivo} onChange={(e) => setNewMeta({ ...newMeta, objetivo: e.target.value })} placeholder={newMeta.unidade === "%" ? "100" : newMeta.unidade === "dias" ? "30" : "100"} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
