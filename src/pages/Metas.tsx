@@ -38,22 +38,133 @@ interface Meta {
   parent_id: string | null;
   ciclo: string;
   status: "no_prazo" | "atencao" | "em_risco" | "atingida";
+  // New extended fields
+  descricao: string;
+  local_obra: string;
+  orcamento: number;
+  custo_atual: number;
+  equipe: string;
+  fornecedor: string;
+  etapa: string;
+  peso: number;
+  tags: string[];
+  data_inicio: string | null;
+  frequencia_checkin: string;
+  risco: string;
+  observacoes: string;
+  aprovador: string;
+  departamento: string;
+  tipo_meta: string;
+  indicador_chave: string;
+  fonte_dados: string;
+  impacto: string;
+  dependencias: string;
+  marco_critico: string;
+  percentual_concluido: number;
 }
 
 type MetaTipo = "quantitativa" | "qualitativa";
 
+// All possible toggleable fields organized by section
 interface FieldToggles {
+  // Progresso
   valores: boolean;
+  // Gestão
   responsavel: boolean;
+  aprovador: boolean;
+  equipe: boolean;
+  departamento: boolean;
+  // Tempo
   prazo: boolean;
-  prioridade: boolean;
+  data_inicio: boolean;
   ciclo: boolean;
-  metaPai: boolean;
+  frequencia_checkin: boolean;
+  // Financeiro
+  orcamento: boolean;
+  // Obra/Projeto
+  local_obra: boolean;
+  etapa: boolean;
+  fornecedor: boolean;
+  marco_critico: boolean;
+  // Detalhes
+  descricao: boolean;
+  observacoes: boolean;
+  risco: boolean;
+  impacto: boolean;
+  dependencias: boolean;
+  // Configuração
+  prioridade: boolean;
+  peso: boolean;
+  tags: boolean;
+  indicador_chave: boolean;
+  fonte_dados: boolean;
   categoria: boolean;
+  metaPai: boolean;
 }
 
-const defaultTogglesQuant: FieldToggles = { valores: true, responsavel: true, prazo: false, prioridade: true, ciclo: true, metaPai: false, categoria: true };
-const defaultTogglesQual: FieldToggles = { valores: false, responsavel: true, prazo: true, prioridade: true, ciclo: false, metaPai: false, categoria: true };
+const defaultTogglesQuant: FieldToggles = {
+  valores: true, responsavel: true, aprovador: false, equipe: false, departamento: false,
+  prazo: false, data_inicio: false, ciclo: true, frequencia_checkin: false,
+  orcamento: false, local_obra: false, etapa: false, fornecedor: false, marco_critico: false,
+  descricao: false, observacoes: false, risco: false, impacto: false, dependencias: false,
+  prioridade: true, peso: false, tags: false, indicador_chave: false, fonte_dados: false,
+  categoria: true, metaPai: false,
+};
+const defaultTogglesQual: FieldToggles = {
+  valores: false, responsavel: true, aprovador: false, equipe: false, departamento: false,
+  prazo: true, data_inicio: false, ciclo: false, frequencia_checkin: false,
+  orcamento: false, local_obra: false, etapa: false, fornecedor: false, marco_critico: false,
+  descricao: true, observacoes: false, risco: false, impacto: false, dependencias: false,
+  prioridade: true, peso: false, tags: false, indicador_chave: false, fonte_dados: false,
+  categoria: true, metaPai: false,
+};
+
+// Field definitions for the toggle UI, organized by section
+const fieldSections = [
+  { section: "📊 Progresso", fields: [
+    { key: "valores" as keyof FieldToggles, label: "Valores/Progresso", quantOnly: true },
+  ]},
+  { section: "👤 Gestão", fields: [
+    { key: "responsavel" as keyof FieldToggles, label: "Responsável" },
+    { key: "aprovador" as keyof FieldToggles, label: "Aprovador" },
+    { key: "equipe" as keyof FieldToggles, label: "Equipe" },
+    { key: "departamento" as keyof FieldToggles, label: "Departamento" },
+  ]},
+  { section: "📅 Tempo", fields: [
+    { key: "prazo" as keyof FieldToggles, label: "Prazo Final" },
+    { key: "data_inicio" as keyof FieldToggles, label: "Data Início" },
+    { key: "ciclo" as keyof FieldToggles, label: "Ciclo" },
+    { key: "frequencia_checkin" as keyof FieldToggles, label: "Freq. Check-in" },
+  ]},
+  { section: "💰 Financeiro", fields: [
+    { key: "orcamento" as keyof FieldToggles, label: "Orçamento/Custo" },
+  ]},
+  { section: "🏗️ Obra/Projeto", fields: [
+    { key: "local_obra" as keyof FieldToggles, label: "Local/Obra" },
+    { key: "etapa" as keyof FieldToggles, label: "Etapa/Fase" },
+    { key: "fornecedor" as keyof FieldToggles, label: "Fornecedor" },
+    { key: "marco_critico" as keyof FieldToggles, label: "Marco Crítico" },
+  ]},
+  { section: "📋 Detalhes", fields: [
+    { key: "descricao" as keyof FieldToggles, label: "Descrição" },
+    { key: "observacoes" as keyof FieldToggles, label: "Observações" },
+    { key: "risco" as keyof FieldToggles, label: "Riscos" },
+    { key: "impacto" as keyof FieldToggles, label: "Impacto" },
+    { key: "dependencias" as keyof FieldToggles, label: "Dependências" },
+  ]},
+  { section: "⚙️ Configuração", fields: [
+    { key: "prioridade" as keyof FieldToggles, label: "Prioridade" },
+    { key: "peso" as keyof FieldToggles, label: "Peso" },
+    { key: "tags" as keyof FieldToggles, label: "Tags" },
+    { key: "indicador_chave" as keyof FieldToggles, label: "Indicador-Chave" },
+    { key: "fonte_dados" as keyof FieldToggles, label: "Fonte de Dados" },
+    { key: "categoria" as keyof FieldToggles, label: "Categoria" },
+    { key: "metaPai" as keyof FieldToggles, label: "Meta Pai" },
+  ]},
+];
+
+const frequenciasCheckin = ["diário", "semanal", "quinzenal", "mensal"];
+const etapasPreset = ["Planejamento", "Fundação", "Estrutura", "Alvenaria", "Elétrica", "Hidráulica", "Acabamento", "Entrega", "Em andamento", "Concluído"];
 
 interface AcaoMeta {
   id: string;
@@ -149,6 +260,225 @@ const FileThumbnail = ({ url }: { url: string }) => {
     </a>
   );
 };
+// Helper to render all dynamic fields based on toggles
+const inputStyle = { background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" };
+const labelStyle = { color: "hsl(var(--pbi-text-secondary))" };
+
+function renderDynamicFields(
+  toggles: FieldToggles,
+  values: Record<string, string>,
+  setValues: (v: Record<string, string>) => void,
+  categorias: string[],
+  metas: Meta[],
+  editingId: string | null,
+) {
+  const set = (key: string, val: string) => setValues({ ...values, [key]: val });
+  const fields: React.ReactNode[] = [];
+
+  // Row 1: Gestão
+  const gestaoFields: React.ReactNode[] = [];
+  if (toggles.responsavel) gestaoFields.push(
+    <div key="resp" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Responsável</Label>
+      <Input value={values.responsavel} onChange={(e) => set("responsavel", e.target.value)} placeholder="Nome" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.aprovador) gestaoFields.push(
+    <div key="aprov" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Aprovador</Label>
+      <Input value={values.aprovador} onChange={(e) => set("aprovador", e.target.value)} placeholder="Quem aprova" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.equipe) gestaoFields.push(
+    <div key="equipe" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Equipe</Label>
+      <Input value={values.equipe} onChange={(e) => set("equipe", e.target.value)} placeholder="Membros da equipe" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.departamento) gestaoFields.push(
+    <div key="depto" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Departamento</Label>
+      <Input value={values.departamento} onChange={(e) => set("departamento", e.target.value)} placeholder="Setor" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (gestaoFields.length > 0) fields.push(
+    <div key="gestao" className="grid grid-cols-1 sm:grid-cols-3 gap-3">{gestaoFields}</div>
+  );
+
+  // Row 2: Config (prioridade, categoria, ciclo)
+  const cfgFields: React.ReactNode[] = [];
+  if (toggles.prioridade) cfgFields.push(
+    <div key="prio" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Prioridade</Label>
+      <select value={values.prioridade} onChange={(e) => set("prioridade", e.target.value)} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={inputStyle}>
+        <option value="alta">🔴 Alta</option><option value="media">🟡 Média</option><option value="baixa">🔵 Baixa</option>
+      </select>
+    </div>
+  );
+  if (toggles.categoria) cfgFields.push(
+    <div key="cat" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Categoria</Label>
+      <select value={values.categoria} onChange={(e) => setValues({ ...values, categoria: e.target.value, categoriaCustom: "" })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={inputStyle}>
+        {categorias.map((c) => <option key={c} value={c}>{c}</option>)}
+        <option value="__outra__">✨ Outra</option>
+      </select>
+      {values.categoria === "__outra__" && (
+        <Input value={values.categoriaCustom} onChange={(e) => set("categoriaCustom", e.target.value)} placeholder="Nova categoria..." maxLength={40} className="h-7 text-[11px] border-none mt-1" style={inputStyle} />
+      )}
+    </div>
+  );
+  if (toggles.ciclo) cfgFields.push(
+    <div key="ciclo" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Ciclo</Label>
+      <select value={values.ciclo} onChange={(e) => set("ciclo", e.target.value)} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={inputStyle}>
+        {ciclosDisponiveis.map((c) => <option key={c} value={c}>{c}</option>)}
+      </select>
+    </div>
+  );
+  if (cfgFields.length > 0) fields.push(
+    <div key="cfg" className="grid grid-cols-1 sm:grid-cols-3 gap-3">{cfgFields}</div>
+  );
+
+  // Row 3: Tempo
+  const tempoFields: React.ReactNode[] = [];
+  if (toggles.data_inicio) tempoFields.push(
+    <div key="di" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Data Início</Label>
+      <Input type="date" value={values.data_inicio} onChange={(e) => set("data_inicio", e.target.value)} className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.prazo) tempoFields.push(
+    <div key="prazo" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Prazo Final</Label>
+      <Input type="date" value={values.prazo} onChange={(e) => set("prazo", e.target.value)} className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.frequencia_checkin) tempoFields.push(
+    <div key="freq" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Frequência Check-in</Label>
+      <select value={values.frequencia_checkin} onChange={(e) => set("frequencia_checkin", e.target.value)} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={inputStyle}>
+        {frequenciasCheckin.map((f) => <option key={f} value={f}>{f.charAt(0).toUpperCase() + f.slice(1)}</option>)}
+      </select>
+    </div>
+  );
+  if (tempoFields.length > 0) fields.push(
+    <div key="tempo" className="grid grid-cols-1 sm:grid-cols-3 gap-3">{tempoFields}</div>
+  );
+
+  // Row 4: Financeiro
+  if (toggles.orcamento) fields.push(
+    <div key="fin" className="grid grid-cols-2 gap-3">
+      <div className="space-y-1.5">
+        <Label className="text-[11px]" style={labelStyle}>Orçamento (R$)</Label>
+        <Input type="number" value={values.orcamento} onChange={(e) => set("orcamento", e.target.value)} placeholder="0" className="h-8 text-[12px] border-none" style={inputStyle} />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="text-[11px]" style={labelStyle}>Custo Atual (R$)</Label>
+        <Input type="number" value={values.custo_atual} onChange={(e) => set("custo_atual", e.target.value)} placeholder="0" className="h-8 text-[12px] border-none" style={inputStyle} />
+      </div>
+    </div>
+  );
+
+  // Row 5: Obra/Projeto
+  const obraFields: React.ReactNode[] = [];
+  if (toggles.local_obra) obraFields.push(
+    <div key="local" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Local / Obra</Label>
+      <Input value={values.local_obra} onChange={(e) => set("local_obra", e.target.value)} placeholder="Endereço ou nome da obra" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.etapa) obraFields.push(
+    <div key="etapa" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Etapa / Fase</Label>
+      <select value={values.etapa} onChange={(e) => set("etapa", e.target.value)} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={inputStyle}>
+        <option value="">Selecione...</option>
+        {etapasPreset.map((e) => <option key={e} value={e}>{e}</option>)}
+      </select>
+    </div>
+  );
+  if (toggles.fornecedor) obraFields.push(
+    <div key="forn" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Fornecedor</Label>
+      <Input value={values.fornecedor} onChange={(e) => set("fornecedor", e.target.value)} placeholder="Nome do fornecedor" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.marco_critico) obraFields.push(
+    <div key="marco" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Marco Crítico</Label>
+      <Input value={values.marco_critico} onChange={(e) => set("marco_critico", e.target.value)} placeholder="Próximo marco importante" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (obraFields.length > 0) fields.push(
+    <div key="obra" className="grid grid-cols-1 sm:grid-cols-2 gap-3">{obraFields}</div>
+  );
+
+  // Row 6: Textos longos
+  if (toggles.observacoes) fields.push(
+    <div key="obs" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Observações</Label>
+      <Textarea value={values.observacoes} onChange={(e) => set("observacoes", e.target.value)} placeholder="Notas adicionais..." className="resize-none h-14 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.risco) fields.push(
+    <div key="risco" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Riscos</Label>
+      <Textarea value={values.risco} onChange={(e) => set("risco", e.target.value)} placeholder="Riscos identificados..." className="resize-none h-14 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.impacto) fields.push(
+    <div key="impacto" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Impacto</Label>
+      <Input value={values.impacto} onChange={(e) => set("impacto", e.target.value)} placeholder="Impacto esperado" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.dependencias) fields.push(
+    <div key="dep" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Dependências</Label>
+      <Input value={values.dependencias} onChange={(e) => set("dependencias", e.target.value)} placeholder="O que depende disso?" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+
+  // Row 7: Avançados
+  const advFields: React.ReactNode[] = [];
+  if (toggles.peso) advFields.push(
+    <div key="peso" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Peso (0-100)</Label>
+      <Input type="number" value={values.peso} onChange={(e) => set("peso", e.target.value)} placeholder="0" min="0" max="100" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.tags) advFields.push(
+    <div key="tags" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Tags (separadas por vírgula)</Label>
+      <Input value={values.tags} onChange={(e) => set("tags", e.target.value)} placeholder="urgente, fase1, obra-sp" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.indicador_chave) advFields.push(
+    <div key="kpi" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Indicador-Chave (KPI)</Label>
+      <Input value={values.indicador_chave} onChange={(e) => set("indicador_chave", e.target.value)} placeholder="Ex: NPS, ROI, CAC" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.fonte_dados) advFields.push(
+    <div key="fonte" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Fonte de Dados</Label>
+      <Input value={values.fonte_dados} onChange={(e) => set("fonte_dados", e.target.value)} placeholder="De onde vem a informação" className="h-8 text-[12px] border-none" style={inputStyle} />
+    </div>
+  );
+  if (toggles.metaPai) advFields.push(
+    <div key="pai" className="space-y-1.5">
+      <Label className="text-[11px]" style={labelStyle}>Meta Pai (cascata)</Label>
+      <select value={values.parent_id} onChange={(e) => set("parent_id", e.target.value)} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={inputStyle}>
+        <option value="">Nenhuma (meta raiz)</option>
+        {metas.filter(m => m.id !== editingId && !m.parent_id).map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
+      </select>
+    </div>
+  );
+  if (advFields.length > 0) fields.push(
+    <div key="adv" className="grid grid-cols-1 sm:grid-cols-2 gap-3">{advFields}</div>
+  );
+
+  return <>{fields}</>;
+}
 
 export default function Metas() {
   const { toast } = useToast();
@@ -164,17 +494,27 @@ export default function Metas() {
   const [acaoMetaId, setAcaoMetaId] = useState<string | null>(null);
   const [checkinMetaId, setCheckinMetaId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editValues, setEditValues] = useState<{
-    nome: string; atual: string; objetivo: string; unidade: string;
-    categoria: string; categoriaCustom: string; responsavel: string;
-    prioridade: string; ciclo: string; parent_id: string; prazo: string;
-  }>({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "", prazo: "" });
+  const [editValues, setEditValues] = useState<Record<string, string>>({
+    nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "",
+    responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "", prazo: "",
+    descricao: "", local_obra: "", orcamento: "", custo_atual: "", equipe: "", fornecedor: "",
+    etapa: "", peso: "", tags: "", data_inicio: "", frequencia_checkin: "semanal",
+    risco: "", observacoes: "", aprovador: "", departamento: "", indicador_chave: "",
+    fonte_dados: "", impacto: "", dependencias: "", marco_critico: "",
+  });
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [newMetaTipo, setNewMetaTipo] = useState<MetaTipo>("quantitativa");
   const [newMetaToggles, setNewMetaToggles] = useState<FieldToggles>(defaultTogglesQuant);
   const [editMetaTipo, setEditMetaTipo] = useState<MetaTipo>("quantitativa");
   const [editMetaToggles, setEditMetaToggles] = useState<FieldToggles>(defaultTogglesQuant);
-  const [newMeta, setNewMeta] = useState({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media" as Meta["prioridade"], ciclo: "Q1 2026", parent_id: "", descricao: "" });
+  const [newMeta, setNewMeta] = useState<Record<string, string>>({
+    nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "",
+    responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "", descricao: "",
+    local_obra: "", orcamento: "", custo_atual: "", equipe: "", fornecedor: "",
+    etapa: "", peso: "", tags: "", data_inicio: "", frequencia_checkin: "semanal",
+    risco: "", observacoes: "", aprovador: "", departamento: "", indicador_chave: "",
+    fonte_dados: "", impacto: "", dependencias: "", marco_critico: "",
+  });
 
   // Dynamic categories: base + any custom ones from existing metas
   const categorias = useMemo(() => {
@@ -197,6 +537,18 @@ export default function Metas() {
         prazo: m.prazo, prioridade: m.prioridade as Meta["prioridade"],
         parent_id: m.parent_id ?? null, ciclo: m.ciclo ?? "Q1 2026",
         status: m.status ?? "no_prazo",
+        descricao: m.descricao ?? "", local_obra: m.local_obra ?? "",
+        orcamento: Number(m.orcamento ?? 0), custo_atual: Number(m.custo_atual ?? 0),
+        equipe: m.equipe ?? "", fornecedor: m.fornecedor ?? "",
+        etapa: m.etapa ?? "", peso: Number(m.peso ?? 0),
+        tags: m.tags ?? [], data_inicio: m.data_inicio ?? null,
+        frequencia_checkin: m.frequencia_checkin ?? "semanal",
+        risco: m.risco ?? "", observacoes: m.observacoes ?? "",
+        aprovador: m.aprovador ?? "", departamento: m.departamento ?? "",
+        tipo_meta: m.tipo_meta ?? "quantitativa",
+        indicador_chave: m.indicador_chave ?? "", fonte_dados: m.fonte_dados ?? "",
+        impacto: m.impacto ?? "", dependencias: m.dependencias ?? "",
+        marco_critico: m.marco_critico ?? "", percentual_concluido: Number(m.percentual_concluido ?? 0),
       })));
     }
     setLoading(false);
@@ -246,13 +598,34 @@ export default function Metas() {
       cor,
       categoria: categoriaFinal || "Geral",
       responsavel: newMetaToggles.responsavel ? newMeta.responsavel : "",
-      prioridade: newMetaToggles.prioridade ? newMeta.prioridade : "media",
+      prioridade: newMetaToggles.prioridade ? (newMeta.prioridade || "media") : "media",
       created_by: user?.id,
       ciclo: newMetaToggles.ciclo ? newMeta.ciclo : "Q1 2026",
       parent_id: newMetaToggles.metaPai ? (newMeta.parent_id || null) : null,
+      tipo_meta: newMetaTipo,
+      descricao: newMetaToggles.descricao ? newMeta.descricao : "",
+      local_obra: newMetaToggles.local_obra ? newMeta.local_obra : "",
+      orcamento: newMetaToggles.orcamento ? (parseFloat(newMeta.orcamento) || 0) : 0,
+      custo_atual: newMetaToggles.orcamento ? (parseFloat(newMeta.custo_atual) || 0) : 0,
+      equipe: newMetaToggles.equipe ? newMeta.equipe : "",
+      fornecedor: newMetaToggles.fornecedor ? newMeta.fornecedor : "",
+      etapa: newMetaToggles.etapa ? newMeta.etapa : "",
+      peso: newMetaToggles.peso ? (parseFloat(newMeta.peso) || 0) : 0,
+      tags: newMetaToggles.tags ? (newMeta.tags || "").split(",").map((t: string) => t.trim()).filter(Boolean) : [],
+      data_inicio: newMetaToggles.data_inicio ? (newMeta.data_inicio || null) : null,
+      frequencia_checkin: newMetaToggles.frequencia_checkin ? (newMeta.frequencia_checkin || "semanal") : "semanal",
+      risco: newMetaToggles.risco ? newMeta.risco : "",
+      observacoes: newMetaToggles.observacoes ? newMeta.observacoes : "",
+      aprovador: newMetaToggles.aprovador ? newMeta.aprovador : "",
+      departamento: newMetaToggles.departamento ? newMeta.departamento : "",
+      indicador_chave: newMetaToggles.indicador_chave ? newMeta.indicador_chave : "",
+      fonte_dados: newMetaToggles.fonte_dados ? newMeta.fonte_dados : "",
+      impacto: newMetaToggles.impacto ? newMeta.impacto : "",
+      dependencias: newMetaToggles.dependencias ? newMeta.dependencias : "",
+      marco_critico: newMetaToggles.marco_critico ? newMeta.marco_critico : "",
     });
     if (error) { toast({ title: "Erro ao criar meta", description: error.message, variant: "destructive" }); return; }
-    setNewMeta({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "", descricao: "" });
+    setNewMeta({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "", descricao: "", local_obra: "", orcamento: "", custo_atual: "", equipe: "", fornecedor: "", etapa: "", peso: "", tags: "", data_inicio: "", frequencia_checkin: "semanal", risco: "", observacoes: "", aprovador: "", departamento: "", indicador_chave: "", fonte_dados: "", impacto: "", dependencias: "", marco_critico: "" });
     setDialogOpen(false);
     toast({ title: "Meta criada!" });
   };
@@ -284,11 +657,32 @@ export default function Metas() {
       unidade: isQual ? "texto" : editValues.unidade,
       categoria: categoriaFinal || "Geral",
       responsavel: editMetaToggles.responsavel ? editValues.responsavel : "",
-      prioridade: editMetaToggles.prioridade ? editValues.prioridade : "media",
+      prioridade: editMetaToggles.prioridade ? (editValues.prioridade || "media") : "media",
       ciclo: editMetaToggles.ciclo ? editValues.ciclo : meta?.ciclo || "Q1 2026",
       parent_id: editMetaToggles.metaPai ? (editValues.parent_id || null) : null,
       prazo: editMetaToggles.prazo ? (editValues.prazo || null) : null,
       status: newStatus,
+      tipo_meta: editMetaTipo,
+      descricao: editMetaToggles.descricao ? editValues.descricao : "",
+      local_obra: editMetaToggles.local_obra ? editValues.local_obra : "",
+      orcamento: editMetaToggles.orcamento ? (parseFloat(editValues.orcamento) || 0) : 0,
+      custo_atual: editMetaToggles.orcamento ? (parseFloat(editValues.custo_atual) || 0) : 0,
+      equipe: editMetaToggles.equipe ? editValues.equipe : "",
+      fornecedor: editMetaToggles.fornecedor ? editValues.fornecedor : "",
+      etapa: editMetaToggles.etapa ? editValues.etapa : "",
+      peso: editMetaToggles.peso ? (parseFloat(editValues.peso) || 0) : 0,
+      tags: editMetaToggles.tags ? (editValues.tags || "").split(",").map((t: string) => t.trim()).filter(Boolean) : [],
+      data_inicio: editMetaToggles.data_inicio ? (editValues.data_inicio || null) : null,
+      frequencia_checkin: editMetaToggles.frequencia_checkin ? (editValues.frequencia_checkin || "semanal") : "semanal",
+      risco: editMetaToggles.risco ? editValues.risco : "",
+      observacoes: editMetaToggles.observacoes ? editValues.observacoes : "",
+      aprovador: editMetaToggles.aprovador ? editValues.aprovador : "",
+      departamento: editMetaToggles.departamento ? editValues.departamento : "",
+      indicador_chave: editMetaToggles.indicador_chave ? editValues.indicador_chave : "",
+      fonte_dados: editMetaToggles.fonte_dados ? editValues.fonte_dados : "",
+      impacto: editMetaToggles.impacto ? editValues.impacto : "",
+      dependencias: editMetaToggles.dependencias ? editValues.dependencias : "",
+      marco_critico: editMetaToggles.marco_critico ? editValues.marco_critico : "",
     }).eq("id", id);
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
 
@@ -496,14 +890,14 @@ export default function Metas() {
                 <Plus className="w-3 h-3 mr-1" /> Nova Meta
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }} onInteractOutside={(e) => e.preventDefault()}>
+            <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }} onInteractOutside={(e) => e.preventDefault()}>
               <DialogHeader>
-                <DialogTitle className="text-[14px]" style={{ color: "hsl(var(--pbi-text-primary))" }}>Criar Nova Meta</DialogTitle>
+                <DialogTitle className="text-[14px]" style={{ color: "hsl(var(--pbi-text-primary))" }}>🛠️ Criar Nova Meta — Editor Avançado</DialogTitle>
               </DialogHeader>
               <div className="space-y-3 pt-2">
                 {/* Tipo de Meta */}
                 <div className="space-y-1.5">
-                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Tipo de Meta</Label>
+                  <Label className="text-[11px] font-semibold" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Tipo de Meta</Label>
                   <div className="grid grid-cols-2 gap-2">
                     {([
                       { key: "quantitativa" as MetaTipo, label: "📊 Quantitativa", desc: "Com valores numéricos e progresso" },
@@ -526,39 +920,49 @@ export default function Metas() {
                   </div>
                 </div>
 
-                {/* Campos opcionais toggle */}
-                <div className="space-y-1.5">
-                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Campos da Meta (clique para ativar/desativar)</Label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {([
-                      { key: "valores" as keyof FieldToggles, label: "Valores/Progresso", hidden: newMetaTipo === "qualitativa" },
-                      { key: "responsavel" as keyof FieldToggles, label: "Responsável" },
-                      { key: "prioridade" as keyof FieldToggles, label: "Prioridade" },
-                      { key: "categoria" as keyof FieldToggles, label: "Categoria" },
-                      { key: "ciclo" as keyof FieldToggles, label: "Ciclo" },
-                      { key: "prazo" as keyof FieldToggles, label: "Prazo" },
-                      { key: "metaPai" as keyof FieldToggles, label: "Meta Pai" },
-                    ] as { key: keyof FieldToggles; label: string; hidden?: boolean }[]).filter(f => !f.hidden).map((f) => (
-                      <button key={f.key} type="button" onClick={() => setNewMetaToggles({ ...newMetaToggles, [f.key]: !newMetaToggles[f.key] })}
-                        className="text-[10px] px-2.5 py-1.5 rounded font-medium transition-all"
-                        style={{
-                          background: newMetaToggles[f.key] ? "hsl(152, 60%, 38%, 0.15)" : "hsl(var(--pbi-dark))",
-                          color: newMetaToggles[f.key] ? "hsl(152, 60%, 38%)" : "hsl(var(--pbi-text-secondary))",
-                          border: `1px solid ${newMetaToggles[f.key] ? "hsl(152, 60%, 38%, 0.4)" : "hsl(var(--pbi-border))"}`,
-                        }}
-                      >
-                        {newMetaToggles[f.key] ? "✓ " : ""}{f.label}
-                      </button>
-                    ))}
-                  </div>
+                {/* Campos opcionais toggle — POR SEÇÃO */}
+                <div className="space-y-2">
+                  <Label className="text-[11px] font-semibold" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Campos da Meta (clique para ativar/desativar)</Label>
+                  {fieldSections.map((section) => {
+                    const visibleFields = section.fields.filter(f => !(f as any).quantOnly || newMetaTipo === "quantitativa");
+                    if (visibleFields.length === 0) return null;
+                    return (
+                      <div key={section.section}>
+                        <p className="text-[10px] text-muted-foreground mb-1">{section.section}</p>
+                        <div className="flex flex-wrap gap-1">
+                          {visibleFields.map((f) => (
+                            <button key={f.key} type="button" onClick={() => setNewMetaToggles({ ...newMetaToggles, [f.key]: !newMetaToggles[f.key] })}
+                              className="text-[10px] px-2 py-1 rounded font-medium transition-all"
+                              style={{
+                                background: newMetaToggles[f.key] ? "hsl(152, 60%, 38%, 0.15)" : "hsl(var(--pbi-dark))",
+                                color: newMetaToggles[f.key] ? "hsl(152, 60%, 38%)" : "hsl(var(--pbi-text-secondary))",
+                                border: `1px solid ${newMetaToggles[f.key] ? "hsl(152, 60%, 38%, 0.4)" : "hsl(var(--pbi-border))"}`,
+                              }}
+                            >
+                              {newMetaToggles[f.key] ? "✓ " : ""}{f.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
+                {/* Nome — sempre visível */}
                 <div className="space-y-1.5">
                   <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Nome da Meta *</Label>
-                  <Input value={newMeta.nome} onChange={(e) => setNewMeta({ ...newMeta, nome: e.target.value })} placeholder="Ex: Construir muro, Faturamento Mensal, Treinar equipe..." className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                  <Input value={newMeta.nome} onChange={(e) => setNewMeta({ ...newMeta, nome: e.target.value })} placeholder="Ex: Construir muro, Faturamento Mensal..." className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
                 </div>
 
-                {/* Unidade + Valores (only for quantitativa with valores toggled on) */}
+                {/* Descrição */}
+                {newMetaToggles.descricao && (
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Descrição</Label>
+                    <Textarea value={newMeta.descricao} onChange={(e) => setNewMeta({ ...newMeta, descricao: e.target.value })} placeholder="Descreva a meta em detalhes..." className="resize-none h-16 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                  </div>
+                )}
+
+                {/* Valores/Progresso */}
                 {newMetaTipo === "quantitativa" && newMetaToggles.valores && (
                   <>
                     <div className="space-y-1.5">
@@ -575,82 +979,23 @@ export default function Metas() {
                           >{u.label}</button>
                         ))}
                       </div>
-                      <Input value={newMeta.unidade} onChange={(e) => setNewMeta({ ...newMeta, unidade: e.target.value })} placeholder="Ou digite uma personalizada..." className="h-7 text-[11px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                      <Input value={newMeta.unidade} onChange={(e) => setNewMeta({ ...newMeta, unidade: e.target.value })} placeholder="Ou personalizada..." className="h-7 text-[11px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
-                          {newMeta.unidade === "%" ? "Progresso Atual (%)" : newMeta.unidade === "dias" ? "Dias Transcorridos" : `Valor Atual (${newMeta.unidade})`}
-                        </Label>
+                        <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Valor Atual ({newMeta.unidade})</Label>
                         <Input type="number" value={newMeta.atual} onChange={(e) => setNewMeta({ ...newMeta, atual: e.target.value })} placeholder="0" className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
-                          {newMeta.unidade === "%" ? "Meta (%) *" : newMeta.unidade === "dias" ? "Total de Dias *" : `Objetivo (${newMeta.unidade}) *`}
-                        </Label>
-                        <Input type="number" value={newMeta.objetivo} onChange={(e) => setNewMeta({ ...newMeta, objetivo: e.target.value })} placeholder={newMeta.unidade === "%" ? "100" : newMeta.unidade === "dias" ? "30" : "100"} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                        <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Objetivo ({newMeta.unidade}) *</Label>
+                        <Input type="number" value={newMeta.objetivo} onChange={(e) => setNewMeta({ ...newMeta, objetivo: e.target.value })} placeholder="100" className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
                       </div>
                     </div>
                   </>
                 )}
 
-                {/* Conditional fields based on toggles */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {newMetaToggles.categoria && (
-                    <div className="space-y-1.5">
-                      <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Categoria</Label>
-                      <select value={newMeta.categoria} onChange={(e) => setNewMeta({ ...newMeta, categoria: e.target.value, categoriaCustom: "" })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                        {categorias.map((c) => <option key={c} value={c}>{c}</option>)}
-                        <option value="__outra__">✨ Outra (personalizada)</option>
-                      </select>
-                      {newMeta.categoria === "__outra__" && (
-                        <Input value={newMeta.categoriaCustom} onChange={(e) => setNewMeta({ ...newMeta, categoriaCustom: e.target.value })} placeholder="Digite a nova categoria..." maxLength={40} className="h-8 text-[12px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-                      )}
-                    </div>
-                  )}
-                  {newMetaToggles.responsavel && (
-                    <div className="space-y-1.5">
-                      <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Responsável</Label>
-                      <Input value={newMeta.responsavel} onChange={(e) => setNewMeta({ ...newMeta, responsavel: e.target.value })} placeholder="Nome" className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-                    </div>
-                  )}
-                  {newMetaToggles.prioridade && (
-                    <div className="space-y-1.5">
-                      <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Prioridade</Label>
-                      <select value={newMeta.prioridade} onChange={(e) => setNewMeta({ ...newMeta, prioridade: e.target.value as Meta["prioridade"] })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                        <option value="alta">Alta</option>
-                        <option value="media">Média</option>
-                        <option value="baixa">Baixa</option>
-                      </select>
-                    </div>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {newMetaToggles.ciclo && (
-                    <div className="space-y-1.5">
-                      <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Ciclo</Label>
-                      <select value={newMeta.ciclo} onChange={(e) => setNewMeta({ ...newMeta, ciclo: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                        {ciclosDisponiveis.map((c) => <option key={c} value={c}>{c}</option>)}
-                      </select>
-                    </div>
-                  )}
-                  {newMetaToggles.metaPai && (
-                    <div className="space-y-1.5">
-                      <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Meta Pai (cascata)</Label>
-                      <select value={newMeta.parent_id} onChange={(e) => setNewMeta({ ...newMeta, parent_id: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                        <option value="">Nenhuma (meta principal)</option>
-                        {metas.filter(m => !m.parent_id).map((m) => <option key={m.id} value={m.id}>{m.nome}</option>)}
-                      </select>
-                    </div>
-                  )}
-                  {newMetaToggles.prazo && (
-                    <div className="space-y-1.5">
-                      <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Prazo</Label>
-                      <Input type="date" value={newMeta.objetivo} onChange={(e) => setNewMeta({ ...newMeta, objetivo: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-                    </div>
-                  )}
-                </div>
+                {/* Dynamic fields based on toggles */}
+                {renderDynamicFields(newMetaToggles, newMeta, (v) => setNewMeta(v), categorias, metas, null)}
 
                 <Button onClick={addMeta} className="w-full h-8 text-[12px] font-semibold" style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}>Criar Meta</Button>
               </div>
@@ -774,6 +1119,7 @@ export default function Metas() {
                                 const isMetaQual = meta.unidade === "texto";
                                 setEditMetaTipo(isMetaQual ? "qualitativa" : "quantitativa");
                                 setEditMetaToggles({
+                                  ...defaultTogglesQuant,
                                   valores: !isMetaQual,
                                   responsavel: !!meta.responsavel,
                                   prazo: !!meta.prazo,
@@ -781,6 +1127,25 @@ export default function Metas() {
                                   ciclo: !!meta.ciclo,
                                   metaPai: !!meta.parent_id,
                                   categoria: !!meta.categoria,
+                                  descricao: !!meta.descricao,
+                                  local_obra: !!meta.local_obra,
+                                  orcamento: meta.orcamento > 0,
+                                  equipe: !!meta.equipe,
+                                  fornecedor: !!meta.fornecedor,
+                                  etapa: !!meta.etapa,
+                                  risco: !!meta.risco,
+                                  observacoes: !!meta.observacoes,
+                                  aprovador: !!meta.aprovador,
+                                  departamento: !!meta.departamento,
+                                  impacto: !!meta.impacto,
+                                  dependencias: !!meta.dependencias,
+                                  marco_critico: !!meta.marco_critico,
+                                  peso: meta.peso > 0,
+                                  tags: (meta.tags?.length ?? 0) > 0,
+                                  indicador_chave: !!meta.indicador_chave,
+                                  fonte_dados: !!meta.fonte_dados,
+                                  data_inicio: !!meta.data_inicio,
+                                  frequencia_checkin: meta.frequencia_checkin !== "semanal",
                                 });
                                 setEditValues({
                                   nome: meta.nome, atual: meta.atual.toString(), objetivo: meta.objetivo.toString(),
@@ -788,6 +1153,17 @@ export default function Metas() {
                                   categoriaCustom: categorias.includes(meta.categoria) ? "" : meta.categoria,
                                   responsavel: meta.responsavel, prioridade: meta.prioridade,
                                   ciclo: meta.ciclo, parent_id: meta.parent_id || "", prazo: meta.prazo || "",
+                                  descricao: meta.descricao || "", local_obra: meta.local_obra || "",
+                                  orcamento: meta.orcamento.toString(), custo_atual: meta.custo_atual.toString(),
+                                  equipe: meta.equipe || "", fornecedor: meta.fornecedor || "",
+                                  etapa: meta.etapa || "", peso: meta.peso.toString(),
+                                  tags: (meta.tags || []).join(", "), data_inicio: meta.data_inicio || "",
+                                  frequencia_checkin: meta.frequencia_checkin || "semanal",
+                                  risco: meta.risco || "", observacoes: meta.observacoes || "",
+                                  aprovador: meta.aprovador || "", departamento: meta.departamento || "",
+                                  indicador_chave: meta.indicador_chave || "", fonte_dados: meta.fonte_dados || "",
+                                  impacto: meta.impacto || "", dependencias: meta.dependencias || "",
+                                  marco_critico: meta.marco_critico || "",
                                 });
                                 setEditDialogOpen(true);
                               }} className="p-1 rounded hover:bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" title="Editar meta"><Pencil className="w-3 h-3" /></button>
@@ -1354,16 +1730,16 @@ export default function Metas() {
 
       {/* ========== EDIT META DIALOG ========== */}
       <Dialog open={editDialogOpen} onOpenChange={(open) => { setEditDialogOpen(open); if (!open) setEditingId(null); }}>
-        <DialogContent className="pbi-tile border-border max-w-lg" style={{ background: "hsl(var(--pbi-surface))" }} onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="pbi-tile border-border sm:max-w-2xl max-h-[90vh] overflow-y-auto" style={{ background: "hsl(var(--pbi-surface))" }} onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="text-[14px] font-bold text-foreground flex items-center gap-2">
-              <Pencil className="w-4 h-4" style={{ color: "hsl(var(--pbi-yellow))" }} /> Editar Meta
+              <Pencil className="w-4 h-4" style={{ color: "hsl(var(--pbi-yellow))" }} /> 🛠️ Editar Meta — Editor Avançado
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             {/* Tipo de Meta */}
             <div className="space-y-1.5">
-              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Tipo de Meta</Label>
+              <Label className="text-[11px] font-semibold" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Tipo de Meta</Label>
               <div className="grid grid-cols-2 gap-2">
                 {([
                   { key: "quantitativa" as MetaTipo, label: "📊 Quantitativa", desc: "Com valores numéricos" },
@@ -1387,38 +1763,49 @@ export default function Metas() {
               </div>
             </div>
 
-            {/* Field toggles */}
-            <div className="space-y-1.5">
-              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Campos ativos</Label>
-              <div className="flex flex-wrap gap-1.5">
-                {([
-                  { key: "valores" as keyof FieldToggles, label: "Valores/Progresso", hidden: editMetaTipo === "qualitativa" },
-                  { key: "responsavel" as keyof FieldToggles, label: "Responsável" },
-                  { key: "prioridade" as keyof FieldToggles, label: "Prioridade" },
-                  { key: "categoria" as keyof FieldToggles, label: "Categoria" },
-                  { key: "ciclo" as keyof FieldToggles, label: "Ciclo" },
-                  { key: "prazo" as keyof FieldToggles, label: "Prazo" },
-                  { key: "metaPai" as keyof FieldToggles, label: "Meta Pai" },
-                ] as { key: keyof FieldToggles; label: string; hidden?: boolean }[]).filter(f => !f.hidden).map((f) => (
-                  <button key={f.key} type="button" onClick={() => setEditMetaToggles({ ...editMetaToggles, [f.key]: !editMetaToggles[f.key] })}
-                    className="text-[9px] px-2 py-1 rounded font-medium transition-all"
-                    style={{
-                      background: editMetaToggles[f.key] ? "hsl(152, 60%, 38%, 0.15)" : "hsl(var(--pbi-dark))",
-                      color: editMetaToggles[f.key] ? "hsl(152, 60%, 38%)" : "hsl(var(--pbi-text-secondary))",
-                      border: `1px solid ${editMetaToggles[f.key] ? "hsl(152, 60%, 38%, 0.4)" : "hsl(var(--pbi-border))"}`,
-                    }}
-                  >
-                    {editMetaToggles[f.key] ? "✓ " : ""}{f.label}
-                  </button>
-                ))}
-              </div>
+            {/* Field toggles — POR SEÇÃO */}
+            <div className="space-y-2">
+              <Label className="text-[11px] font-semibold" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Campos ativos (clique para ativar/desativar)</Label>
+              {fieldSections.map((section) => {
+                const visibleFields = section.fields.filter(f => !(f as any).quantOnly || editMetaTipo === "quantitativa");
+                if (visibleFields.length === 0) return null;
+                return (
+                  <div key={section.section}>
+                    <p className="text-[10px] text-muted-foreground mb-1">{section.section}</p>
+                    <div className="flex flex-wrap gap-1">
+                      {visibleFields.map((f) => (
+                        <button key={f.key} type="button" onClick={() => setEditMetaToggles({ ...editMetaToggles, [f.key]: !editMetaToggles[f.key] })}
+                          className="text-[9px] px-2 py-1 rounded font-medium transition-all"
+                          style={{
+                            background: editMetaToggles[f.key] ? "hsl(152, 60%, 38%, 0.15)" : "hsl(var(--pbi-dark))",
+                            color: editMetaToggles[f.key] ? "hsl(152, 60%, 38%)" : "hsl(var(--pbi-text-secondary))",
+                            border: `1px solid ${editMetaToggles[f.key] ? "hsl(152, 60%, 38%, 0.4)" : "hsl(var(--pbi-border))"}`,
+                          }}
+                        >
+                          {editMetaToggles[f.key] ? "✓ " : ""}{f.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
+            {/* Nome */}
             <div className="space-y-1.5">
               <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Nome da Meta</Label>
               <Input value={editValues.nome} onChange={(e) => setEditValues({ ...editValues, nome: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
             </div>
 
+            {/* Descrição */}
+            {editMetaToggles.descricao && (
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Descrição</Label>
+                <Textarea value={editValues.descricao} onChange={(e) => setEditValues({ ...editValues, descricao: e.target.value })} placeholder="Descreva a meta em detalhes..." className="resize-none h-16 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+              </div>
+            )}
+
+            {/* Valores/Progresso */}
             {editMetaToggles.valores && (
               <>
                 <div className="space-y-1.5">
@@ -1435,7 +1822,7 @@ export default function Metas() {
                       >{u.label}</button>
                     ))}
                   </div>
-                  <Input value={editValues.unidade} onChange={(e) => setEditValues({ ...editValues, unidade: e.target.value })} placeholder="Ou personalizada..." className="h-7 text-[11px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                  <Input value={editValues.unidade} onChange={(e) => setEditValues({ ...editValues, unidade: e.target.value })} placeholder="Personalizada..." className="h-7 text-[11px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
@@ -1450,65 +1837,8 @@ export default function Metas() {
               </>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {editMetaToggles.responsavel && (
-                <div className="space-y-1.5">
-                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Responsável</Label>
-                  <Input value={editValues.responsavel} onChange={(e) => setEditValues({ ...editValues, responsavel: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-                </div>
-              )}
-              {editMetaToggles.categoria && (
-                <div className="space-y-1.5">
-                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Categoria</Label>
-                  <select value={editValues.categoria} onChange={(e) => setEditValues({ ...editValues, categoria: e.target.value, categoriaCustom: "" })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                    {categorias.map((c) => <option key={c} value={c}>{c}</option>)}
-                    <option value="__outra__">✨ Outra</option>
-                  </select>
-                  {editValues.categoria === "__outra__" && (
-                    <Input value={editValues.categoriaCustom} onChange={(e) => setEditValues({ ...editValues, categoriaCustom: e.target.value })} placeholder="Nova categoria..." maxLength={40} className="h-8 text-[12px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-                  )}
-                </div>
-              )}
-              {editMetaToggles.prioridade && (
-                <div className="space-y-1.5">
-                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Prioridade</Label>
-                  <select value={editValues.prioridade} onChange={(e) => setEditValues({ ...editValues, prioridade: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                    <option value="alta">Alta</option>
-                    <option value="media">Média</option>
-                    <option value="baixa">Baixa</option>
-                  </select>
-                </div>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {editMetaToggles.ciclo && (
-                <div className="space-y-1.5">
-                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Ciclo</Label>
-                  <select value={editValues.ciclo} onChange={(e) => setEditValues({ ...editValues, ciclo: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                    {ciclosDisponiveis.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-              )}
-              {editMetaToggles.prazo && (
-                <div className="space-y-1.5">
-                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Prazo</Label>
-                  <Input type="date" value={editValues.prazo} onChange={(e) => setEditValues({ ...editValues, prazo: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-                  {editValues.prazo && (
-                    <button onClick={() => setEditValues({ ...editValues, prazo: "" })} className="text-[10px] text-muted-foreground hover:text-destructive transition-colors">✕ Remover prazo</button>
-                  )}
-                </div>
-              )}
-              {editMetaToggles.metaPai && (
-                <div className="space-y-1.5">
-                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Meta Pai</Label>
-                  <select value={editValues.parent_id} onChange={(e) => setEditValues({ ...editValues, parent_id: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                    <option value="">Nenhuma (meta raiz)</option>
-                    {metas.filter(m => m.id !== editingId).map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
-                  </select>
-                </div>
-              )}
-            </div>
+            {/* Dynamic fields */}
+            {renderDynamicFields(editMetaToggles, editValues, (v) => setEditValues(v), categorias, metas, editingId)}
 
             <div className="flex gap-2">
               <Button onClick={() => { setEditDialogOpen(false); setEditingId(null); }} variant="outline" className="flex-1 h-8 text-[12px]">Cancelar</Button>
