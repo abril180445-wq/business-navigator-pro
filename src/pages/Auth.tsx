@@ -221,9 +221,7 @@ export default function Auth() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="w-full max-w-[420px]"
           >
-            {/* Mobile title */}
             <div className="mb-8 lg:hidden">
-              <p className="text-[10px] uppercase tracking-[0.3em]" style={{ color: "hsl(45, 100%, 51%)" }}>Business Navigator</p>
               <h1 className="text-xl font-bold text-white">San Remo</h1>
             </div>
 
