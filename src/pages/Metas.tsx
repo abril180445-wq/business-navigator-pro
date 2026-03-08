@@ -335,7 +335,7 @@ export default function Metas() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 p-1 rounded" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }}>
+      <div className="pbi-tabs-scroll" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }}>
         {editorTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
