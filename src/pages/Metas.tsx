@@ -843,7 +843,8 @@ export default function Metas() {
           )}
 
           {filteredMetas.map((meta) => {
-            const pct = Math.min(Math.round((meta.atual / meta.objetivo) * 100), 100);
+            const qual = isQualitativa(meta);
+            const pct = qual ? 0 : Math.min(Math.round((meta.atual / meta.objetivo) * 100), 100);
             const metaAcoes = acoes.filter((a) => a.meta_id === meta.id && a.tipo === "acao");
             const metaContribs = acoes.filter((a) => a.meta_id === meta.id && a.tipo === "contribuicao");
             const pCfg = prioridadeConfig[meta.prioridade];
@@ -854,15 +855,16 @@ export default function Metas() {
               <PBITile key={meta.id}>
                 <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Target className="w-4 h-4" style={{ color: meta.cor }} />
+                    {qual ? <FileText className="w-4 h-4" style={{ color: meta.cor }} /> : <Target className="w-4 h-4" style={{ color: meta.cor }} />}
                     <span className="text-[13px] font-semibold text-foreground">{meta.nome}</span>
+                    {qual && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">📝 Qualitativa</span>}
                     <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: pCfg.bg, color: pCfg.color }}>{pCfg.label}</span>
                     <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: sCfg.bg, color: sCfg.color }}>{sCfg.label}</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{meta.ciclo}</span>
+                    {meta.ciclo && <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{meta.ciclo}</span>}
                   </div>
                   <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                    <span className="text-[11px] text-muted-foreground">{formatVal(meta.atual, meta.unidade)} / {formatVal(meta.objetivo, meta.unidade)}</span>
-                    <span className="text-[14px] font-bold" style={{ color: barColor }}>{pct}%</span>
+                    {!qual && <span className="text-[11px] text-muted-foreground">{formatVal(meta.atual, meta.unidade)} / {formatVal(meta.objetivo, meta.unidade)}</span>}
+                    {!qual && <span className="text-[14px] font-bold" style={{ color: barColor }}>{pct}%</span>}
                     <button onClick={() => { setCheckinMetaId(meta.id); setCheckinDialogOpen(true); }} className="text-[10px] px-2 py-1 rounded font-medium" style={{ background: "hsl(262, 52%, 47%)", color: "white" }}>
                       <MessageCircle className="w-3 h-3 inline mr-0.5" /> Check-in
                     </button>
