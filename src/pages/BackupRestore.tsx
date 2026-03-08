@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { HardDrive, Download, Upload, RefreshCw, Shield, Clock, Database, CheckCircle2, AlertTriangle, FileJson, Target, ListChecks, BarChart3, FileText, Users, FileArchive } from "lucide-react";
+import { HardDrive, Download, Upload, RefreshCw, Shield, Clock, Database, CheckCircle2, AlertTriangle, FileJson, Target, ListChecks, BarChart3, FileText, Users, FileArchive, DatabaseZap, ArrowUpCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
