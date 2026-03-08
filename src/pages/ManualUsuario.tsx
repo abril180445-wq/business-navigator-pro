@@ -137,10 +137,71 @@ const sections: ManualSection[] = [
     id: "engenharia",
     title: "Módulo de Engenharia",
     icon: HardHat,
+    status: "placeholder",
     content: [
       {
         title: "Gestão de Engenharia",
-        body: `O módulo de Engenharia gerencia os aspectos técnicos das obras.\n\n**Funcionalidades:**\n- **Ordens de Serviço:** Criação e acompanhamento de OS\n- **Cronogramas:** Planejamento de prazos e entregas\n- **Planejamento:** Recursos e alocação de equipes`,
+        body: `O módulo de Engenharia gerencia os aspectos técnicos das obras.\n\n**Funcionalidades planejadas:**\n- **Ordens de Serviço:** Criação e acompanhamento de OS\n- **Cronogramas:** Planejamento de prazos e entregas\n- **Planejamento:** Recursos e alocação de equipes\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
+      },
+    ],
+  },
+  {
+    id: "patrimonio",
+    title: "Patrimônio",
+    icon: Landmark,
+    status: "placeholder",
+    content: [
+      {
+        title: "Gestão de Patrimônio",
+        body: `O módulo de Patrimônio permitirá o controle completo dos ativos da empresa.\n\n**Funcionalidades planejadas:**\n- Cadastro e catalogação de bens\n- Controle de depreciação\n- Inventário patrimonial\n- Relatórios de ativos\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
+      },
+    ],
+  },
+  {
+    id: "projetos",
+    title: "Projetos de Obra",
+    icon: FolderKanban,
+    status: "placeholder",
+    content: [
+      {
+        title: "Gestão de Projetos",
+        body: `O módulo de Projetos permitirá o gerenciamento completo de projetos de obra.\n\n**Funcionalidades planejadas:**\n- Kanban de tarefas\n- Cronograma de projetos\n- Alocação de recursos\n- Documentação técnica\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
+      },
+    ],
+  },
+  {
+    id: "rh",
+    title: "Recursos Humanos",
+    icon: Users,
+    status: "placeholder",
+    content: [
+      {
+        title: "Gestão de RH",
+        body: `O módulo de RH permitirá a gestão completa de colaboradores.\n\n**Funcionalidades planejadas:**\n- Cadastro de funcionários\n- Controle de ponto\n- Gestão de férias e afastamentos\n- Folha de pagamento\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
+      },
+    ],
+  },
+  {
+    id: "suporte",
+    title: "Suporte / Helpdesk",
+    icon: Headphones,
+    status: "placeholder",
+    content: [
+      {
+        title: "Sistema de Suporte",
+        body: `O módulo de Suporte permitirá o gerenciamento de chamados internos.\n\n**Funcionalidades planejadas:**\n- Abertura de chamados\n- Fila de atendimento\n- SLA e prioridades\n- Base de conhecimento\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
+      },
+    ],
+  },
+  {
+    id: "logistica",
+    title: "Logística",
+    icon: Truck,
+    status: "placeholder",
+    content: [
+      {
+        title: "Gestão de Logística",
+        body: `O módulo de Logística permitirá o controle de entregas e transporte.\n\n**Funcionalidades planejadas:**\n- Controle de entregas\n- Gestão de frota\n- Rastreamento de materiais\n- Roteirização\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
       },
     ],
   },
