@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
         id: u.id,
         email: u.email,
         full_name: userProfile?.full_name || u.user_metadata?.full_name || "",
-        role: userRole?.role || "normal",
+        role: userRole?.role || null,
         created_at: u.created_at,
       };
     });
