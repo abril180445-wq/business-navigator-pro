@@ -90,7 +90,7 @@ export default function BackupRestore() {
       zip.file("backup_completo.json", JSON.stringify(backupWithoutSQL, null, 2));
       if (sql_dump) zip.file("backup_supabase.sql", sql_dump);
 
-      const tables = ["profiles", "user_roles", "metas", "acoes_meta", "meta_checkins", "relatorios_gerados", "auth_users"];
+      const tables = ["profiles", "user_roles", "metas", "acoes_meta", "meta_checkins", "relatorios_gerados", "dados_cadastro", "faturamento", "contas_pagar", "contas_receber", "empreendimentos", "contratos", "materiais", "auth_users"];
       for (const table of tables) {
         const rows = backup.data[table];
         if (rows && rows.length > 0) {
