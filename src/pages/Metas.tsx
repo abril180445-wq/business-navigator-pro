@@ -8,7 +8,7 @@ import {
   ChevronDown, AlertTriangle, BarChart3, Clock, CheckCircle2, XCircle,
   Flame, Trophy, ListChecks, Eye, RefreshCw, Trash2, Users, Zap, MessageSquarePlus,
   History, MessageCircle, ArrowRight, ChevronRight, CircleDot, Activity,
-  Layers, GitBranch,
+  Layers, GitBranch, FileText, FileSpreadsheet,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
