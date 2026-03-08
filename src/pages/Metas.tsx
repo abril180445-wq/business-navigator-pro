@@ -725,8 +725,8 @@ export default function Metas() {
             <PBITile title="Progresso Individual" className="lg:col-span-2">
               <div className="space-y-2.5">
                 {filteredMetas.map((meta) => {
-                  const pct = Math.min(Math.round((meta.atual / meta.objetivo) * 100), 100);
-                  const isEditing = editingId === meta.id;
+                  const qual = isQualitativa(meta);
+                  const pct = qual ? 0 : Math.min(Math.round((meta.atual / meta.objetivo) * 100), 100);
                   const pCfg = prioridadeConfig[meta.prioridade];
                   const sCfg = statusConfig[meta.status];
                   const metaAcoes = acoes.filter((a) => a.meta_id === meta.id);
@@ -738,10 +738,12 @@ export default function Metas() {
                       <div className="flex items-center justify-between mb-1 flex-wrap gap-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           {meta.parent_id && <GitBranch className="w-3 h-3 text-muted-foreground" />}
+                          {qual && <FileText className="w-3 h-3 text-muted-foreground" />}
                           <span className="text-[12px] font-medium text-foreground">{meta.nome}</span>
+                          {qual && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">📝 Qualitativa</span>}
                           <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: pCfg.bg, color: pCfg.color }}>{pCfg.label}</span>
                           <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: sCfg.bg, color: sCfg.color }}>{sCfg.label}</span>
-                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{meta.ciclo}</span>
+                          {meta.ciclo && <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{meta.ciclo}</span>}
                           {metaAcoes.length > 0 && (
                             <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">
                               <ListChecks className="w-3 h-3 inline mr-0.5" />{metaAcoes.filter((a) => a.concluida).length}/{metaAcoes.length}
@@ -759,12 +761,23 @@ export default function Metas() {
                           )}
                         </div>
                         <div className="flex items-center gap-1.5">
-                              <span className="text-[10px] text-muted-foreground hidden sm:inline">{meta.responsavel}</span>
-                              <span className="text-[11px] text-muted-foreground">{formatVal(meta.atual, meta.unidade)} / {formatVal(meta.objetivo, meta.unidade)}</span>
-                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: `${meta.cor}18`, color: meta.cor }}>{pct}%</span>
+                              {meta.responsavel && <span className="text-[10px] text-muted-foreground hidden sm:inline">{meta.responsavel}</span>}
+                              {!qual && <span className="text-[11px] text-muted-foreground">{formatVal(meta.atual, meta.unidade)} / {formatVal(meta.objetivo, meta.unidade)}</span>}
+                              {!qual && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: `${meta.cor}18`, color: meta.cor }}>{pct}%</span>}
                               <button onClick={() => { setCheckinMetaId(meta.id); setCheckinDialogOpen(true); }} className="p-1 rounded hover:bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" title="Check-in"><MessageCircle className="w-3 h-3" /></button>
                               <button onClick={() => {
                                 setEditingId(meta.id);
+                                const isMetaQual = meta.unidade === "texto";
+                                setEditMetaTipo(isMetaQual ? "qualitativa" : "quantitativa");
+                                setEditMetaToggles({
+                                  valores: !isMetaQual,
+                                  responsavel: !!meta.responsavel,
+                                  prazo: !!meta.prazo,
+                                  prioridade: true,
+                                  ciclo: !!meta.ciclo,
+                                  metaPai: !!meta.parent_id,
+                                  categoria: !!meta.categoria,
+                                });
                                 setEditValues({
                                   nome: meta.nome, atual: meta.atual.toString(), objetivo: meta.objetivo.toString(),
                                   unidade: meta.unidade, categoria: categorias.includes(meta.categoria) ? meta.categoria : "__outra__",
@@ -778,9 +791,11 @@ export default function Metas() {
                               <button onClick={() => removeMeta(meta.id)} className="p-1 rounded hover:bg-destructive/10 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-3 h-3" /></button>
                         </div>
                       </div>
-                      <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: meta.cor }} />
-                      </div>
+                      {!qual && (
+                        <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: meta.cor }} />
+                        </div>
+                      )}
                     </div>
                   );
                 })}
