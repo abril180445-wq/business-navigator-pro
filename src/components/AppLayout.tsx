@@ -116,9 +116,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const isActive = (path: string) => location.pathname === path || (path !== "/" && location.pathname.startsWith(path + "/"));
 
-  const sections = [...new Set(modules.map((m) => m.section))];
+  const sections = [...new Set(visibleModules.map((m) => m.section))];
 
-  const currentPage = modules.find(m => isActive(m.path))?.label || "Dashboard";
+  const currentPage = visibleModules.find(m => isActive(m.path))?.label || modules.find(m => isActive(m.path))?.label || "Dashboard";
 
   const SidebarNav = () => (
     <div className="flex flex-col h-full bg-sidebar">
