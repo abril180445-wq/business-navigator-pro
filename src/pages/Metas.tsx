@@ -600,9 +600,13 @@ export default function Metas() {
             <div className="pbi-tile" style={{ borderLeft: "4px solid hsl(174, 62%, 47%)" }}>
               <div className="flex items-center gap-2 mb-1">
                 <ListChecks className="w-4 h-4" style={{ color: "hsl(174, 62%, 47%)" }} />
-                <p className="text-[13px] font-semibold text-foreground">Suas Contribuições</p>
+                <p className="text-[13px] font-semibold text-foreground">Acompanhe e Contribua!</p>
               </div>
-              <p className="text-[11px] text-muted-foreground">Visualize as metas e marque ações como concluídas ou adicione suas contribuições.</p>
+              <p className="text-[11px] text-muted-foreground">
+                Você pode <strong className="text-foreground">fazer check-ins</strong> informando como está o andamento de cada meta, 
+                <strong className="text-foreground"> adicionar contribuições</strong> descrevendo o que está fazendo para ajudar, 
+                e <strong className="text-foreground">marcar ações como concluídas</strong>. Sua participação é essencial!
+              </p>
             </div>
           )}
 
