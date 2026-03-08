@@ -167,7 +167,7 @@ const sections: ManualSection[] = [
     content: [
       {
         title: "Como Realizar um Backup",
-        body: `**Somente administradores podem realizar backups.**\n\n1. Acesse **Backup** no menu lateral (seção Admin)\n2. Clique no botão **"Exportar Backup"**\n3. O sistema irá gerar um arquivo JSON com todos os dados\n4. O arquivo será baixado automaticamente\n5. Armazene o arquivo em local seguro\n\n**O backup inclui:**\n- Perfis de usuários\n- Funções (roles) de cada usuário\n- Metadados de autenticação\n- Data e hora do backup`,
+        body: `**⚠️ Somente administradores podem acessar esta tela.**\nUsuários Master e Normal verão uma mensagem de "Acesso Restrito" ao tentar acessar.\n\n1. Acesse **Backup** no menu lateral (seção Admin — visível apenas para admins)\n2. Clique no botão **"Exportar Backup"**\n3. O sistema irá gerar um arquivo JSON com todos os dados\n4. O arquivo será baixado automaticamente\n5. Armazene o arquivo em local seguro\n\n**O backup inclui:**\n- Perfis de usuários\n- Funções (roles) de cada usuário\n- Metadados de autenticação\n- Data e hora do backup`,
       },
       {
         title: "Como Restaurar um Backup",
