@@ -8,6 +8,7 @@ import { Users, Plus, Trash2, ShieldCheck, Shield, User, RefreshCw, Search } fro
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import AccessDenied from "@/components/AccessDenied";
 import { useRealtimeTable } from "@/hooks/useRealtimeTable";
 
 interface UserEntry {
