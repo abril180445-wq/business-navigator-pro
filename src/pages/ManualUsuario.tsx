@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTheme } from "@/hooks/useTheme";
 import { BookOpen, ChevronDown, ChevronRight, Search, Shield, LayoutDashboard, Target, FileText, Users, HardDrive, FileSpreadsheet, DollarSign, Building2, HardHat, Download } from "lucide-react";
 
 interface ManualSection {
@@ -197,6 +198,7 @@ const sections: ManualSection[] = [
 ];
 
 export default function ManualUsuario() {
+  const { theme } = useTheme();
   const [expandedSections, setExpandedSections] = useState<string[]>(["inicio"]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTopic, setSelectedTopic] = useState<{ sectionId: string; topicIndex: number } | null>({ sectionId: "inicio", topicIndex: 0 });
@@ -250,8 +252,8 @@ export default function ManualUsuario() {
         <div className="flex items-center gap-3">
           <BookOpen className="w-5 h-5" style={{ color: "hsl(var(--pbi-yellow))" }} />
           <div>
-            <h1 className="text-base font-semibold text-white">Manual do Usuário</h1>
-            <p className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Documentação completa do sistema ERP San Remo</p>
+            <h1 className="text-base font-semibold text-foreground">Manual do Usuário</h1>
+            <p className="text-[11px] text-muted-foreground">Documentação completa do sistema ERP San Remo</p>
           </div>
         </div>
         <button onClick={handlePrint} className="flex items-center gap-1.5 h-7 px-3 rounded text-[11px] font-medium" style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}>
@@ -288,7 +290,7 @@ export default function ManualUsuario() {
                   <div key={section.id}>
                     <button
                       onClick={() => toggleSection(section.id)}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-medium hover:bg-white/5 transition-colors"
+                      className={`w-full flex items-center gap-2 px-3 py-2 text-[11px] font-medium transition-colors ${theme === "dark" ? "hover:bg-white/5" : "hover:bg-black/5"}`}
                       style={{ color: "hsl(var(--pbi-text-primary))" }}
                     >
                       <Icon className="w-3.5 h-3.5 shrink-0" style={{ color: "hsl(var(--pbi-yellow))" }} />
