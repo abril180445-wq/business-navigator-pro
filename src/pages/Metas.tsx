@@ -188,7 +188,10 @@ export default function Metas() {
   useRealtimeTable("acoes_meta", fetchAcoes);
   useRealtimeTable("meta_checkins", fetchCheckins);
 
-  useEffect(() => { if (!canEditMetas) setActiveTab("acoes"); }, [canEditMetas]);
+  useEffect(() => {
+    if (canEditMetas) setActiveTab("editor");
+    else setActiveTab("acoes");
+  }, [canEditMetas]);
 
   const addMeta = async () => {
     if (!newMeta.nome || !newMeta.objetivo) {
