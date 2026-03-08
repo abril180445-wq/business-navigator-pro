@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useTheme } from "@/hooks/useTheme";
-import { BookOpen, ChevronDown, ChevronRight, Search, Shield, LayoutDashboard, Target, FileText, Users, HardDrive, FileSpreadsheet, DollarSign, Building2, HardHat, Download } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronRight, Search, Shield, LayoutDashboard, Target, FileText, Users, HardDrive, FileSpreadsheet, DollarSign, Building2, HardHat, Download, Construction, Landmark, FolderKanban, Headphones, Truck, Rocket } from "lucide-react";
 
 interface ManualSection {
   id: string;
   title: string;
   icon: React.ElementType;
   content: ManualTopic[];
+  status?: "active" | "placeholder";
+  adminOnly?: boolean;
 }
 
 interface ManualTopic {
@@ -135,10 +137,71 @@ const sections: ManualSection[] = [
     id: "engenharia",
     title: "Módulo de Engenharia",
     icon: HardHat,
+    status: "placeholder",
     content: [
       {
         title: "Gestão de Engenharia",
-        body: `O módulo de Engenharia gerencia os aspectos técnicos das obras.\n\n**Funcionalidades:**\n- **Ordens de Serviço:** Criação e acompanhamento de OS\n- **Cronogramas:** Planejamento de prazos e entregas\n- **Planejamento:** Recursos e alocação de equipes`,
+        body: `O módulo de Engenharia gerencia os aspectos técnicos das obras.\n\n**Funcionalidades planejadas:**\n- **Ordens de Serviço:** Criação e acompanhamento de OS\n- **Cronogramas:** Planejamento de prazos e entregas\n- **Planejamento:** Recursos e alocação de equipes\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
+      },
+    ],
+  },
+  {
+    id: "patrimonio",
+    title: "Patrimônio",
+    icon: Landmark,
+    status: "placeholder",
+    content: [
+      {
+        title: "Gestão de Patrimônio",
+        body: `O módulo de Patrimônio permitirá o controle completo dos ativos da empresa.\n\n**Funcionalidades planejadas:**\n- Cadastro e catalogação de bens\n- Controle de depreciação\n- Inventário patrimonial\n- Relatórios de ativos\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
+      },
+    ],
+  },
+  {
+    id: "projetos",
+    title: "Projetos de Obra",
+    icon: FolderKanban,
+    status: "placeholder",
+    content: [
+      {
+        title: "Gestão de Projetos",
+        body: `O módulo de Projetos permitirá o gerenciamento completo de projetos de obra.\n\n**Funcionalidades planejadas:**\n- Kanban de tarefas\n- Cronograma de projetos\n- Alocação de recursos\n- Documentação técnica\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
+      },
+    ],
+  },
+  {
+    id: "rh",
+    title: "Recursos Humanos",
+    icon: Users,
+    status: "placeholder",
+    content: [
+      {
+        title: "Gestão de RH",
+        body: `O módulo de RH permitirá a gestão completa de colaboradores.\n\n**Funcionalidades planejadas:**\n- Cadastro de funcionários\n- Controle de ponto\n- Gestão de férias e afastamentos\n- Folha de pagamento\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
+      },
+    ],
+  },
+  {
+    id: "suporte",
+    title: "Suporte / Helpdesk",
+    icon: Headphones,
+    status: "placeholder",
+    content: [
+      {
+        title: "Sistema de Suporte",
+        body: `O módulo de Suporte permitirá o gerenciamento de chamados internos.\n\n**Funcionalidades planejadas:**\n- Abertura de chamados\n- Fila de atendimento\n- SLA e prioridades\n- Base de conhecimento\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
+      },
+    ],
+  },
+  {
+    id: "logistica",
+    title: "Logística",
+    icon: Truck,
+    status: "placeholder",
+    content: [
+      {
+        title: "Gestão de Logística",
+        body: `O módulo de Logística permitirá o controle de entregas e transporte.\n\n**Funcionalidades planejadas:**\n- Controle de entregas\n- Gestão de frota\n- Rastreamento de materiais\n- Roteirização\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
       },
     ],
   },
@@ -146,6 +209,7 @@ const sections: ManualSection[] = [
     id: "usuarios",
     title: "Gerenciamento de Usuários",
     icon: Users,
+    adminOnly: true,
     content: [
       {
         title: "Como Criar um Novo Usuário",
@@ -165,6 +229,7 @@ const sections: ManualSection[] = [
     id: "backup",
     title: "Backup e Restauração",
     icon: HardDrive,
+    adminOnly: true,
     content: [
       {
         title: "Como Realizar um Backup",
@@ -293,8 +358,16 @@ export default function ManualUsuario() {
                       className={`w-full flex items-center gap-2 px-3 py-2 text-[11px] font-medium transition-colors ${theme === "dark" ? "hover:bg-white/5" : "hover:bg-black/5"}`}
                       style={{ color: "hsl(var(--pbi-text-primary))" }}
                     >
-                      <Icon className="w-3.5 h-3.5 shrink-0" style={{ color: "hsl(var(--pbi-yellow))" }} />
-                      <span className="flex-1 text-left">{section.title}</span>
+                      <Icon className="w-3.5 h-3.5 shrink-0" style={{ color: section.status === "placeholder" ? "hsl(var(--pbi-text-secondary))" : "hsl(var(--pbi-yellow))" }} />
+                      <span className="flex-1 text-left flex items-center gap-1.5">
+                        {section.title}
+                        {section.adminOnly && (
+                          <span className="text-[8px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider" style={{ background: "hsl(var(--pbi-yellow) / 0.15)", color: "hsl(var(--pbi-yellow))" }}>Admin</span>
+                        )}
+                        {section.status === "placeholder" && (
+                          <span className="text-[8px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider bg-muted text-muted-foreground">Em breve</span>
+                        )}
+                      </span>
                       {expanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                     </button>
                     {expanded && (
@@ -328,16 +401,44 @@ export default function ManualUsuario() {
         <div className="lg:col-span-3">
           {currentTopic && currentSection ? (
             <div className="pbi-tile">
-              <div className="flex items-center gap-2 mb-4 pb-3" style={{ borderBottom: "1px solid hsl(var(--pbi-border))" }}>
+              <div className="flex items-center gap-2 mb-4 pb-3 flex-wrap" style={{ borderBottom: "1px solid hsl(var(--pbi-border))" }}>
                 <currentSection.icon className="w-4 h-4" style={{ color: "hsl(var(--pbi-yellow))" }} />
                 <span className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>{currentSection.title}</span>
                 <span style={{ color: "hsl(var(--pbi-text-secondary))" }}>/</span>
                 <span className="text-[11px] font-medium" style={{ color: "hsl(var(--pbi-text-primary))" }}>{currentTopic.title}</span>
+                {currentSection.adminOnly && (
+                  <span className="text-[9px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ml-auto" style={{ background: "hsl(var(--pbi-yellow) / 0.15)", color: "hsl(var(--pbi-yellow))" }}>🔒 Admin</span>
+                )}
+                {currentSection.status === "placeholder" && (
+                  <span className="text-[9px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ml-auto bg-muted text-muted-foreground">🚧 Em desenvolvimento</span>
+                )}
               </div>
               <h2 className="text-[16px] font-bold mb-4" style={{ color: "hsl(var(--pbi-yellow))" }}>{currentTopic.title}</h2>
               <div className="space-y-1">
                 {renderMarkdown(currentTopic.body)}
               </div>
+
+              {/* Implementar agora button for placeholder modules */}
+              {currentSection.status === "placeholder" && (
+                <div className="mt-6 p-4 rounded-lg border border-dashed flex items-center gap-3 flex-wrap" style={{ borderColor: "hsl(var(--pbi-yellow) / 0.3)", background: "hsl(var(--pbi-yellow) / 0.05)" }}>
+                  <Construction className="w-5 h-5 shrink-0" style={{ color: "hsl(var(--pbi-yellow))" }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-semibold" style={{ color: "hsl(var(--pbi-text-primary))" }}>Módulo em desenvolvimento</p>
+                    <p className="text-[11px] text-muted-foreground">Solicite a implementação deste módulo ao administrador do sistema.</p>
+                  </div>
+                  <button
+                    className="flex items-center gap-1.5 h-8 px-4 rounded-md text-[11px] font-semibold transition-all hover:scale-105 shrink-0"
+                    style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}
+                    onClick={() => {
+                      const msg = `Solicitar implementação do módulo "${currentSection.title}"`;
+                      window.alert(msg);
+                    }}
+                  >
+                    <Rocket className="w-3.5 h-3.5" />
+                    Implementar agora
+                  </button>
+                </div>
+              )}
 
               {/* Navigation */}
               <div className="flex justify-between mt-8 pt-4" style={{ borderTop: "1px solid hsl(var(--pbi-border))" }}>
