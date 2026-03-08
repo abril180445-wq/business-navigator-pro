@@ -381,8 +381,11 @@ export default function Metas() {
 
   const rankingMetas = [...metas].sort((a, b) => (b.atual / b.objetivo) - (a.atual / a.objetivo));
 
-  const formatVal = (v: number, unidade: string) =>
-    unidade === "R$" ? `R$ ${v.toLocaleString("pt-BR")}` : `${v} ${unidade}`;
+  const formatVal = (v: number, unidade: string) => {
+    if (unidade === "R$") return `R$ ${v.toLocaleString("pt-BR")}`;
+    if (unidade === "%") return `${v}%`;
+    return `${v.toLocaleString("pt-BR")} ${unidade}`;
+  };
 
   // Parent metas (top-level)
   const parentMetas = metas.filter(m => !m.parent_id);
