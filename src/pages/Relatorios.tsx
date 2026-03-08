@@ -22,12 +22,6 @@ const tiposRelatorio = [
   { value: "metas", label: "Relatório de Metas" },
 ];
 
-const chartData = [
-  { cat: "Vendas", valor: 1116000 },
-  { cat: "Receitas", valor: 195000 },
-  { cat: "Compras", valor: 217000 },
-  { cat: "Despesas", valor: 298000 },
-];
 
 type RelatorioGerado = {
   id: string; user_id: string; user_name: string; tipo: string;
