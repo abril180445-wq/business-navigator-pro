@@ -142,8 +142,8 @@ export default function Metas() {
   const [editValues, setEditValues] = useState<{
     nome: string; atual: string; objetivo: string; unidade: string;
     categoria: string; categoriaCustom: string; responsavel: string;
-    prioridade: string; ciclo: string; parent_id: string;
-  }>({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "" });
+    prioridade: string; ciclo: string; parent_id: string; prazo: string;
+  }>({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "", prazo: "" });
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [newMeta, setNewMeta] = useState({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media" as Meta["prioridade"], ciclo: "Q1 2026", parent_id: "" });
 
@@ -242,6 +242,7 @@ export default function Metas() {
       prioridade: editValues.prioridade,
       ciclo: editValues.ciclo,
       parent_id: editValues.parent_id || null,
+      prazo: editValues.prazo || null,
       status: newStatus,
     }).eq("id", id);
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
@@ -626,7 +627,7 @@ export default function Metas() {
                                   unidade: meta.unidade, categoria: categorias.includes(meta.categoria) ? meta.categoria : "__outra__",
                                   categoriaCustom: categorias.includes(meta.categoria) ? "" : meta.categoria,
                                   responsavel: meta.responsavel, prioridade: meta.prioridade,
-                                  ciclo: meta.ciclo, parent_id: meta.parent_id || "",
+                                  ciclo: meta.ciclo, parent_id: meta.parent_id || "", prazo: meta.prazo || "",
                                 });
                                 setEditDialogOpen(true);
                               }} className="p-1 rounded hover:bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" title="Editar meta"><Pencil className="w-3 h-3" /></button>
@@ -1236,12 +1237,21 @@ export default function Metas() {
                 </select>
               </div>
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Meta Pai (opcional)</Label>
-              <select value={editValues.parent_id} onChange={(e) => setEditValues({ ...editValues, parent_id: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                <option value="">Nenhuma (meta raiz)</option>
-                {metas.filter(m => m.id !== editingId).map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
-              </select>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Prazo (opcional)</Label>
+                <Input type="date" value={editValues.prazo} onChange={(e) => setEditValues({ ...editValues, prazo: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                {editValues.prazo && (
+                  <button onClick={() => setEditValues({ ...editValues, prazo: "" })} className="text-[10px] text-muted-foreground hover:text-destructive transition-colors">✕ Remover prazo</button>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Meta Pai (opcional)</Label>
+                <select value={editValues.parent_id} onChange={(e) => setEditValues({ ...editValues, parent_id: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                  <option value="">Nenhuma (meta raiz)</option>
+                  {metas.filter(m => m.id !== editingId).map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
+                </select>
+              </div>
             </div>
             <div className="flex gap-2">
               <Button onClick={() => { setEditDialogOpen(false); setEditingId(null); }} variant="outline" className="flex-1 h-8 text-[12px]">Cancelar</Button>
