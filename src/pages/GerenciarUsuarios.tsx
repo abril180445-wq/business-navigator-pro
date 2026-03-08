@@ -166,7 +166,7 @@ export default function GerenciarUsuarios() {
       </div>
 
       {/* KPI tiles */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {(["admin", "master", "normal"] as const).map((role) => {
           const cfg = roleConfig[role];
           const Icon = cfg.icon;

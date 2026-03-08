@@ -86,7 +86,7 @@ export default function Pedidos() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 p-1 rounded-md" style={{ background: "hsl(var(--pbi-surface))" }}>
+      <div className="pbi-tabs-scroll" style={{ background: "hsl(var(--pbi-surface))" }}>
         {([
           { key: "empreendimentos", label: "Empreendimentos" },
           { key: "contratos", label: "Contratos" },

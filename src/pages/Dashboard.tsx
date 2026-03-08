@@ -91,7 +91,7 @@ const kpis = [
 ];
 
 const PBITile = ({ children, title, className = "" }: { children: React.ReactNode; title?: string; className?: string }) => (
-  <div className={`pbi-tile p-4 ${className}`}>
+  <div className={`pbi-tile ${className}`}>
     {title && (
       <h3 className="text-[13px] font-semibold text-foreground mb-3">{title}</h3>
     )}
