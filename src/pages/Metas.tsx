@@ -275,17 +275,27 @@ export default function Metas() {
   const [acaoMetaId, setAcaoMetaId] = useState<string | null>(null);
   const [checkinMetaId, setCheckinMetaId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editValues, setEditValues] = useState<{
-    nome: string; atual: string; objetivo: string; unidade: string;
-    categoria: string; categoriaCustom: string; responsavel: string;
-    prioridade: string; ciclo: string; parent_id: string; prazo: string;
-  }>({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "", prazo: "" });
+  const [editValues, setEditValues] = useState<Record<string, string>>({
+    nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "",
+    responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "", prazo: "",
+    descricao: "", local_obra: "", orcamento: "", custo_atual: "", equipe: "", fornecedor: "",
+    etapa: "", peso: "", tags: "", data_inicio: "", frequencia_checkin: "semanal",
+    risco: "", observacoes: "", aprovador: "", departamento: "", indicador_chave: "",
+    fonte_dados: "", impacto: "", dependencias: "", marco_critico: "",
+  });
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [newMetaTipo, setNewMetaTipo] = useState<MetaTipo>("quantitativa");
   const [newMetaToggles, setNewMetaToggles] = useState<FieldToggles>(defaultTogglesQuant);
   const [editMetaTipo, setEditMetaTipo] = useState<MetaTipo>("quantitativa");
   const [editMetaToggles, setEditMetaToggles] = useState<FieldToggles>(defaultTogglesQuant);
-  const [newMeta, setNewMeta] = useState({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media" as Meta["prioridade"], ciclo: "Q1 2026", parent_id: "", descricao: "" });
+  const [newMeta, setNewMeta] = useState<Record<string, string>>({
+    nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "",
+    responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "", descricao: "",
+    local_obra: "", orcamento: "", custo_atual: "", equipe: "", fornecedor: "",
+    etapa: "", peso: "", tags: "", data_inicio: "", frequencia_checkin: "semanal",
+    risco: "", observacoes: "", aprovador: "", departamento: "", indicador_chave: "",
+    fonte_dados: "", impacto: "", dependencias: "", marco_critico: "",
+  });
 
   // Dynamic categories: base + any custom ones from existing metas
   const categorias = useMemo(() => {
