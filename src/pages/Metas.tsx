@@ -188,7 +188,10 @@ export default function Metas() {
   useRealtimeTable("acoes_meta", fetchAcoes);
   useRealtimeTable("meta_checkins", fetchCheckins);
 
-  useEffect(() => { if (!canEditMetas) setActiveTab("acoes"); }, [canEditMetas]);
+  useEffect(() => {
+    if (canEditMetas) setActiveTab("editor");
+    else setActiveTab("acoes");
+  }, [canEditMetas]);
 
   const addMeta = async () => {
     if (!newMeta.nome || !newMeta.objetivo) {
@@ -444,7 +447,7 @@ export default function Metas() {
                 <Plus className="w-3 h-3 mr-1" /> Nova Meta
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }}>
+            <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }} onInteractOutside={(e) => e.preventDefault()}>
               <DialogHeader>
                 <DialogTitle className="text-[14px]" style={{ color: "hsl(var(--pbi-text-primary))" }}>Criar Nova Meta</DialogTitle>
               </DialogHeader>
@@ -1085,7 +1088,7 @@ export default function Metas() {
 
       {/* Add Action Dialog */}
       <Dialog open={acaoDialogOpen} onOpenChange={setAcaoDialogOpen}>
-        <DialogContent className="sm:max-w-md" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }}>
+        <DialogContent className="sm:max-w-md" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }} onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="text-[14px]" style={{ color: "hsl(var(--pbi-text-primary))" }}>
               {canEditMetas ? "Adicionar Ação" : "Adicionar Contribuição"} — {metas.find((m) => m.id === acaoMetaId)?.nome}
@@ -1119,7 +1122,7 @@ export default function Metas() {
 
       {/* Check-in Dialog */}
       <Dialog open={checkinDialogOpen} onOpenChange={setCheckinDialogOpen}>
-        <DialogContent className="sm:max-w-md" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }}>
+        <DialogContent className="sm:max-w-md" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }} onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="text-[14px]" style={{ color: "hsl(var(--pbi-text-primary))" }}>
               <MessageCircle className="w-4 h-4 inline mr-2" style={{ color: "hsl(262, 52%, 47%)" }} />
@@ -1196,7 +1199,7 @@ export default function Metas() {
 
       {/* ========== EDIT META DIALOG ========== */}
       <Dialog open={editDialogOpen} onOpenChange={(open) => { setEditDialogOpen(open); if (!open) setEditingId(null); }}>
-        <DialogContent className="pbi-tile border-border max-w-lg" style={{ background: "hsl(var(--pbi-surface))" }}>
+        <DialogContent className="pbi-tile border-border max-w-lg" style={{ background: "hsl(var(--pbi-surface))" }} onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="text-[14px] font-bold text-foreground flex items-center gap-2">
               <Pencil className="w-4 h-4" style={{ color: "hsl(var(--pbi-yellow))" }} /> Editar Meta
