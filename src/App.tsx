@@ -17,6 +17,7 @@ import Pedidos from "@/pages/Pedidos";
 import GerenciarUsuarios from "@/pages/GerenciarUsuarios";
 import BackupRestore from "@/pages/BackupRestore";
 import ManualUsuario from "@/pages/ManualUsuario";
+import ManualAdmin from "@/pages/ManualAdmin";
 
 import Auth from "@/pages/Auth";
 import ResetPassword from "@/pages/ResetPassword";
