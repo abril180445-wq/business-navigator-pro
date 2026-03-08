@@ -27,6 +27,8 @@ import {
   Filter,
   HardDrive,
   BookOpen,
+  Sun,
+  Moon,
 } from "lucide-react";
 import logoSanRemo from "@/assets/logo-san-remo.png";
 import { Button } from "@/components/ui/button";
