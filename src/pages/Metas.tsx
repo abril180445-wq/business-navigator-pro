@@ -59,7 +59,7 @@ const prioridadeConfig = {
 };
 
 const PBITile = ({ children, title, className = "", actions }: { children: React.ReactNode; title?: string; className?: string; actions?: React.ReactNode }) => (
-  <div className={`pbi-tile p-4 ${className}`}>
+  <div className={`pbi-tile ${className}`}>
     {(title || actions) && (
       <div className="flex items-center justify-between mb-3">
         {title && <h3 className="text-[13px] font-semibold text-foreground">{title}</h3>}
