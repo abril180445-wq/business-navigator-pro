@@ -264,7 +264,7 @@ export default function BackupRestore() {
             <FileArchive className="w-4 h-4" style={{ color: "hsl(207, 89%, 48%)" }} />
             <span className="text-[10px] uppercase tracking-wider" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Formato</span>
           </div>
-          <p className="text-[12px]" style={{ color: "hsl(var(--pbi-text-primary))" }}>ZIP compactado com JSON completo + CSVs individuais por tabela</p>
+          <p className="text-[12px]" style={{ color: "hsl(var(--pbi-text-primary))" }}>ZIP com JSON + SQL (Supabase) + CSVs por tabela</p>
         </div>
         <div className="pbi-tile">
           <div className="flex items-center gap-2 mb-2">
