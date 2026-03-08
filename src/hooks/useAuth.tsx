@@ -29,23 +29,27 @@ async function loadAuthState(session: Session | null) {
       session,
       profile: null,
       isAdmin: false,
+      userRole: null as AppRole | null,
+      canEditMetas: false,
     };
   }
 
-  const [{ data: profile }, { data: isAdmin, error: roleError }] = await Promise.all([
+  const [{ data: profile }, { data: roleData }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-    supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }),
+    supabase.from("user_roles").select("role").eq("user_id", user.id).maybeSingle(),
   ]);
 
-  if (roleError) {
-    throw roleError;
-  }
+  const userRole = (roleData?.role as AppRole) ?? "normal";
+  const isAdmin = userRole === "admin";
+  const canEditMetas = userRole === "admin" || userRole === "master";
 
   return {
     user,
     session,
     profile: profile ?? null,
-    isAdmin: Boolean(isAdmin),
+    isAdmin,
+    userRole,
+    canEditMetas,
   };
 }
 
