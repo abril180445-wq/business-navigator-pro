@@ -124,6 +124,7 @@ export default function Relatorios() {
   const [historico, setHistorico] = useState<RelatorioGerado[]>([]);
   const [showHistorico, setShowHistorico] = useState(false);
   const [metasData, setMetasData] = useState<MetaRow[]>([]);
+  const [dadosFinanceiros, setDadosFinanceiros] = useState<DadoFinanceiro[]>([]);
 
   const gridColor = theme === "dark" ? "hsl(0, 0%, 25%)" : "hsl(0, 0%, 85%)";
   const axisColor = theme === "dark" ? "hsl(0, 0%, 55%)" : "hsl(0, 0%, 50%)";
