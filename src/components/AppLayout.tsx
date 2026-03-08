@@ -100,6 +100,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const location = useLocation();
   const { profile, user, userRole, isAdmin, canEditMetas, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   // Filter modules based on role
   const visibleModules = modules.filter((mod) => {
