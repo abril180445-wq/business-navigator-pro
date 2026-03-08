@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTheme } from "@/hooks/useTheme";
-import { BookOpen, ChevronDown, ChevronRight, Search, Shield, LayoutDashboard, Target, FileText, Users, HardDrive, FileSpreadsheet, DollarSign, Building2, HardHat, Download, Construction, Landmark, FolderKanban, Headphones, Truck, Rocket } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronRight, Search, Shield, LayoutDashboard, Target, FileText, Users, HardDrive, FileSpreadsheet, Download, Construction, Rocket } from "lucide-react";
 
 interface ManualSection {
   id: string;
@@ -108,102 +108,6 @@ const sections: ManualSection[] = [
       {
         title: "Importação de Excel",
         body: `O sistema permite importar dados a partir de planilhas Excel.\n\n**Como importar:**\n1. Acesse **Importar Excel** no menu lateral\n2. Clique em **"Selecionar Arquivo"** ou arraste o arquivo\n3. Formatos aceitos: .xlsx, .xls\n4. O sistema fará a leitura automática das colunas\n5. Revise os dados importados na prévia\n6. Confirme a importação\n\n**Dicas:**\n- Certifique-se de que a primeira linha contém os cabeçalhos\n- Remova linhas em branco antes de importar\n- Verifique se os formatos de data e valores estão corretos`,
-      },
-    ],
-  },
-  {
-    id: "financeiro",
-    title: "Módulo Financeiro",
-    icon: DollarSign,
-    status: "placeholder",
-    content: [
-      {
-        title: "Visão Geral do Financeiro",
-        body: `O módulo Financeiro centralizará todas as operações financeiras da empresa.\n\n**Submódulos planejados:**\n- **Faturamento:** Controle de receitas e notas fiscais\n- **Contas a Pagar:** Gestão de pagamentos e vencimentos\n- **Contas a Receber:** Acompanhamento de recebíveis\n- **Impostos:** Controle tributário\n- **Relatórios Financeiros:** Demonstrativos e balanços\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
-      },
-    ],
-  },
-  {
-    id: "obras",
-    title: "Módulo de Obras",
-    icon: Building2,
-    status: "placeholder",
-    content: [
-      {
-        title: "Gestão de Obras",
-        body: `O módulo de Obras permitirá gerenciar todos os empreendimentos da construtora.\n\n**Submódulos planejados:**\n- **Empreendimentos:** Cadastro e acompanhamento de obras\n- **Contratos:** Gestão de contratos com fornecedores e clientes\n- **Materiais:** Controle de estoque de materiais\n- **Clientes:** CRM com informações de compradores\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
-      },
-    ],
-  },
-  {
-    id: "engenharia",
-    title: "Módulo de Engenharia",
-    icon: HardHat,
-    status: "placeholder",
-    content: [
-      {
-        title: "Gestão de Engenharia",
-        body: `O módulo de Engenharia gerencia os aspectos técnicos das obras.\n\n**Funcionalidades planejadas:**\n- **Ordens de Serviço:** Criação e acompanhamento de OS\n- **Cronogramas:** Planejamento de prazos e entregas\n- **Planejamento:** Recursos e alocação de equipes\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
-      },
-    ],
-  },
-  {
-    id: "patrimonio",
-    title: "Patrimônio",
-    icon: Landmark,
-    status: "placeholder",
-    content: [
-      {
-        title: "Gestão de Patrimônio",
-        body: `O módulo de Patrimônio permitirá o controle completo dos ativos da empresa.\n\n**Funcionalidades planejadas:**\n- Cadastro e catalogação de bens\n- Controle de depreciação\n- Inventário patrimonial\n- Relatórios de ativos\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
-      },
-    ],
-  },
-  {
-    id: "projetos",
-    title: "Projetos de Obra",
-    icon: FolderKanban,
-    status: "placeholder",
-    content: [
-      {
-        title: "Gestão de Projetos",
-        body: `O módulo de Projetos permitirá o gerenciamento completo de projetos de obra.\n\n**Funcionalidades planejadas:**\n- Kanban de tarefas\n- Cronograma de projetos\n- Alocação de recursos\n- Documentação técnica\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
-      },
-    ],
-  },
-  {
-    id: "rh",
-    title: "Recursos Humanos",
-    icon: Users,
-    status: "placeholder",
-    content: [
-      {
-        title: "Gestão de RH",
-        body: `O módulo de RH permitirá a gestão completa de colaboradores.\n\n**Funcionalidades planejadas:**\n- Cadastro de funcionários\n- Controle de ponto\n- Gestão de férias e afastamentos\n- Folha de pagamento\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
-      },
-    ],
-  },
-  {
-    id: "suporte",
-    title: "Suporte / Helpdesk",
-    icon: Headphones,
-    status: "placeholder",
-    content: [
-      {
-        title: "Sistema de Suporte",
-        body: `O módulo de Suporte permitirá o gerenciamento de chamados internos.\n\n**Funcionalidades planejadas:**\n- Abertura de chamados\n- Fila de atendimento\n- SLA e prioridades\n- Base de conhecimento\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
-      },
-    ],
-  },
-  {
-    id: "logistica",
-    title: "Logística",
-    icon: Truck,
-    status: "placeholder",
-    content: [
-      {
-        title: "Gestão de Logística",
-        body: `O módulo de Logística permitirá o controle de entregas e transporte.\n\n**Funcionalidades planejadas:**\n- Controle de entregas\n- Gestão de frota\n- Rastreamento de materiais\n- Roteirização\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
       },
     ],
   },
