@@ -69,6 +69,7 @@ const modules: ModuleItem[] = [
   },
   { label: "Usuários", icon: Users, path: "/usuarios", section: "Admin" },
   { label: "Backup", icon: HardDrive, path: "/backup", section: "Admin" },
+  { label: "Manual Admin", icon: BookOpen, path: "/manual-admin", section: "Admin" },
   { label: "Manual", icon: BookOpen, path: "/manual", section: "Ajuda" },
 ];
 
