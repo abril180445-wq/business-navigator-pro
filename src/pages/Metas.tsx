@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -71,7 +71,7 @@ const coresMeta = [
   "hsl(270, 60%, 55%)", "hsl(330, 70%, 50%)",
 ];
 
-const categorias = ["Financeiro", "Vendas", "Operacional", "Qualidade", "RH", "Engenharia"];
+const categoriasBase = ["Financeiro", "Vendas", "Operacional", "Qualidade", "RH", "Engenharia"];
 const ciclosDisponiveis = ["Q1 2026", "Q2 2026", "Q3 2026", "Q4 2026", "Anual 2026"];
 
 const prioridadeConfig = {
@@ -140,7 +140,13 @@ export default function Metas() {
   const [checkinMetaId, setCheckinMetaId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState({ atual: "", objetivo: "" });
-  const [newMeta, setNewMeta] = useState({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", responsavel: "", prioridade: "media" as Meta["prioridade"], ciclo: "Q1 2026", parent_id: "" });
+  const [newMeta, setNewMeta] = useState({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media" as Meta["prioridade"], ciclo: "Q1 2026", parent_id: "" });
+
+  // Dynamic categories: base + any custom ones from existing metas
+  const categorias = useMemo(() => {
+    const fromMetas = metas.map(m => m.categoria).filter(c => c && !categoriasBase.includes(c));
+    return [...categoriasBase, ...Array.from(new Set(fromMetas))];
+  }, [metas]);
   const [newAcao, setNewAcao] = useState({ descricao: "", responsavel: "", prazo: "", imagens: [] as string[] });
   const [newCheckin, setNewCheckin] = useState({ valor: "", comentario: "", confianca: "no_prazo" as CheckIn["confianca"], imagens: [] as string[] });
   const [activeTab, setActiveTab] = useState<"editor" | "analytics" | "ranking" | "acoes" | "timeline">(canEditMetas ? "editor" : "acoes");
@@ -184,17 +190,22 @@ export default function Metas() {
       toast({ title: "Preencha nome e objetivo", variant: "destructive" });
       return;
     }
+    const categoriaFinal = newMeta.categoria === "__outra__" ? newMeta.categoriaCustom.trim() : newMeta.categoria;
+    if (!categoriaFinal) {
+      toast({ title: "Informe a categoria", variant: "destructive" });
+      return;
+    }
     const cor = coresMeta[metas.length % coresMeta.length];
     const { error } = await supabase.from("metas").insert({
       nome: newMeta.nome, atual: parseFloat(newMeta.atual) || 0,
       objetivo: parseFloat(newMeta.objetivo), unidade: newMeta.unidade, cor,
-      categoria: newMeta.categoria, responsavel: newMeta.responsavel,
+      categoria: categoriaFinal, responsavel: newMeta.responsavel,
       prioridade: newMeta.prioridade, created_by: user?.id,
       ciclo: newMeta.ciclo,
       parent_id: newMeta.parent_id || null,
     });
     if (error) { toast({ title: "Erro ao criar meta", description: error.message, variant: "destructive" }); return; }
-    setNewMeta({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "" });
+    setNewMeta({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "" });
     setDialogOpen(false);
     toast({ title: "Meta criada!" });
   };
@@ -430,9 +441,20 @@ export default function Metas() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1.5">
                     <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Categoria</Label>
-                    <select value={newMeta.categoria} onChange={(e) => setNewMeta({ ...newMeta, categoria: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                    <select value={newMeta.categoria} onChange={(e) => setNewMeta({ ...newMeta, categoria: e.target.value, categoriaCustom: "" })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
                       {categorias.map((c) => <option key={c} value={c}>{c}</option>)}
+                      <option value="__outra__">✨ Outra (personalizada)</option>
                     </select>
+                    {newMeta.categoria === "__outra__" && (
+                      <Input
+                        value={newMeta.categoriaCustom}
+                        onChange={(e) => setNewMeta({ ...newMeta, categoriaCustom: e.target.value })}
+                        placeholder="Digite a nova categoria..."
+                        maxLength={40}
+                        className="h-8 text-[12px] border-none mt-1"
+                        style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}
+                      />
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Responsável</Label>
