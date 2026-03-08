@@ -1112,8 +1112,8 @@ export default function Metas() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Imagens (opcional)</Label>
-              <MetaImageUpload images={newCheckin.imagens} onChange={(imgs) => setNewCheckin({ ...newCheckin, imagens: imgs })} folder="checkins" />
+              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Anexos (opcional)</Label>
+              <MetaFileUpload files={newCheckin.imagens} onChange={(imgs) => setNewCheckin({ ...newCheckin, imagens: imgs })} folder="checkins" />
             </div>
 
             <Button onClick={addCheckin} className="w-full h-8 text-[12px] font-semibold" style={{ background: "hsl(262, 52%, 47%)", color: "white" }}>
