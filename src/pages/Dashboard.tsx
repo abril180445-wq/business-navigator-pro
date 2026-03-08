@@ -173,7 +173,8 @@ export default function Dashboard() {
         })}
       </div>
 
-      {/* Row 2: Revenue chart + Pie */}
+      {/* Row 2: Revenue chart + Pie — financial hidden for normal */}
+      {!isNormal && (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <PBITile title="Faturamento vs Custos (R$ mil)" className="lg:col-span-2">
           <ResponsiveContainer width="100%" height={260}>
