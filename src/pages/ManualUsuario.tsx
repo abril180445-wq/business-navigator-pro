@@ -115,10 +115,11 @@ const sections: ManualSection[] = [
     id: "financeiro",
     title: "Módulo Financeiro",
     icon: DollarSign,
+    status: "placeholder",
     content: [
       {
         title: "Visão Geral do Financeiro",
-        body: `O módulo Financeiro centraliza todas as operações financeiras da empresa.\n\n**Submódulos disponíveis:**\n- **Faturamento:** Controle de receitas e notas fiscais\n- **Contas a Pagar:** Gestão de pagamentos e vencimentos\n- **Contas a Receber:** Acompanhamento de recebíveis\n- **Impostos:** Controle tributário\n- **Relatórios Financeiros:** Demonstrativos e balanços`,
+        body: `O módulo Financeiro centralizará todas as operações financeiras da empresa.\n\n**Submódulos planejados:**\n- **Faturamento:** Controle de receitas e notas fiscais\n- **Contas a Pagar:** Gestão de pagamentos e vencimentos\n- **Contas a Receber:** Acompanhamento de recebíveis\n- **Impostos:** Controle tributário\n- **Relatórios Financeiros:** Demonstrativos e balanços\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
       },
     ],
   },
