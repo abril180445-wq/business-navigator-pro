@@ -17,6 +17,7 @@ import Pedidos from "@/pages/Pedidos";
 import GerenciarUsuarios from "@/pages/GerenciarUsuarios";
 import BackupRestore from "@/pages/BackupRestore";
 import ManualUsuario from "@/pages/ManualUsuario";
+import ManualAdmin from "@/pages/ManualAdmin";
 
 import Auth from "@/pages/Auth";
 import ResetPassword from "@/pages/ResetPassword";
@@ -40,6 +41,7 @@ const ProtectedApp = () => (
         <Route path="/usuarios" element={<GerenciarUsuarios />} />
         <Route path="/backup" element={<BackupRestore />} />
         <Route path="/manual" element={<ManualUsuario />} />
+        <Route path="/manual-admin" element={<ManualAdmin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
