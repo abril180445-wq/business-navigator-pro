@@ -308,7 +308,7 @@ export default function Metas() {
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
 
     // Update meta value and status if changed
-    if (novoValor !== meta.atual && canEditMetas) {
+    if (novoValor !== meta.atual) {
       const pct = (novoValor / meta.objetivo) * 100;
       let st: Meta["status"] = newCheckin.confianca === "em_risco" ? "em_risco" : newCheckin.confianca === "atencao" ? "atencao" : pct >= 100 ? "atingida" : "no_prazo";
       await supabase.from("metas").update({ atual: novoValor, status: st }).eq("id", checkinMetaId);
@@ -1124,12 +1124,10 @@ export default function Metas() {
               );
             })()}
 
-            {canEditMetas && (
-              <div className="space-y-1.5">
-                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Novo valor (opcional)</Label>
-                <Input type="number" value={newCheckin.valor} onChange={(e) => setNewCheckin({ ...newCheckin, valor: e.target.value })} placeholder={`Atual: ${metas.find(m => m.id === checkinMetaId)?.atual || 0}`} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-              </div>
-            )}
+            <div className="space-y-1.5">
+              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Novo valor (opcional)</Label>
+              <Input type="number" value={newCheckin.valor} onChange={(e) => setNewCheckin({ ...newCheckin, valor: e.target.value })} placeholder={`Atual: ${metas.find(m => m.id === checkinMetaId)?.atual || 0}`} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+            </div>
 
             <div className="space-y-1.5">
               <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Nível de confiança</Label>
