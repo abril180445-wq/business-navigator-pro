@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 import {
   DollarSign,
   Building2,
@@ -103,7 +104,15 @@ const PBITile = ({ children, title, className = "" }: { children: React.ReactNod
 export default function Dashboard() {
   const [periodo, setPeriodo] = useState("2025");
   const { userRole, profile } = useAuth();
+  const { theme } = useTheme();
   const isNormal = userRole === "normal";
+
+  // Theme-adaptive colors
+  const gridColor = theme === "dark" ? "hsl(0, 0%, 25%)" : "hsl(0, 0%, 88%)";
+  const axisColor = theme === "dark" ? "hsl(0, 0%, 45%)" : "hsl(0, 0%, 60%)";
+  const tooltipBg = theme === "dark" ? "hsl(0, 0%, 18%)" : "#fff";
+  const tooltipBorder = theme === "dark" ? "hsl(0, 0%, 30%)" : "hsl(0, 0%, 88%)";
+  const tooltipStyle = { borderRadius: "4px", border: `1px solid ${tooltipBorder}`, fontSize: 12, backgroundColor: tooltipBg, color: theme === "dark" ? "#e8e8e8" : "#222" };
 
   return (
     <div className="space-y-3">
@@ -179,12 +188,12 @@ export default function Dashboard() {
         <PBITile title="Faturamento vs Custos (R$ mil)" className="lg:col-span-2">
           <ResponsiveContainer width="100%" height={260}>
             <ComposedChart data={revenueData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(0, 0%, 88%)" />
-              <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(0, 0%, 60%)" />
-              <YAxis tick={{ fontSize: 11 }} stroke="hsl(0, 0%, 60%)" />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+              <XAxis dataKey="month" tick={{ fontSize: 11, fill: axisColor }} stroke={axisColor} />
+              <YAxis tick={{ fontSize: 11, fill: axisColor }} stroke={axisColor} />
               <Tooltip
                 formatter={(value: number) => [`R$ ${value}k`, ""]}
-                contentStyle={{ borderRadius: "4px", border: "1px solid hsl(0, 0%, 88%)", fontSize: 12, boxShadow: "0 2px 8px hsl(0 0% 0% / 0.1)" }}
+                contentStyle={tooltipStyle}
               />
               <Legend iconType="square" wrapperStyle={{ fontSize: 11 }} />
               <Bar dataKey="receita" fill="hsl(207, 89%, 48%)" radius={[2, 2, 0, 0]} barSize={18} name="Faturamento" />
@@ -201,7 +210,7 @@ export default function Dashboard() {
                   <Cell key={index} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value: number) => [value, "obras"]} contentStyle={{ borderRadius: "4px", fontSize: 12 }} />
+              <Tooltip formatter={(value: number) => [value, "obras"]} contentStyle={tooltipStyle} />
             </PieChart>
           </ResponsiveContainer>
           <div className="space-y-1.5 mt-1">
@@ -222,13 +231,13 @@ export default function Dashboard() {
         <PBITile title="Vendas por Empreendimento">
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={topEmpreendimentos} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(0, 0%, 88%)" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 10 }} stroke="hsl(0, 0%, 60%)" />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} stroke="hsl(0, 0%, 60%)" width={100} />
-              <Tooltip contentStyle={{ borderRadius: "4px", fontSize: 12 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} horizontal={false} />
+              <XAxis type="number" tick={{ fontSize: 10, fill: axisColor }} stroke={axisColor} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: axisColor }} stroke={axisColor} width={100} />
+              <Tooltip contentStyle={tooltipStyle} />
               <Legend iconType="square" wrapperStyle={{ fontSize: 10 }} />
               <Bar dataKey="vendas" fill="hsl(207, 89%, 48%)" radius={[0, 2, 2, 0]} barSize={14} name="Vendas" />
-              <Bar dataKey="meta" fill="hsl(0, 0%, 80%)" radius={[0, 2, 2, 0]} barSize={14} name="Meta" />
+              <Bar dataKey="meta" fill={theme === "dark" ? "hsl(0, 0%, 40%)" : "hsl(0, 0%, 80%)"} radius={[0, 2, 2, 0]} barSize={14} name="Meta" />
             </BarChart>
           </ResponsiveContainer>
         </PBITile>
@@ -264,10 +273,10 @@ export default function Dashboard() {
                   <stop offset="95%" stopColor="hsl(174, 62%, 47%)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(0, 0%, 88%)" />
-              <XAxis dataKey="month" tick={{ fontSize: 10 }} stroke="hsl(0, 0%, 60%)" />
-              <YAxis tick={{ fontSize: 10 }} stroke="hsl(0, 0%, 60%)" />
-              <Tooltip contentStyle={{ borderRadius: "4px", fontSize: 12 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+              <XAxis dataKey="month" tick={{ fontSize: 10, fill: axisColor }} stroke={axisColor} />
+              <YAxis tick={{ fontSize: 10, fill: axisColor }} stroke={axisColor} />
+              <Tooltip contentStyle={tooltipStyle} />
               <Area type="monotone" dataKey="unidades" stroke="hsl(174, 62%, 47%)" fill="url(#colorUnidades)" strokeWidth={2} name="Unidades" />
             </AreaChart>
           </ResponsiveContainer>

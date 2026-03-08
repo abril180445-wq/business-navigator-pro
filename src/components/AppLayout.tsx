@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTheme } from "@/hooks/useTheme";
 import {
   LayoutDashboard,
   Target,
@@ -26,6 +27,8 @@ import {
   Filter,
   HardDrive,
   BookOpen,
+  Sun,
+  Moon,
 } from "lucide-react";
 import logoSanRemo from "@/assets/logo-san-remo.png";
 import { Button } from "@/components/ui/button";
@@ -97,6 +100,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const location = useLocation();
   const { profile, user, userRole, isAdmin, canEditMetas, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   // Filter modules based on role
   const visibleModules = modules.filter((mod) => {
@@ -262,6 +266,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               className="bg-transparent border-none outline-none text-[12px] flex-1 text-white placeholder:text-white/40 w-32"
             />
           </div>
+
+          <button onClick={toggleTheme} className="p-1.5 rounded hover:bg-white/10 transition-colors" title={theme === "dark" ? "Modo Claro" : "Modo Escuro"}>
+            {theme === "dark" ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-white/70" />}
+          </button>
 
           <button className="p-1.5 rounded hover:bg-white/10 transition-colors relative">
             <Bell className="w-4 h-4 text-white/70" />
