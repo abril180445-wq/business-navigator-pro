@@ -626,7 +626,7 @@ export default function Metas() {
                                   unidade: meta.unidade, categoria: categorias.includes(meta.categoria) ? meta.categoria : "__outra__",
                                   categoriaCustom: categorias.includes(meta.categoria) ? "" : meta.categoria,
                                   responsavel: meta.responsavel, prioridade: meta.prioridade,
-                                  ciclo: meta.ciclo, parent_id: meta.parent_id || "",
+                                  ciclo: meta.ciclo, parent_id: meta.parent_id || "", prazo: meta.prazo || "",
                                 });
                                 setEditDialogOpen(true);
                               }} className="p-1 rounded hover:bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" title="Editar meta"><Pencil className="w-3 h-3" /></button>
