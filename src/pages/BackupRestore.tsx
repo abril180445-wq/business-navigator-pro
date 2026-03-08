@@ -57,17 +57,21 @@ export default function BackupRestore() {
       const zip = new JSZip();
       const dateStr = new Date().toISOString().split("T")[0];
 
-      // Full backup JSON
-      zip.file("backup_completo.json", JSON.stringify(backup, null, 2));
+      // Full backup JSON (without sql_dump to keep clean)
+      const { sql_dump, ...backupWithoutSQL } = backup;
+      zip.file("backup_completo.json", JSON.stringify(backupWithoutSQL, null, 2));
+
+      // SQL dump — compatible with Supabase SQL Editor / psql
+      if (sql_dump) {
+        zip.file("backup_supabase.sql", sql_dump);
+      }
 
       // Individual table CSVs for easy viewing
       const tables = ["profiles", "user_roles", "metas", "acoes_meta", "meta_checkins", "relatorios_gerados", "auth_users"];
       for (const table of tables) {
         const rows = backup.data[table];
         if (rows && rows.length > 0) {
-          // JSON per table
           zip.file(`tabelas/${table}.json`, JSON.stringify(rows, null, 2));
-          // CSV per table
           const headers = Object.keys(rows[0]);
           const csvLines = [
             headers.join(";"),
@@ -84,8 +88,7 @@ export default function BackupRestore() {
 
       // Metadata file
       zip.file("LEIAME.txt", [
-        `=== BACKUP COMPLETO SAN REMO ===`,
-        `Versão: ${backup.version}`,
+        `=== BACKUP COMPLETO SAN REMO v3.0 ===`,
         `Data: ${new Date(backup.created_at).toLocaleString("pt-BR")}`,
         `Criado por: ${backup.created_by}`,
         ``,
@@ -99,12 +102,14 @@ export default function BackupRestore() {
         `Relatórios: ${backup.metadata.total_relatorios}`,
         ``,
         `=== ARQUIVOS ===`,
-        `backup_completo.json - Backup completo (usar para restauração)`,
-        `tabelas/*.json - Tabelas individuais em JSON`,
-        `tabelas/*.csv - Tabelas individuais em CSV (abrir no Excel)`,
+        `backup_completo.json — Backup JSON (restauração via sistema)`,
+        `backup_supabase.sql — SQL compatível com Supabase SQL Editor / psql`,
+        `tabelas/*.json — Tabelas individuais em JSON`,
+        `tabelas/*.csv — Tabelas individuais em CSV (abrir no Excel)`,
         ``,
         `=== RESTAURAÇÃO ===`,
-        `Para restaurar, importe o arquivo .zip na tela de Backup & Restauração.`,
+        `Opção 1: Importe o .zip na tela de Backup & Restauração.`,
+        `Opção 2: Cole backup_supabase.sql no SQL Editor do Supabase.`,
       ].join("\n"));
 
       const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 9 } });
