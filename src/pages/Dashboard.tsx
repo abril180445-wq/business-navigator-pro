@@ -298,7 +298,48 @@ export default function Dashboard() {
             </AreaChart>
           </ResponsiveContainer>
         </PBITile>
-      </div>
+      {/* Admin: Modules to implement */}
+      {isAdmin && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Construction className="w-4 h-4 text-muted-foreground" />
+            <h3 className="text-[13px] font-semibold text-foreground">Módulos para Implementar</h3>
+            <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider" style={{ background: "hsl(var(--pbi-yellow) / 0.15)", color: "hsl(var(--pbi-yellow))" }}>Admin</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {pendingModules.map((mod) => {
+              const Icon = mod.icon;
+              return (
+                <div key={mod.title} className="pbi-tile flex flex-col gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg shrink-0" style={{ backgroundColor: `${mod.color}15` }}>
+                      <Icon className="w-4 h-4" style={{ color: mod.color }} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-semibold text-foreground">{mod.title}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">{mod.description}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-auto">
+                    <div className="flex-1 h-1.5 rounded-full overflow-hidden bg-secondary">
+                      <div className="h-full rounded-full w-0" style={{ background: mod.color }} />
+                    </div>
+                    <span className="text-[9px] text-muted-foreground font-medium">0%</span>
+                  </div>
+                  <button
+                    onClick={() => window.alert(`Solicitar implementação do módulo "${mod.title}"`)}
+                    className="flex items-center justify-center gap-1.5 w-full h-8 rounded-md text-[11px] font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}
+                  >
+                    <Rocket className="w-3.5 h-3.5" />
+                    Implementar agora
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
