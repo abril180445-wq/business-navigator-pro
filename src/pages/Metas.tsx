@@ -480,7 +480,7 @@ function renderDynamicFields(
   return <>{fields}</>;
 }
 
-
+export default function Metas() {
   const { toast } = useToast();
   const { user, profile, canEditMetas, userRole } = useAuth();
   const [metas, setMetas] = useState<Meta[]>([]);
