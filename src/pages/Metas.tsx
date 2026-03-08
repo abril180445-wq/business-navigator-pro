@@ -40,6 +40,8 @@ interface AcaoMeta {
   concluida: boolean;
   responsavel: string | null;
   prazo: string | null;
+  tipo: "acao" | "contribuicao";
+  created_by: string | null;
 }
 
 const coresMeta = [
