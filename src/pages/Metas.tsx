@@ -308,6 +308,18 @@ export default function Metas() {
         prazo: m.prazo, prioridade: m.prioridade as Meta["prioridade"],
         parent_id: m.parent_id ?? null, ciclo: m.ciclo ?? "Q1 2026",
         status: m.status ?? "no_prazo",
+        descricao: m.descricao ?? "", local_obra: m.local_obra ?? "",
+        orcamento: Number(m.orcamento ?? 0), custo_atual: Number(m.custo_atual ?? 0),
+        equipe: m.equipe ?? "", fornecedor: m.fornecedor ?? "",
+        etapa: m.etapa ?? "", peso: Number(m.peso ?? 0),
+        tags: m.tags ?? [], data_inicio: m.data_inicio ?? null,
+        frequencia_checkin: m.frequencia_checkin ?? "semanal",
+        risco: m.risco ?? "", observacoes: m.observacoes ?? "",
+        aprovador: m.aprovador ?? "", departamento: m.departamento ?? "",
+        tipo_meta: m.tipo_meta ?? "quantitativa",
+        indicador_chave: m.indicador_chave ?? "", fonte_dados: m.fonte_dados ?? "",
+        impacto: m.impacto ?? "", dependencias: m.dependencias ?? "",
+        marco_critico: m.marco_critico ?? "", percentual_concluido: Number(m.percentual_concluido ?? 0),
       })));
     }
     setLoading(false);
