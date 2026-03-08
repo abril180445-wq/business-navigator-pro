@@ -764,11 +764,7 @@ export default function Metas() {
                             {ci.comentario && <p className="text-muted-foreground truncate">{ci.comentario}</p>}
                             {ci.imagens && ci.imagens.length > 0 && (
                               <div className="flex gap-1 mt-1">
-                                {ci.imagens.map((img, i) => (
-                                  <a key={i} href={img} target="_blank" rel="noopener noreferrer">
-                                    <img src={img} alt="" className="w-8 h-8 rounded object-cover" style={{ border: "1px solid hsl(var(--pbi-border))" }} />
-                                  </a>
-                                ))}
+                                {ci.imagens.map((f, i) => <FileThumbnail key={i} url={f} />)}
                               </div>
                             )}
                           </div>
