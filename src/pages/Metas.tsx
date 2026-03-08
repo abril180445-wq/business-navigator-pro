@@ -219,6 +219,11 @@ export default function Metas() {
     const meta = metas.find(m => m.id === id);
     const novoValor = parseFloat(editValues.atual) || 0;
     const novoObj = parseFloat(editValues.objetivo) || 1;
+    const categoriaFinal = editValues.categoria === "__outra__" ? editValues.categoriaCustom.trim() : editValues.categoria;
+    if (!categoriaFinal) {
+      toast({ title: "Informe a categoria", variant: "destructive" });
+      return;
+    }
     
     // Auto-calculate status
     const pct = (novoValor / novoObj) * 100;
@@ -228,7 +233,16 @@ export default function Metas() {
     else if (pct < 60) newStatus = "atencao";
 
     const { error } = await supabase.from("metas").update({
-      atual: novoValor, objetivo: novoObj, status: newStatus,
+      nome: editValues.nome,
+      atual: novoValor,
+      objetivo: novoObj,
+      unidade: editValues.unidade,
+      categoria: categoriaFinal,
+      responsavel: editValues.responsavel,
+      prioridade: editValues.prioridade,
+      ciclo: editValues.ciclo,
+      parent_id: editValues.parent_id || null,
+      status: newStatus,
     }).eq("id", id);
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
 
@@ -243,6 +257,7 @@ export default function Metas() {
       });
     }
     setEditingId(null);
+    setEditDialogOpen(false);
     toast({ title: "Meta atualizada!" });
   };
 
