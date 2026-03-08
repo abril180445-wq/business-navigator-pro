@@ -1199,7 +1199,7 @@ export default function Metas() {
 
       {/* ========== EDIT META DIALOG ========== */}
       <Dialog open={editDialogOpen} onOpenChange={(open) => { setEditDialogOpen(open); if (!open) setEditingId(null); }}>
-        <DialogContent className="pbi-tile border-border max-w-lg" style={{ background: "hsl(var(--pbi-surface))" }}>
+        <DialogContent className="pbi-tile border-border max-w-lg" style={{ background: "hsl(var(--pbi-surface))" }} onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="text-[14px] font-bold text-foreground flex items-center gap-2">
               <Pencil className="w-4 h-4" style={{ color: "hsl(var(--pbi-yellow))" }} /> Editar Meta
