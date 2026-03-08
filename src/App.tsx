@@ -14,6 +14,7 @@ import ImportacaoExcel from "@/pages/ImportacaoExcel";
 import Contabilidade from "@/pages/Contabilidade";
 import Pedidos from "@/pages/Pedidos";
 import GerenciarUsuarios from "@/pages/GerenciarUsuarios";
+import BackupRestore from "@/pages/BackupRestore";
 import ModulePlaceholder from "@/pages/ModulePlaceholder";
 import Auth from "@/pages/Auth";
 import ResetPassword from "@/pages/ResetPassword";
@@ -35,6 +36,7 @@ const ProtectedApp = () => (
         <Route path="/pedidos" element={<Pedidos />} />
         <Route path="/pedidos/*" element={<Pedidos />} />
         <Route path="/usuarios" element={<GerenciarUsuarios />} />
+        <Route path="/backup" element={<BackupRestore />} />
         <Route path="/manufatura/*" element={<ModulePlaceholder />} />
         <Route path="/manufatura" element={<ModulePlaceholder />} />
         <Route path="/ativos" element={<ModulePlaceholder />} />

@@ -24,6 +24,7 @@ import {
   MoreVertical,
   BarChart3,
   Filter,
+  HardDrive,
 } from "lucide-react";
 import logoSanRemo from "@/assets/logo-san-remo.png";
 import { Button } from "@/components/ui/button";
@@ -85,6 +86,7 @@ const modules: ModuleItem[] = [
   { label: "Suporte", icon: Headphones, path: "/helpdesk", section: "Módulos" },
   { label: "Logística", icon: Truck, path: "/pdv", section: "Módulos" },
   { label: "Usuários", icon: Users, path: "/usuarios", section: "Admin" },
+  { label: "Backup", icon: HardDrive, path: "/backup", section: "Admin" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

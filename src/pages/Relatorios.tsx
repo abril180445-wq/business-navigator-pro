@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { FileText, Download, Filter, ChevronDown, ArrowUpRight, ArrowDownRight, BarChart3 } from "lucide-react";
+import { FileText, Download, Filter, ArrowUpRight, ArrowDownRight, BarChart3, FileSpreadsheet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 const dadosExemplo = [
@@ -84,6 +85,172 @@ export default function Relatorios() {
     toast({ title: "PDF gerado!", description: `${tipoLabel} exportado com sucesso.` });
   };
 
+  const exportExcel = () => {
+    const tipoLabel = tiposRelatorio.find((t) => t.value === tipo)?.label || "Relatório";
+    const wb = XLSX.utils.book_new();
+
+    // === SHEET 1: Cover / Summary ===
+    const coverData = [
+      [""],
+      ["SAN REMO CONSTRUTORA"],
+      ["Sistema ERP — Painel de Gestão"],
+      [""],
+      [tipoLabel.toUpperCase()],
+      [`Período: ${dataInicio} a ${dataFim}`],
+      [`Gerado em: ${new Date().toLocaleString("pt-BR")}`],
+      [""],
+      ["RESUMO EXECUTIVO"],
+      [""],
+      ["Indicador", "Valor (R$)", "Observação"],
+      ["Total de Receitas", totalReceitas, "Entradas no período"],
+      ["Total de Despesas", totalDespesas, "Saídas no período"],
+      ["Saldo Líquido", saldo, saldo >= 0 ? "Positivo" : "Negativo"],
+      ["Nº de Registros", filteredData.length, "Lançamentos filtrados"],
+      [""],
+      ["ANÁLISE POR CATEGORIA"],
+      [""],
+      ["Categoria", "Total (R$)", "Nº Registros", "% do Total"],
+    ];
+
+    // Calculate category breakdown
+    const categories = [...new Set(filteredData.map(d => d.categoria))];
+    const totalAbs = filteredData.reduce((s, d) => s + Math.abs(d.valor), 0);
+    categories.forEach(cat => {
+      const items = filteredData.filter(d => d.categoria === cat);
+      const total = items.reduce((s, d) => s + d.valor, 0);
+      const pct = totalAbs > 0 ? ((Math.abs(total) / totalAbs) * 100).toFixed(1) + "%" : "0%";
+      coverData.push([cat, total, items.length, pct] as any);
+    });
+
+    const wsCover = XLSX.utils.aoa_to_sheet(coverData);
+
+    // Column widths
+    wsCover["!cols"] = [{ wch: 28 }, { wch: 20 }, { wch: 18 }, { wch: 14 }];
+
+    // Merge cells for header
+    wsCover["!merges"] = [
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } }, // Company name
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 3 } }, // Subtitle
+      { s: { r: 4, c: 0 }, e: { r: 4, c: 3 } }, // Report type
+      { s: { r: 5, c: 0 }, e: { r: 5, c: 3 } }, // Period
+      { s: { r: 6, c: 0 }, e: { r: 6, c: 3 } }, // Generated
+      { s: { r: 8, c: 0 }, e: { r: 8, c: 3 } }, // Summary title
+      { s: { r: 16, c: 0 }, e: { r: 16, c: 3 } }, // Category title
+    ];
+
+    XLSX.utils.book_append_sheet(wb, wsCover, "Resumo");
+
+    // === SHEET 2: Detailed Data ===
+    const detailHeader = [
+      ["SAN REMO CONSTRUTORA — DETALHAMENTO DE LANÇAMENTOS"],
+      [tipoLabel + ` | Período: ${dataInicio} a ${dataFim}`],
+      [""],
+      ["#", "Data", "Categoria", "Descrição", "Valor (R$)", "Tipo"],
+    ];
+
+    const detailRows = filteredData.map((d, i) => [
+      i + 1,
+      d.data,
+      d.categoria,
+      d.descricao,
+      d.valor,
+      d.valor >= 0 ? "Receita" : "Despesa",
+    ]);
+
+    // Totals row
+    const totalRow = ["", "", "", "TOTAL", filteredData.reduce((s, d) => s + d.valor, 0), ""];
+    const allDetailData = [...detailHeader, ...detailRows, [""], totalRow as any];
+
+    const wsDetail = XLSX.utils.aoa_to_sheet(allDetailData);
+
+    wsDetail["!cols"] = [
+      { wch: 5 },  // #
+      { wch: 12 }, // Data
+      { wch: 16 }, // Categoria
+      { wch: 45 }, // Descrição
+      { wch: 18 }, // Valor
+      { wch: 10 }, // Tipo
+    ];
+
+    wsDetail["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }, // Title
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } }, // Subtitle
+    ];
+
+    // Format valor column as currency
+    const startRow = 4; // data starts at row 4 (0-indexed)
+    for (let i = 0; i < detailRows.length; i++) {
+      const cell = wsDetail[XLSX.utils.encode_cell({ r: startRow + i, c: 4 })];
+      if (cell) cell.z = '#,##0.00';
+    }
+    // Total cell
+    const totalCell = wsDetail[XLSX.utils.encode_cell({ r: startRow + detailRows.length + 1, c: 4 })];
+    if (totalCell) totalCell.z = '#,##0.00';
+
+    XLSX.utils.book_append_sheet(wb, wsDetail, "Detalhamento");
+
+    // === SHEET 3: Category Analysis ===
+    const catHeader = [
+      ["SAN REMO CONSTRUTORA — ANÁLISE POR CATEGORIA"],
+      [`Período: ${dataInicio} a ${dataFim}`],
+      [""],
+      ["Categoria", "Receitas (R$)", "Despesas (R$)", "Saldo (R$)", "Nº Transações", "Ticket Médio (R$)"],
+    ];
+
+    const catRows = categories.map(cat => {
+      const items = filteredData.filter(d => d.categoria === cat);
+      const rec = items.filter(d => d.valor > 0).reduce((s, d) => s + d.valor, 0);
+      const desp = items.filter(d => d.valor < 0).reduce((s, d) => s + Math.abs(d.valor), 0);
+      const total = items.reduce((s, d) => s + d.valor, 0);
+      const avg = items.length > 0 ? total / items.length : 0;
+      return [cat, rec, desp, total, items.length, Math.round(avg)];
+    });
+
+    const allCatData = [...catHeader, ...catRows];
+    const wsCat = XLSX.utils.aoa_to_sheet(allCatData);
+    wsCat["!cols"] = [{ wch: 22 }, { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 14 }, { wch: 18 }];
+    wsCat["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } },
+    ];
+
+    XLSX.utils.book_append_sheet(wb, wsCat, "Por Categoria");
+
+    // === SHEET 4: Monthly Summary ===
+    const monthHeader = [
+      ["SAN REMO CONSTRUTORA — RESUMO MENSAL"],
+      [`Período: ${dataInicio} a ${dataFim}`],
+      [""],
+      ["Mês", "Receitas (R$)", "Despesas (R$)", "Saldo (R$)", "Nº Lançamentos"],
+    ];
+
+    // Group by month
+    const months: Record<string, { rec: number; desp: number; count: number }> = {};
+    filteredData.forEach(d => {
+      const m = d.data.substring(3, 10); // MM/YYYY
+      if (!months[m]) months[m] = { rec: 0, desp: 0, count: 0 };
+      if (d.valor > 0) months[m].rec += d.valor;
+      else months[m].desp += Math.abs(d.valor);
+      months[m].count++;
+    });
+
+    const monthRows = Object.entries(months).map(([m, v]) => [m, v.rec, v.desp, v.rec - v.desp, v.count]);
+    const allMonthData = [...monthHeader, ...monthRows];
+    const wsMonth = XLSX.utils.aoa_to_sheet(allMonthData);
+    wsMonth["!cols"] = [{ wch: 12 }, { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 16 }];
+    wsMonth["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } },
+    ];
+
+    XLSX.utils.book_append_sheet(wb, wsMonth, "Mensal");
+
+    // Save
+    const fileName = `${tipoLabel.replace(/ /g, "_")}_${dataInicio}_${dataFim}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    toast({ title: "Excel profissional gerado!", description: `4 abas: Resumo, Detalhamento, Por Categoria e Mensal` });
+  };
+
   return (
     <div className="space-y-4">
       {/* PBI Header */}
@@ -92,12 +259,17 @@ export default function Relatorios() {
           <BarChart3 className="w-5 h-5" style={{ color: "hsl(var(--pbi-yellow))" }} />
           <div>
             <h1 className="text-base font-semibold text-white">Relatórios</h1>
-            <p className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Gere e exporte relatórios analíticos em PDF</p>
+            <p className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Gere e exporte relatórios analíticos em PDF e Excel</p>
           </div>
         </div>
-        <Button onClick={exportPDF} className="h-8 text-[12px] font-semibold gap-1.5" style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}>
-          <Download className="w-3.5 h-3.5" /> Exportar PDF
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={exportExcel} className="h-8 text-[12px] font-semibold gap-1.5" style={{ background: "hsl(152, 60%, 38%)", color: "white" }}>
+            <FileSpreadsheet className="w-3.5 h-3.5" /> Exportar Excel
+          </Button>
+          <Button onClick={exportPDF} className="h-8 text-[12px] font-semibold gap-1.5" style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}>
+            <Download className="w-3.5 h-3.5" /> Exportar PDF
+          </Button>
+        </div>
       </div>
 
       {/* Filter bar */}
@@ -121,6 +293,27 @@ export default function Relatorios() {
         <div className="flex items-center gap-2">
           <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Até:</Label>
           <Input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} className="h-7 text-[11px] w-[130px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+        </div>
+      </div>
+
+      {/* Excel preview info */}
+      <div className="pbi-tile flex items-center gap-4" style={{ borderLeft: "3px solid hsl(152, 60%, 38%)" }}>
+        <FileSpreadsheet className="w-5 h-5 shrink-0" style={{ color: "hsl(152, 60%, 38%)" }} />
+        <div className="flex-1">
+          <p className="text-[12px] font-semibold" style={{ color: "hsl(var(--pbi-text-primary))" }}>Relatório Excel Profissional</p>
+          <p className="text-[10px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>4 abas: Resumo Executivo · Detalhamento Completo · Análise por Categoria · Resumo Mensal</p>
+        </div>
+        <div className="flex gap-4 text-center">
+          {[
+            { label: "Registros", value: filteredData.length },
+            { label: "Categorias", value: [...new Set(filteredData.map(d => d.categoria))].length },
+            { label: "Abas", value: 4 },
+          ].map((s) => (
+            <div key={s.label}>
+              <p className="text-lg font-bold" style={{ color: "hsl(var(--pbi-text-primary))" }}>{s.value}</p>
+              <p className="text-[9px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>{s.label}</p>
+            </div>
+          ))}
         </div>
       </div>
 
