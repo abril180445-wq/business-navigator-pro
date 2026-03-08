@@ -58,53 +58,114 @@ export type Database = {
           },
         ]
       }
+      meta_checkins: {
+        Row: {
+          comentario: string | null
+          confianca: string
+          created_at: string
+          id: string
+          meta_id: string
+          user_id: string
+          user_name: string
+          valor_anterior: number
+          valor_novo: number
+        }
+        Insert: {
+          comentario?: string | null
+          confianca?: string
+          created_at?: string
+          id?: string
+          meta_id: string
+          user_id: string
+          user_name?: string
+          valor_anterior?: number
+          valor_novo?: number
+        }
+        Update: {
+          comentario?: string | null
+          confianca?: string
+          created_at?: string
+          id?: string
+          meta_id?: string
+          user_id?: string
+          user_name?: string
+          valor_anterior?: number
+          valor_novo?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_checkins_meta_id_fkey"
+            columns: ["meta_id"]
+            isOneToOne: false
+            referencedRelation: "metas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       metas: {
         Row: {
           atual: number
           categoria: string
+          ciclo: string
           cor: string
           created_at: string
           created_by: string | null
           id: string
           nome: string
           objetivo: number
+          parent_id: string | null
           prazo: string
           prioridade: string
           responsavel: string
+          status: string
           unidade: string
           updated_at: string
         }
         Insert: {
           atual?: number
           categoria?: string
+          ciclo?: string
           cor?: string
           created_at?: string
           created_by?: string | null
           id?: string
           nome: string
           objetivo: number
+          parent_id?: string | null
           prazo?: string
           prioridade?: string
           responsavel?: string
+          status?: string
           unidade?: string
           updated_at?: string
         }
         Update: {
           atual?: number
           categoria?: string
+          ciclo?: string
           cor?: string
           created_at?: string
           created_by?: string | null
           id?: string
           nome?: string
           objetivo?: number
+          parent_id?: string | null
           prazo?: string
           prioridade?: string
           responsavel?: string
+          status?: string
           unidade?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "metas_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "metas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
