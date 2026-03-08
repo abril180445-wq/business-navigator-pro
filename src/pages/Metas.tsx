@@ -907,6 +907,7 @@ export default function Metas() {
                                 const isMetaQual = meta.unidade === "texto";
                                 setEditMetaTipo(isMetaQual ? "qualitativa" : "quantitativa");
                                 setEditMetaToggles({
+                                  ...defaultTogglesQuant,
                                   valores: !isMetaQual,
                                   responsavel: !!meta.responsavel,
                                   prazo: !!meta.prazo,
@@ -914,6 +915,25 @@ export default function Metas() {
                                   ciclo: !!meta.ciclo,
                                   metaPai: !!meta.parent_id,
                                   categoria: !!meta.categoria,
+                                  descricao: !!meta.descricao,
+                                  local_obra: !!meta.local_obra,
+                                  orcamento: meta.orcamento > 0,
+                                  equipe: !!meta.equipe,
+                                  fornecedor: !!meta.fornecedor,
+                                  etapa: !!meta.etapa,
+                                  risco: !!meta.risco,
+                                  observacoes: !!meta.observacoes,
+                                  aprovador: !!meta.aprovador,
+                                  departamento: !!meta.departamento,
+                                  impacto: !!meta.impacto,
+                                  dependencias: !!meta.dependencias,
+                                  marco_critico: !!meta.marco_critico,
+                                  peso: meta.peso > 0,
+                                  tags: (meta.tags?.length ?? 0) > 0,
+                                  indicador_chave: !!meta.indicador_chave,
+                                  fonte_dados: !!meta.fonte_dados,
+                                  data_inicio: !!meta.data_inicio,
+                                  frequencia_checkin: meta.frequencia_checkin !== "semanal",
                                 });
                                 setEditValues({
                                   nome: meta.nome, atual: meta.atual.toString(), objetivo: meta.objetivo.toString(),
@@ -921,6 +941,17 @@ export default function Metas() {
                                   categoriaCustom: categorias.includes(meta.categoria) ? "" : meta.categoria,
                                   responsavel: meta.responsavel, prioridade: meta.prioridade,
                                   ciclo: meta.ciclo, parent_id: meta.parent_id || "", prazo: meta.prazo || "",
+                                  descricao: meta.descricao || "", local_obra: meta.local_obra || "",
+                                  orcamento: meta.orcamento.toString(), custo_atual: meta.custo_atual.toString(),
+                                  equipe: meta.equipe || "", fornecedor: meta.fornecedor || "",
+                                  etapa: meta.etapa || "", peso: meta.peso.toString(),
+                                  tags: (meta.tags || []).join(", "), data_inicio: meta.data_inicio || "",
+                                  frequencia_checkin: meta.frequencia_checkin || "semanal",
+                                  risco: meta.risco || "", observacoes: meta.observacoes || "",
+                                  aprovador: meta.aprovador || "", departamento: meta.departamento || "",
+                                  indicador_chave: meta.indicador_chave || "", fonte_dados: meta.fonte_dados || "",
+                                  impacto: meta.impacto || "", dependencias: meta.dependencias || "",
+                                  marco_critico: meta.marco_critico || "",
                                 });
                                 setEditDialogOpen(true);
                               }} className="p-1 rounded hover:bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" title="Editar meta"><Pencil className="w-3 h-3" /></button>
