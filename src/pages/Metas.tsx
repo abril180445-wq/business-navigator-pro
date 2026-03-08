@@ -62,6 +62,7 @@ interface CheckIn {
   comentario: string | null;
   confianca: "no_prazo" | "atencao" | "em_risco";
   created_at: string;
+  imagens: string[];
 }
 
 const coresMeta = [
