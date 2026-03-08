@@ -112,6 +112,15 @@
     --warning-foreground: 0 0% 100%;
     --info: 205 75% 55%;
     --info-foreground: 0 0% 100%;
+
+    /* PBI text tokens for dark mode */
+    --pbi-text-primary: 0 0% 92%;
+    --pbi-text-secondary: 0 0% 55%;
+
+    --pbi-dark: 0 0% 12%;
+    --pbi-gray: 0 0% 14%;
+    --pbi-surface: 0 0% 18%;
+    --pbi-border: 0 0% 22%;
   }
 }
 
