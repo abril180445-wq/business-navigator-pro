@@ -59,7 +59,7 @@ const prioridadeConfig = {
 };
 
 const PBITile = ({ children, title, className = "", actions }: { children: React.ReactNode; title?: string; className?: string; actions?: React.ReactNode }) => (
-  <div className={`pbi-tile p-4 ${className}`}>
+  <div className={`pbi-tile ${className}`}>
     {(title || actions) && (
       <div className="flex items-center justify-between mb-3">
         {title && <h3 className="text-[13px] font-semibold text-foreground">{title}</h3>}
@@ -251,7 +251,7 @@ export default function Metas() {
   return (
     <div className="space-y-3">
       {/* Header with role badge */}
-      <div className="pbi-filter-bar rounded-sm px-4 py-2.5 flex items-center gap-3 flex-wrap">
+      <div className="pbi-filter-bar rounded-sm px-3 sm:px-4 py-2.5 flex items-center gap-2 sm:gap-3 flex-wrap">
         <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
           <Filter className="w-3.5 h-3.5" />
           <span className="font-medium">Filtros</span>
@@ -293,7 +293,7 @@ export default function Metas() {
                   <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Nome da Meta *</Label>
                   <Input value={newMeta.nome} onChange={(e) => setNewMeta({ ...newMeta, nome: e.target.value })} placeholder="Ex: Faturamento Mensal" className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
                 </div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1.5">
                     <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Valor Atual</Label>
                     <Input type="number" value={newMeta.atual} onChange={(e) => setNewMeta({ ...newMeta, atual: e.target.value })} placeholder="0" className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
@@ -307,7 +307,7 @@ export default function Metas() {
                     <Input value={newMeta.unidade} onChange={(e) => setNewMeta({ ...newMeta, unidade: e.target.value })} placeholder="R$" className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1.5">
                     <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Categoria</Label>
                     <select value={newMeta.categoria} onChange={(e) => setNewMeta({ ...newMeta, categoria: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
@@ -335,7 +335,7 @@ export default function Metas() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 p-1 rounded" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }}>
+      <div className="pbi-tabs-scroll" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }}>
         {editorTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
@@ -349,7 +349,7 @@ export default function Metas() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {[
           { label: "Total Metas", value: metas.length, color: "hsl(207, 89%, 48%)", icon: Target },
           { label: "Progresso Médio", value: `${Math.round(totalProgress)}%`, color: "hsl(152, 60%, 38%)", icon: TrendingUp },
@@ -457,7 +457,7 @@ export default function Metas() {
       {activeTab === "acoes" && !loading && (
         <div className="space-y-3">
           {!canEditMetas && (
-            <div className="pbi-tile p-4" style={{ borderLeft: "4px solid hsl(174, 62%, 47%)" }}>
+            <div className="pbi-tile" style={{ borderLeft: "4px solid hsl(174, 62%, 47%)" }}>
               <div className="flex items-center gap-2 mb-1">
                 <ListChecks className="w-4 h-4" style={{ color: "hsl(174, 62%, 47%)" }} />
                 <p className="text-[13px] font-semibold text-foreground">Suas Contribuições</p>

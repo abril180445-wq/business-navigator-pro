@@ -91,7 +91,7 @@ const kpis = [
 ];
 
 const PBITile = ({ children, title, className = "" }: { children: React.ReactNode; title?: string; className?: string }) => (
-  <div className={`pbi-tile p-4 ${className}`}>
+  <div className={`pbi-tile ${className}`}>
     {title && (
       <h3 className="text-[13px] font-semibold text-foreground mb-3">{title}</h3>
     )}
@@ -105,7 +105,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-3">
       {/* Filter bar — Power BI style */}
-      <div className="pbi-filter-bar rounded-sm px-4 py-2.5 flex items-center gap-3 flex-wrap">
+      <div className="pbi-filter-bar rounded-sm px-3 sm:px-4 py-2.5 flex items-center gap-2 sm:gap-3 flex-wrap">
         <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
           <Filter className="w-3.5 h-3.5" />
           <span className="font-medium">Filtros</span>

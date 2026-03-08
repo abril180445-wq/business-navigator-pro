@@ -47,7 +47,7 @@ export default function Pedidos() {
   return (
     <div className="space-y-4">
       {/* PBI Header */}
-      <div className="pbi-header flex items-center justify-between">
+      <div className="pbi-header flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-3">
           <Building2 className="w-5 h-5" style={{ color: "hsl(var(--pbi-yellow))" }} />
           <div>
@@ -86,7 +86,7 @@ export default function Pedidos() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 p-1 rounded-md" style={{ background: "hsl(var(--pbi-surface))" }}>
+      <div className="pbi-tabs-scroll" style={{ background: "hsl(var(--pbi-surface))" }}>
         {([
           { key: "empreendimentos", label: "Empreendimentos" },
           { key: "contratos", label: "Contratos" },

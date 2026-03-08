@@ -266,7 +266,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Power BI canvas */}
-        <main className="flex-1 overflow-y-auto pbi-canvas p-3 sm:p-4 lg:p-5">
+        <main className="flex-1 overflow-y-auto pbi-canvas p-2 sm:p-4 lg:p-5">
           {children}
         </main>
       </div>
