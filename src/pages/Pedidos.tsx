@@ -52,11 +52,11 @@ export default function Pedidos() {
           <Building2 className="w-5 h-5" style={{ color: "hsl(var(--pbi-yellow))" }} />
           <div>
             <h1 className="text-base font-semibold text-white">Gestão de Obras</h1>
-            <p className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Empreendimentos, contratos e materiais</p>
+            <p className="text-[11px]" style={{ color: "hsl(0, 0%, 72%)" }}>Empreendimentos, contratos e materiais</p>
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="h-7 text-[11px] border-none gap-1" style={{ background: "hsl(var(--pbi-surface))", color: "hsl(var(--pbi-text-primary))" }}>
+          <Button variant="outline" size="sm" className="h-7 text-[11px] border-none gap-1 bg-secondary text-foreground hover:bg-secondary/80">
             <Filter className="w-3 h-3" /> Filtrar
           </Button>
           <Button size="sm" className="h-7 text-[11px] font-semibold gap-1" style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}>
@@ -72,10 +72,10 @@ export default function Pedidos() {
           return (
             <div key={card.title} className="pbi-tile">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] uppercase tracking-wider" style={{ color: "hsl(var(--pbi-text-secondary))" }}>{card.title}</p>
-                <Icon className="w-3.5 h-3.5" style={{ color: "hsl(var(--pbi-text-secondary))" }} />
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{card.title}</p>
+                <Icon className="w-3.5 h-3.5 text-muted-foreground" />
               </div>
-              <p className="text-xl font-bold" style={{ color: "hsl(var(--pbi-text-primary))" }}>{card.value}</p>
+              <p className="text-xl font-bold text-foreground">{card.value}</p>
               <div className="flex items-center gap-1 mt-1">
                 <ArrowUpRight className="w-3 h-3" style={{ color: "hsl(152, 60%, 38%)" }} />
                 <span className="text-[10px]" style={{ color: "hsl(152, 60%, 38%)" }}>{card.change}</span>
@@ -86,7 +86,7 @@ export default function Pedidos() {
       </div>
 
       {/* Tabs */}
-      <div className="pbi-tabs-scroll" style={{ background: "hsl(var(--pbi-surface))" }}>
+      <div className="pbi-tabs-scroll bg-card border border-border rounded-md">
         {([
           { key: "empreendimentos", label: "Empreendimentos" },
           { key: "contratos", label: "Contratos" },
@@ -98,10 +98,10 @@ export default function Pedidos() {
             className="px-4 py-1.5 rounded text-[11px] font-medium transition-colors"
             style={{
               background: activeTab === tab.key ? "hsl(var(--pbi-yellow))" : "transparent",
-              color: activeTab === tab.key ? "hsl(var(--pbi-dark))" : "hsl(var(--pbi-text-secondary))",
+              color: activeTab === tab.key ? "hsl(var(--pbi-dark))" : undefined,
             }}
           >
-            {tab.label}
+            <span className={activeTab !== tab.key ? "text-muted-foreground" : ""}>{tab.label}</span>
           </button>
         ))}
       </div>
@@ -110,13 +110,13 @@ export default function Pedidos() {
       <div className="pbi-tile">
         {activeTab === "empreendimentos" && (
           <>
-            <p className="text-[11px] font-semibold mb-3" style={{ color: "hsl(var(--pbi-text-primary))" }}>Empreendimentos</p>
+            <p className="text-[11px] font-semibold mb-3 text-foreground">Empreendimentos</p>
             <div className="overflow-x-auto">
               <table className="w-full text-[11px]">
                 <thead>
-                  <tr style={{ borderBottom: "1px solid hsl(var(--pbi-border))" }}>
+                  <tr className="border-b border-border">
                     {["Código", "Empreendimento", "Fase", "Unidades", "Vendidas", "Previsão", "Status"].map((h) => (
-                      <th key={h} className="text-left py-2 px-2 font-medium" style={{ color: "hsl(var(--pbi-text-secondary))" }}>{h}</th>
+                      <th key={h} className="text-left py-2 px-2 font-medium text-muted-foreground">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -125,21 +125,21 @@ export default function Pedidos() {
                     const pct = Math.round((e.vendidas / e.unidades) * 100);
                     const st = statusColors[e.status] || statusColors["planejamento"];
                     return (
-                      <tr key={e.id} className="hover:bg-white/5 cursor-pointer transition-colors" style={{ borderBottom: "1px solid hsl(var(--pbi-border) / 0.5)" }}>
+                      <tr key={e.id} className="pbi-row-hover cursor-pointer transition-colors border-b border-border/50">
                         <td className="py-1.5 px-2 font-medium" style={{ color: "hsl(207, 89%, 48%)" }}>{e.id}</td>
-                        <td className="py-1.5 px-2 font-medium" style={{ color: "hsl(var(--pbi-text-primary))" }}>{e.nome}</td>
-                        <td className="py-1.5 px-2" style={{ color: "hsl(var(--pbi-text-secondary))" }}>{e.fase}</td>
-                        <td className="py-1.5 px-2" style={{ color: "hsl(var(--pbi-text-primary))" }}>{e.unidades}</td>
+                        <td className="py-1.5 px-2 font-medium text-foreground">{e.nome}</td>
+                        <td className="py-1.5 px-2 text-muted-foreground">{e.fase}</td>
+                        <td className="py-1.5 px-2 text-foreground">{e.unidades}</td>
                         <td className="py-1.5 px-2">
                           <div className="flex items-center gap-2">
-                            <span style={{ color: "hsl(var(--pbi-text-primary))" }}>{e.vendidas}</span>
-                            <div className="w-16 h-1.5 rounded-full" style={{ background: "hsl(var(--pbi-border))" }}>
+                            <span className="text-foreground">{e.vendidas}</span>
+                            <div className="w-16 h-1.5 rounded-full bg-secondary">
                               <div className="h-full rounded-full" style={{ width: `${pct}%`, background: "hsl(207, 89%, 48%)" }} />
                             </div>
-                            <span className="text-[10px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>{pct}%</span>
+                            <span className="text-[10px] text-muted-foreground">{pct}%</span>
                           </div>
                         </td>
-                        <td className="py-1.5 px-2" style={{ color: "hsl(var(--pbi-text-secondary))" }}>{e.previsao}</td>
+                        <td className="py-1.5 px-2 text-muted-foreground">{e.previsao}</td>
                         <td className="py-1.5 px-2">
                           <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: st.bg, color: st.color }}>{e.status}</span>
                         </td>
@@ -154,13 +154,13 @@ export default function Pedidos() {
 
         {activeTab === "contratos" && (
           <>
-            <p className="text-[11px] font-semibold mb-3" style={{ color: "hsl(var(--pbi-text-primary))" }}>Contratos com Fornecedores</p>
+            <p className="text-[11px] font-semibold mb-3 text-foreground">Contratos com Fornecedores</p>
             <div className="overflow-x-auto">
               <table className="w-full text-[11px]">
                 <thead>
-                  <tr style={{ borderBottom: "1px solid hsl(var(--pbi-border))" }}>
+                  <tr className="border-b border-border">
                     {["Contrato", "Fornecedor", "Objeto", "Data", "Valor", "Status"].map((h) => (
-                      <th key={h} className={`py-2 px-2 font-medium ${h === "Valor" ? "text-right" : "text-left"}`} style={{ color: "hsl(var(--pbi-text-secondary))" }}>{h}</th>
+                      <th key={h} className={`py-2 px-2 font-medium text-muted-foreground ${h === "Valor" ? "text-right" : "text-left"}`}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -168,12 +168,12 @@ export default function Pedidos() {
                   {contratos.map((c) => {
                     const st = statusColors[c.status] || statusColors["ativo"];
                     return (
-                      <tr key={c.id} className="hover:bg-white/5 cursor-pointer transition-colors" style={{ borderBottom: "1px solid hsl(var(--pbi-border) / 0.5)" }}>
+                      <tr key={c.id} className="pbi-row-hover cursor-pointer transition-colors border-b border-border/50">
                         <td className="py-1.5 px-2 font-medium" style={{ color: "hsl(207, 89%, 48%)" }}>{c.id}</td>
-                        <td className="py-1.5 px-2" style={{ color: "hsl(var(--pbi-text-primary))" }}>{c.fornecedor}</td>
-                        <td className="py-1.5 px-2 max-w-[200px] truncate" style={{ color: "hsl(var(--pbi-text-secondary))" }}>{c.objeto}</td>
-                        <td className="py-1.5 px-2" style={{ color: "hsl(var(--pbi-text-secondary))" }}>{c.data}</td>
-                        <td className="py-1.5 px-2 text-right font-medium" style={{ color: "hsl(var(--pbi-text-primary))" }}>R$ {c.valor.toLocaleString()}</td>
+                        <td className="py-1.5 px-2 text-foreground">{c.fornecedor}</td>
+                        <td className="py-1.5 px-2 max-w-[200px] truncate text-muted-foreground">{c.objeto}</td>
+                        <td className="py-1.5 px-2 text-muted-foreground">{c.data}</td>
+                        <td className="py-1.5 px-2 text-right font-medium text-foreground">R$ {c.valor.toLocaleString()}</td>
                         <td className="py-1.5 px-2">
                           <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: st.bg, color: st.color }}>{c.status}</span>
                         </td>
@@ -188,13 +188,13 @@ export default function Pedidos() {
 
         {activeTab === "materiais" && (
           <>
-            <p className="text-[11px] font-semibold mb-3" style={{ color: "hsl(var(--pbi-text-primary))" }}>Estoque de Materiais</p>
+            <p className="text-[11px] font-semibold mb-3 text-foreground">Estoque de Materiais</p>
             <div className="overflow-x-auto">
               <table className="w-full text-[11px]">
                 <thead>
-                  <tr style={{ borderBottom: "1px solid hsl(var(--pbi-border))" }}>
+                  <tr className="border-b border-border">
                     {["Código", "Material", "Canteiro", "Quantidade", "Mínimo", "Status"].map((h) => (
-                      <th key={h} className={`py-2 px-2 font-medium ${h === "Quantidade" || h === "Mínimo" ? "text-right" : "text-left"}`} style={{ color: "hsl(var(--pbi-text-secondary))" }}>{h}</th>
+                      <th key={h} className={`py-2 px-2 font-medium text-muted-foreground ${h === "Quantidade" || h === "Mínimo" ? "text-right" : "text-left"}`}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -208,12 +208,12 @@ export default function Pedidos() {
                       ? { label: "Baixo", color: "hsl(45, 100%, 51%)", bg: "hsl(45, 100%, 51%, 0.15)" }
                       : { label: "Crítico", color: "hsl(0, 72%, 51%)", bg: "hsl(0, 72%, 51%, 0.15)" };
                     return (
-                      <tr key={item.codigo} className="hover:bg-white/5 cursor-pointer transition-colors" style={{ borderBottom: "1px solid hsl(var(--pbi-border) / 0.5)" }}>
+                      <tr key={item.codigo} className="pbi-row-hover cursor-pointer transition-colors border-b border-border/50">
                         <td className="py-1.5 px-2 font-medium" style={{ color: "hsl(207, 89%, 48%)" }}>{item.codigo}</td>
-                        <td className="py-1.5 px-2" style={{ color: "hsl(var(--pbi-text-primary))" }}>{item.nome}</td>
-                        <td className="py-1.5 px-2" style={{ color: "hsl(var(--pbi-text-secondary))" }}>{item.armazem}</td>
-                        <td className="py-1.5 px-2 text-right" style={{ color: "hsl(var(--pbi-text-primary))" }}>{item.qtd.toLocaleString()} {item.unidade}</td>
-                        <td className="py-1.5 px-2 text-right" style={{ color: "hsl(var(--pbi-text-secondary))" }}>{item.minimo.toLocaleString()} {item.unidade}</td>
+                        <td className="py-1.5 px-2 text-foreground">{item.nome}</td>
+                        <td className="py-1.5 px-2 text-muted-foreground">{item.armazem}</td>
+                        <td className="py-1.5 px-2 text-right text-foreground">{item.qtd.toLocaleString()} {item.unidade}</td>
+                        <td className="py-1.5 px-2 text-right text-muted-foreground">{item.minimo.toLocaleString()} {item.unidade}</td>
                         <td className="py-1.5 px-2">
                           <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: st.bg, color: st.color }}>{st.label}</span>
                         </td>
