@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import {
   DollarSign,
   Building2,
@@ -101,9 +102,20 @@ const PBITile = ({ children, title, className = "" }: { children: React.ReactNod
 
 export default function Dashboard() {
   const [periodo, setPeriodo] = useState("2025");
+  const { userRole, profile } = useAuth();
+  const isNormal = userRole === "normal";
 
   return (
     <div className="space-y-3">
+      {/* Welcome banner for normal users */}
+      {isNormal && (
+        <div className="pbi-tile" style={{ borderLeft: "3px solid hsl(207, 89%, 48%)" }}>
+          <p className="text-[12px] font-medium" style={{ color: "hsl(var(--pbi-text-primary))" }}>
+            Bem-vindo, <strong style={{ color: "hsl(var(--pbi-yellow))" }}>{profile?.full_name}</strong>! 
+            Você está no modo <strong>visualização</strong>. Para editar metas ou gerar relatórios, solicite acesso ao administrador.
+          </p>
+        </div>
+      )}
       {/* Filter bar — Power BI style */}
       <div className="pbi-filter-bar rounded-sm px-3 sm:px-4 py-2.5 flex items-center gap-2 sm:gap-3 flex-wrap">
         <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
@@ -161,7 +173,8 @@ export default function Dashboard() {
         })}
       </div>
 
-      {/* Row 2: Revenue chart + Pie */}
+      {/* Row 2: Revenue chart + Pie — financial hidden for normal */}
+      {!isNormal && (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <PBITile title="Faturamento vs Custos (R$ mil)" className="lg:col-span-2">
           <ResponsiveContainer width="100%" height={260}>
@@ -202,6 +215,7 @@ export default function Dashboard() {
           </div>
         </PBITile>
       </div>
+      )}
 
       {/* Row 3: Bar chart + Progress + Line chart */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useAuth } from "@/hooks/useAuth";
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { loading, user, isAdmin, signOut } = useAuth();
+  const { loading, user, userRole, signOut } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -20,7 +20,8 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     return <Navigate to="/auth" replace state={{ from: location.pathname }} />;
   }
 
-  if (!isAdmin) {
+  // All users with a role can access the system
+  if (!userRole) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <Card className="w-full max-w-lg border-border erp-card-shadow">
@@ -30,7 +31,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
             </div>
             <CardTitle>Acesso restrito</CardTitle>
             <CardDescription>
-              Seu usuário existe, mas ainda não tem permissão administrativa para entrar no Sistema ERP San Remo.
+              Seu usuário existe, mas ainda não tem permissão para entrar no Sistema ERP San Remo. Solicite acesso ao administrador.
             </CardDescription>
           </CardHeader>
           <CardContent>

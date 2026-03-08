@@ -48,7 +48,7 @@ const sections: ManualSection[] = [
       },
       {
         title: "Níveis de Acesso",
-        body: `O sistema possui três níveis de acesso:\n\n**Admin (Administrador)**\n- Acesso total a todos os módulos\n- Pode criar, editar e excluir usuários\n- Acesso ao sistema de backup e restauração\n- Gerenciamento de configurações do sistema\n\n**Master**\n- Acesso a todos os módulos operacionais\n- Pode gerar relatórios\n- Não pode gerenciar usuários ou backups\n\n**Normal**\n- Acesso ao Dashboard e módulos básicos\n- Pode visualizar relatórios\n- Acesso restrito a funções administrativas`,
+        body: `O sistema possui três níveis de acesso com permissões distintas:\n\n**Admin (Administrador)**\n- Acesso total a todos os módulos do sistema\n- Dashboard completo com dados financeiros (faturamento, custos)\n- Criar, editar e excluir metas (incluindo check-ins e ações)\n- Gerar e exportar relatórios (PDF e Excel)\n- Importar dados via Excel\n- Cadastro de dados\n- Criar, editar e excluir usuários\n- Atribuir roles (Admin, Master, Normal)\n- Realizar backup e restauração do sistema\n- Acesso ao módulo Financeiro, Obras, Engenharia e todos os demais\n\n**Master (Usuário Premium)**\n- Dashboard completo com dados financeiros\n- Criar, editar e excluir metas (incluindo check-ins e ações)\n- Gerar e exportar relatórios (PDF e Excel)\n- Importar dados via Excel\n- Cadastro de dados\n- Acesso ao módulo Financeiro, Obras, Engenharia e demais módulos operacionais\n- **NÃO pode** gerenciar usuários\n- **NÃO pode** realizar backup/restauração\n\n**Normal (Usuário Básico)**\n- Dashboard com visão resumida (sem dados financeiros detalhados)\n- Visualizar metas (sem editar)\n- Acessar módulos de Obras, Engenharia, Patrimônio, Projetos, RH, etc.\n- **NÃO pode** gerar relatórios\n- **NÃO pode** importar Excel\n- **NÃO pode** cadastrar dados\n- **NÃO pode** gerenciar usuários\n- **NÃO pode** realizar backup/restauração`,
       },
     ],
   },
@@ -59,7 +59,7 @@ const sections: ManualSection[] = [
     content: [
       {
         title: "Visão Geral do Dashboard",
-        body: `O Dashboard é a tela principal do sistema e apresenta uma visão consolidada de todos os indicadores-chave da empresa.\n\n**Elementos do Dashboard:**\n- **KPIs (Indicadores):** Faturamento, Obras Ativas, Unidades Vendidas e Clientes Ativos\n- **Gráfico de Faturamento vs Custos:** Comparativo mensal em gráfico combinado (barras + linha)\n- **Obras por Status:** Gráfico de pizza mostrando distribuição das obras\n- **Vendas por Empreendimento:** Comparativo de vendas realizadas vs meta\n- **Progresso das Obras:** Barras de progresso percentual de cada obra\n- **Unidades Vendidas/Mês:** Gráfico de área com evolução mensal`,
+        body: `O Dashboard é a tela principal do sistema e apresenta uma visão consolidada dos indicadores da empresa.\n\n**O que cada perfil vê:**\n\n**Admin e Master:**\n- KPIs completos: Faturamento, Obras Ativas, Unidades Vendidas e Clientes Ativos\n- Gráfico de Faturamento vs Custos\n- Obras por Status (pizza)\n- Vendas por Empreendimento\n- Progresso das Obras\n- Unidades Vendidas/Mês\n\n**Normal:**\n- KPIs operacionais (Obras Ativas, Unidades Vendidas, Clientes)\n- Banner informativo de modo visualização\n- Progresso das Obras e Vendas por Empreendimento\n- **Dados financeiros detalhados são ocultos** (Faturamento vs Custos)`,
       },
       {
         title: "Filtros do Dashboard",
@@ -78,7 +78,7 @@ const sections: ManualSection[] = [
     content: [
       {
         title: "Acompanhamento de Metas",
-        body: `O módulo de Metas permite definir e acompanhar objetivos da empresa.\n\n**Funcionalidades:**\n- Visualização de metas por período\n- Indicadores de progresso com cores (verde, amarelo, vermelho)\n- Comparativo meta vs realizado\n- Histórico de desempenho`,
+        body: `O módulo de Metas permite definir e acompanhar objetivos da empresa com metodologia OKR.\n\n**Funcionalidades por perfil:**\n\n**Admin e Master:**\n- Criar, editar e excluir metas\n- Fazer check-ins com comentários e nível de confiança\n- Adicionar ações e planos para cada meta\n- Definir metas pai-filho (cascata)\n- Visualizar timeline e heatmap de saúde\n\n**Normal:**\n- Visualizar todas as metas e seu progresso\n- Visualizar timeline de atividades\n- **NÃO pode** criar, editar ou excluir metas\n- **NÃO pode** fazer check-ins`,
       },
     ],
   },
@@ -167,7 +167,7 @@ const sections: ManualSection[] = [
     content: [
       {
         title: "Como Realizar um Backup",
-        body: `**Somente administradores podem realizar backups.**\n\n1. Acesse **Backup** no menu lateral (seção Admin)\n2. Clique no botão **"Exportar Backup"**\n3. O sistema irá gerar um arquivo JSON com todos os dados\n4. O arquivo será baixado automaticamente\n5. Armazene o arquivo em local seguro\n\n**O backup inclui:**\n- Perfis de usuários\n- Funções (roles) de cada usuário\n- Metadados de autenticação\n- Data e hora do backup`,
+        body: `**⚠️ Somente administradores podem acessar esta tela.**\nUsuários Master e Normal verão uma mensagem de "Acesso Restrito" ao tentar acessar.\n\n1. Acesse **Backup** no menu lateral (seção Admin — visível apenas para admins)\n2. Clique no botão **"Exportar Backup"**\n3. O sistema irá gerar um arquivo JSON com todos os dados\n4. O arquivo será baixado automaticamente\n5. Armazene o arquivo em local seguro\n\n**O backup inclui:**\n- Perfis de usuários\n- Funções (roles) de cada usuário\n- Metadados de autenticação\n- Data e hora do backup`,
       },
       {
         title: "Como Restaurar um Backup",

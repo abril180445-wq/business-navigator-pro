@@ -8,6 +8,7 @@ import { Users, Plus, Trash2, ShieldCheck, Shield, User, RefreshCw, Search } fro
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import AccessDenied from "@/components/AccessDenied";
 import { useRealtimeTable } from "@/hooks/useRealtimeTable";
 
 interface UserEntry {
@@ -26,7 +27,7 @@ const roleConfig: Record<string, { label: string; color: string; bg: string; ico
 
 export default function GerenciarUsuarios() {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [users, setUsers] = useState<UserEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -104,6 +105,8 @@ export default function GerenciarUsuarios() {
   );
 
   const counts = { admin: users.filter((u) => u.role === "admin").length, master: users.filter((u) => u.role === "master").length, normal: users.filter((u) => u.role === "normal").length };
+
+  if (!isAdmin) return <AccessDenied requiredRole="Administrador" />;
 
   return (
     <div className="space-y-4">

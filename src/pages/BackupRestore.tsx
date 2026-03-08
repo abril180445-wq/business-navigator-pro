@@ -4,6 +4,8 @@ import { HardDrive, Download, Upload, RefreshCw, Shield, Clock, Database, CheckC
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useAuth } from "@/hooks/useAuth";
+import AccessDenied from "@/components/AccessDenied";
 
 interface BackupMeta {
   version: string;
@@ -17,6 +19,7 @@ interface BackupMeta {
 }
 
 export default function BackupRestore() {
+  const { isAdmin } = useAuth();
   const { toast } = useToast();
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -95,6 +98,8 @@ export default function BackupRestore() {
       setImporting(false);
     }
   };
+
+  if (!isAdmin) return <AccessDenied requiredRole="Administrador" />;
 
   return (
     <div className="space-y-4">
