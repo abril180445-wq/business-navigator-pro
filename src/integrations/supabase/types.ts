@@ -61,6 +61,39 @@ export type Database = {
           },
         ]
       }
+      dados_cadastro: {
+        Row: {
+          categoria: string
+          created_at: string
+          created_by: string
+          data: string
+          descricao: string
+          id: string
+          responsavel: string | null
+          valor: number
+        }
+        Insert: {
+          categoria: string
+          created_at?: string
+          created_by: string
+          data?: string
+          descricao: string
+          id?: string
+          responsavel?: string | null
+          valor?: number
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          created_by?: string
+          data?: string
+          descricao?: string
+          id?: string
+          responsavel?: string | null
+          valor?: number
+        }
+        Relationships: []
+      }
       meta_checkins: {
         Row: {
           comentario: string | null
