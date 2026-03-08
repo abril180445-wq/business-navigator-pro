@@ -99,6 +99,32 @@ const PBITile = ({ children, title, className = "", actions }: { children: React
   </div>
 );
 
+const FileThumbnail = ({ url }: { url: string }) => {
+  const isPdf = /\.pdf(\?|$)/i.test(url);
+  const isExcel = /\.(xlsx|xls)(\?|$)/i.test(url);
+  const isImg = /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url);
+
+  if (isImg) {
+    return (
+      <a href={url} target="_blank" rel="noopener noreferrer">
+        <img src={url} alt="" className="w-8 h-8 rounded object-cover" style={{ border: "1px solid hsl(var(--pbi-border))" }} />
+      </a>
+    );
+  }
+
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer"
+      className="w-8 h-8 rounded flex items-center justify-center"
+      style={{ border: "1px solid hsl(var(--pbi-border))", background: "hsl(var(--pbi-dark))" }}
+      title={isPdf ? "PDF" : isExcel ? "Excel" : "Arquivo"}
+    >
+      {isPdf ? <FileText className="w-4 h-4" style={{ color: "hsl(0, 72%, 51%)" }} /> :
+       isExcel ? <FileSpreadsheet className="w-4 h-4" style={{ color: "hsl(152, 60%, 38%)" }} /> :
+       <FileText className="w-4 h-4" style={{ color: "hsl(var(--pbi-text-secondary))" }} />}
+    </a>
+  );
+};
+
 export default function Metas() {
   const { toast } = useToast();
   const { user, profile, canEditMetas, userRole } = useAuth();
