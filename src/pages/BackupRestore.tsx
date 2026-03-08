@@ -178,6 +178,58 @@ export default function BackupRestore() {
     }
   };
 
+  const handleUpdateFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      let backup: any;
+      if (file.name.endsWith(".zip")) {
+        const zip = await JSZip.loadAsync(file);
+        const jsonFile = zip.file("backup_completo.json");
+        if (!jsonFile) throw new Error("Arquivo backup_completo.json não encontrado no ZIP");
+        const text = await jsonFile.async("string");
+        backup = JSON.parse(text);
+      } else if (file.name.endsWith(".json")) {
+        const text = await file.text();
+        backup = JSON.parse(text);
+      } else {
+        throw new Error("Formato não suportado. Use .zip ou .json");
+      }
+      if (!backup.data || !backup.version) throw new Error("Formato de backup inválido");
+      setUpdateFile(backup);
+      setUpdateMeta({ version: backup.version, created_at: backup.created_at, created_by: backup.created_by, metadata: backup.metadata });
+      setConfirmUpdate(true);
+    } catch (err: any) {
+      toast({ title: "Arquivo inválido", description: err.message, variant: "destructive" });
+    }
+    if (updateFileRef.current) updateFileRef.current.value = "";
+  };
+
+  const handleUpdate = async () => {
+    if (!updateFile) return;
+    setUpdating(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await supabase.functions.invoke("backup-system", {
+        body: { action: "import", backup: updateFile },
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (res.error) throw res.error;
+      if (res.data.error) throw new Error(res.data.error);
+
+      const r = res.data.restored;
+      const total = Object.values(r).reduce((a: number, b: any) => a + (Number(b) || 0), 0);
+      toast({ title: "✅ Banco atualizado com sucesso!", description: `${total} registros atualizados em 6 tabelas` });
+      setConfirmUpdate(false);
+      setUpdateFile(null);
+      setUpdateMeta(null);
+    } catch (err: any) {
+      toast({ title: "Erro ao atualizar banco", description: err.message, variant: "destructive" });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   if (!isAdmin) return <AccessDenied requiredRole="Administrador" />;
 
   const metaStats = [
