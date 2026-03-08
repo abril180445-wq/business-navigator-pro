@@ -1,7 +1,9 @@
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload, FileSpreadsheet, CheckCircle2, AlertCircle, X, Download, Database } from "lucide-react";
+import { Upload, FileSpreadsheet, CheckCircle2, AlertCircle, X, Download, Database, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import * as XLSX from "xlsx";
 
 interface ImportedRow {
@@ -10,10 +12,12 @@ interface ImportedRow {
 
 export default function ImportacaoExcel() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [data, setData] = useState<ImportedRow[]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
   const [fileName, setFileName] = useState("");
   const [dragOver, setDragOver] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const processFile = useCallback((file: File) => {
     if (!file.name.match(/\.(xlsx|xls|csv)$/i)) {
@@ -46,6 +50,53 @@ export default function ImportacaoExcel() {
     XLSX.utils.book_append_sheet(wb, ws, "Dados");
     XLSX.writeFile(wb, "modelo_importacao_sanremo.xlsx");
     toast({ title: "Modelo baixado!" });
+  };
+
+  const saveToDatabase = async () => {
+    if (!user || data.length === 0) return;
+    setSaving(true);
+
+    // Map imported columns to dados_cadastro columns
+    const headerMap: Record<string, string> = {};
+    const lowerHeaders = headers.map((h) => h.toLowerCase().trim());
+    
+    const catIdx = lowerHeaders.findIndex((h) => h.includes("categor"));
+    const descIdx = lowerHeaders.findIndex((h) => h.includes("descri"));
+    const valIdx = lowerHeaders.findIndex((h) => h.includes("valor") || h.includes("total") || h.includes("preço") || h.includes("preco"));
+    const dataIdx = lowerHeaders.findIndex((h) => h.includes("data") || h.includes("date"));
+    const respIdx = lowerHeaders.findIndex((h) => h.includes("responsav") || h.includes("resp"));
+
+    if (descIdx === -1) {
+      toast({ title: "Coluna obrigatória não encontrada", description: "A planilha precisa de uma coluna 'Descrição'.", variant: "destructive" });
+      setSaving(false);
+      return;
+    }
+
+    const rows = data.map((row) => ({
+      categoria: catIdx >= 0 ? String(row[headers[catIdx]] || "Importação") : "Importação",
+      descricao: String(row[headers[descIdx]] || ""),
+      valor: valIdx >= 0 ? Number(row[headers[valIdx]]) || 0 : 0,
+      data: dataIdx >= 0 ? parseImportDate(String(row[headers[dataIdx]])) : new Date().toISOString().split("T")[0],
+      responsavel: respIdx >= 0 ? String(row[headers[respIdx]] || "") : "",
+      created_by: user.id,
+    })).filter((r) => r.descricao.trim() !== "");
+
+    // Insert in batches of 50
+    let inserted = 0;
+    for (let i = 0; i < rows.length; i += 50) {
+      const batch = rows.slice(i, i + 50);
+      const { error } = await supabase.from("dados_cadastro").insert(batch);
+      if (error) {
+        toast({ title: "Erro ao salvar", description: `Batch ${i}: ${error.message}`, variant: "destructive" });
+        setSaving(false);
+        return;
+      }
+      inserted += batch.length;
+    }
+
+    setSaving(false);
+    toast({ title: "Dados salvos!", description: `${inserted} registros salvos no banco de dados.` });
+    clearData();
   };
 
   return (
@@ -102,8 +153,13 @@ export default function ImportacaoExcel() {
                 <CheckCircle2 className="w-4 h-4" style={{ color: "hsl(152, 60%, 38%)" }} />
                 <span className="text-[12px] font-semibold text-foreground">Dados Importados</span>
               </div>
-              <Button className="h-7 text-[11px] font-semibold" style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}>
-                Salvar no Sistema
+              <Button
+                onClick={saveToDatabase}
+                disabled={saving}
+                className="h-7 text-[11px] font-semibold gap-1"
+                style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}
+              >
+                <Save className="w-3.5 h-3.5" /> {saving ? "Salvando..." : "Salvar no Sistema"}
               </Button>
             </div>
             <div className="overflow-x-auto">
@@ -130,7 +186,7 @@ export default function ImportacaoExcel() {
               {data.length > 50 && (
                 <div className="py-3 text-center">
                   <p className="text-[10px] flex items-center justify-center gap-1 text-muted-foreground">
-                    <AlertCircle className="w-3.5 h-3.5" /> Exibindo 50 de {data.length} registros
+                    <AlertCircle className="w-3.5 h-3.5" /> Exibindo 50 de {data.length} registros (todos serão salvos)
                   </p>
                 </div>
               )}
@@ -140,4 +196,19 @@ export default function ImportacaoExcel() {
       )}
     </div>
   );
+}
+
+function parseImportDate(dateStr: string): string {
+  if (!dateStr) return new Date().toISOString().split("T")[0];
+  // Try DD/MM/YYYY
+  const parts = dateStr.split("/");
+  if (parts.length === 3) {
+    const [d, m, y] = parts;
+    const year = y.length === 2 ? `20${y}` : y;
+    return `${year}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+  }
+  // Try ISO
+  const parsed = new Date(dateStr);
+  if (!isNaN(parsed.getTime())) return parsed.toISOString().split("T")[0];
+  return new Date().toISOString().split("T")[0];
 }

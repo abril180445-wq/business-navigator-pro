@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Save, Trash2, CheckCircle2, Database, Filter, ChevronDown } from "lucide-react";
+import { Plus, Save, Trash2, CheckCircle2, Database, Filter, ChevronDown, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useRealtimeTable } from "@/hooks/useRealtimeTable";
 
 interface DataEntry {
   id: string;
@@ -14,6 +17,7 @@ interface DataEntry {
   valor: number;
   data: string;
   responsavel: string;
+  created_at: string;
 }
 
 const categorias = [
@@ -26,28 +30,63 @@ const responsaveis = ["Emerson", "Marcos", "Juliana", "Rafael", "Fernanda"];
 
 export default function CadastroDados() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [entries, setEntries] = useState<DataEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     categoria: "", descricao: "", valor: "",
     data: new Date().toISOString().split("T")[0], responsavel: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const fetchEntries = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("dados_cadastro")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (!error && data) {
+      setEntries(data as DataEntry[]);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchEntries(); }, [fetchEntries]);
+  useRealtimeTable("dados_cadastro", fetchEntries);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.categoria || !form.descricao || !form.valor) {
       toast({ title: "Campos obrigatórios", description: "Preencha categoria, descrição e valor.", variant: "destructive" });
       return;
     }
-    const newEntry: DataEntry = {
-      id: Date.now().toString(), categoria: form.categoria, descricao: form.descricao,
-      valor: parseFloat(form.valor), data: form.data, responsavel: form.responsavel,
-    };
-    setEntries((prev) => [newEntry, ...prev]);
+    setSaving(true);
+    const { error } = await supabase.from("dados_cadastro").insert({
+      categoria: form.categoria,
+      descricao: form.descricao,
+      valor: parseFloat(form.valor),
+      data: form.data,
+      responsavel: form.responsavel,
+      created_by: user!.id,
+    });
+    setSaving(false);
+    if (error) {
+      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+      return;
+    }
     setForm({ categoria: "", descricao: "", valor: "", data: new Date().toISOString().split("T")[0], responsavel: "" });
-    toast({ title: "Dado registrado!", description: `${newEntry.categoria}: ${newEntry.descricao}` });
+    toast({ title: "Dado registrado!", description: `${form.categoria}: ${form.descricao}` });
+    fetchEntries();
   };
 
-  const removeEntry = (id: string) => setEntries((prev) => prev.filter((e) => e.id !== id));
+  const removeEntry = async (id: string) => {
+    const { error } = await supabase.from("dados_cadastro").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Erro ao excluir", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Registro excluído" });
+    fetchEntries();
+  };
 
   return (
     <div className="space-y-4">
@@ -61,6 +100,9 @@ export default function CadastroDados() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={fetchEntries} className="h-7 text-[11px] border-none gap-1 bg-secondary text-foreground hover:bg-secondary/80">
+            <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} /> Atualizar
+          </Button>
           <span className="text-[11px] px-2.5 py-1 rounded" style={{ background: "hsl(45, 100%, 51%, 0.15)", color: "hsl(var(--pbi-yellow))" }}>
             {entries.length} registros
           </span>
@@ -128,8 +170,8 @@ export default function CadastroDados() {
                 <Input type="date" value={form.data} onChange={(e) => setForm({ ...form, data: e.target.value })} className="h-8 text-[12px] pbi-input-bg border-none" />
               </div>
             </div>
-            <Button type="submit" className="w-full h-8 text-[12px] font-semibold" style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}>
-              <Save className="w-3.5 h-3.5 mr-1.5" /> Salvar Registro
+            <Button type="submit" disabled={saving} className="w-full h-8 text-[12px] font-semibold" style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}>
+              <Save className="w-3.5 h-3.5 mr-1.5" /> {saving ? "Salvando..." : "Salvar Registro"}
             </Button>
           </form>
         </div>
@@ -142,7 +184,11 @@ export default function CadastroDados() {
               Registros Recentes ({entries.length})
             </span>
           </div>
-          {entries.length === 0 ? (
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <RefreshCw className="w-5 h-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : entries.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Database className="w-10 h-10 mb-3 text-muted-foreground" />
               <p className="text-[12px] text-muted-foreground">Nenhum registro ainda</p>
@@ -164,10 +210,10 @@ export default function CadastroDados() {
                     <p className="text-[12px] mt-1 text-foreground">{entry.descricao}</p>
                     <div className="flex items-center gap-3 mt-1">
                       <span className="text-[12px] font-bold text-foreground">
-                        R$ {entry.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        R$ {Number(entry.valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                       </span>
                       <span className="text-[10px] text-muted-foreground">
-                        {new Date(entry.data).toLocaleDateString("pt-BR")}
+                        {new Date(entry.data + "T00:00:00").toLocaleDateString("pt-BR")}
                       </span>
                     </div>
                   </div>
