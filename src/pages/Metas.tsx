@@ -242,7 +242,7 @@ export default function Metas() {
       parent_id: newMeta.parent_id || null,
     });
     if (error) { toast({ title: "Erro ao criar meta", description: error.message, variant: "destructive" }); return; }
-    setNewMeta({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "" });
+    setNewMeta({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "", descricao: "" });
     setDialogOpen(false);
     toast({ title: "Meta criada!" });
   };
