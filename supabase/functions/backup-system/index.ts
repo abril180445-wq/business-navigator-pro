@@ -20,17 +20,9 @@ function escapeSQL(val: any): string {
 
 function generateTableSQL(tableName: string, rows: any[]): string {
   if (!rows || rows.length === 0) return `-- Table ${tableName}: no data\n`;
-  
   const columns = Object.keys(rows[0]);
   const lines: string[] = [];
-  
-  lines.push(`-- =============================================`);
-  lines.push(`-- Table: public.${tableName}`);
-  lines.push(`-- Rows: ${rows.length}`);
-  lines.push(`-- =============================================`);
-  lines.push(``);
-  
-  // Use INSERT ... ON CONFLICT for idempotent restore
+  lines.push(`-- Table: public.${tableName} (${rows.length} rows)`);
   for (const row of rows) {
     const vals = columns.map(col => escapeSQL(row[col]));
     lines.push(
@@ -40,6 +32,10 @@ function generateTableSQL(tableName: string, rows: any[]): string {
   lines.push(``);
   return lines.join("\n");
 }
+
+// Tables grouped by scope
+const SYSTEM_TABLES = ["profiles", "user_roles"];
+const DATA_TABLES = ["metas", "acoes_meta", "meta_checkins", "relatorios_gerados"];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -61,7 +57,6 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const action = body.action;
-
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     if (action === "export") {
@@ -71,32 +66,20 @@ Deno.serve(async (req) => {
       const { data: acoesMeta } = await adminClient.from("acoes_meta").select("*");
       const { data: metaCheckins } = await adminClient.from("meta_checkins").select("*");
       const { data: relatoriosGerados } = await adminClient.from("relatorios_gerados").select("*");
-
       const { data: { users } } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
 
-      // Generate SQL dump
       const sqlParts: string[] = [];
-      sqlParts.push(`-- =============================================`);
-      sqlParts.push(`-- SAN REMO ERP — Database Backup (SQL Format)`);
-      sqlParts.push(`-- Compatible with Supabase SQL Editor / psql`);
+      sqlParts.push(`-- SAN REMO ERP — Database Backup (SQL)`);
       sqlParts.push(`-- Generated: ${new Date().toISOString()}`);
       sqlParts.push(`-- By: ${caller.email}`);
-      sqlParts.push(`-- =============================================`);
-      sqlParts.push(``);
       sqlParts.push(`BEGIN;`);
-      sqlParts.push(``);
-
-      // Order matters for foreign keys
       sqlParts.push(generateTableSQL("profiles", profiles || []));
       sqlParts.push(generateTableSQL("user_roles", userRoles || []));
       sqlParts.push(generateTableSQL("metas", metas || []));
       sqlParts.push(generateTableSQL("acoes_meta", acoesMeta || []));
       sqlParts.push(generateTableSQL("meta_checkins", metaCheckins || []));
       sqlParts.push(generateTableSQL("relatorios_gerados", relatoriosGerados || []));
-
       sqlParts.push(`COMMIT;`);
-      sqlParts.push(``);
-      sqlParts.push(`-- End of backup`);
 
       const backup = {
         version: "3.0",
@@ -110,10 +93,7 @@ Deno.serve(async (req) => {
           meta_checkins: metaCheckins || [],
           relatorios_gerados: relatoriosGerados || [],
           auth_users: users?.map(u => ({
-            id: u.id,
-            email: u.email,
-            user_metadata: u.user_metadata,
-            created_at: u.created_at,
+            id: u.id, email: u.email, user_metadata: u.user_metadata, created_at: u.created_at,
           })) || [],
         },
         sql_dump: sqlParts.join("\n"),
@@ -130,62 +110,42 @@ Deno.serve(async (req) => {
 
       return new Response(JSON.stringify(backup, null, 2), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
       });
 
     } else if (action === "import") {
       const backupData = body.backup;
       if (!backupData?.data) throw new Error("Invalid backup format");
 
-      const restored: Record<string, number> = {
-        profiles: 0, user_roles: 0, metas: 0, acoes_meta: 0, meta_checkins: 0, relatorios_gerados: 0,
+      // scope: "system" | "database" | "all" (default "all")
+      const scope: string = body.scope || "all";
+
+      const restored: Record<string, number> = {};
+
+      const upsertTable = async (name: string, rows: any[]) => {
+        if (!rows || rows.length === 0) return;
+        restored[name] = 0;
+        for (const row of rows) {
+          await adminClient.from(name).upsert(row, { onConflict: "id" });
+          restored[name]++;
+        }
       };
 
-      if (backupData.data.profiles?.length > 0) {
-        for (const row of backupData.data.profiles) {
-          await adminClient.from("profiles").upsert(row, { onConflict: "id" });
-          restored.profiles++;
-        }
+      // System tables: profiles + user_roles
+      if (scope === "system" || scope === "all") {
+        await upsertTable("profiles", backupData.data.profiles);
+        await upsertTable("user_roles", backupData.data.user_roles);
       }
 
-      if (backupData.data.user_roles?.length > 0) {
-        for (const row of backupData.data.user_roles) {
-          await adminClient.from("user_roles").upsert(row, { onConflict: "id" });
-          restored.user_roles++;
-        }
+      // Data tables: metas, acoes_meta, meta_checkins, relatorios_gerados
+      if (scope === "database" || scope === "all") {
+        await upsertTable("metas", backupData.data.metas);
+        await upsertTable("acoes_meta", backupData.data.acoes_meta);
+        await upsertTable("meta_checkins", backupData.data.meta_checkins);
+        await upsertTable("relatorios_gerados", backupData.data.relatorios_gerados);
       }
 
-      if (backupData.data.metas?.length > 0) {
-        for (const row of backupData.data.metas) {
-          await adminClient.from("metas").upsert(row, { onConflict: "id" });
-          restored.metas++;
-        }
-      }
-
-      if (backupData.data.acoes_meta?.length > 0) {
-        for (const row of backupData.data.acoes_meta) {
-          await adminClient.from("acoes_meta").upsert(row, { onConflict: "id" });
-          restored.acoes_meta++;
-        }
-      }
-
-      if (backupData.data.meta_checkins?.length > 0) {
-        for (const row of backupData.data.meta_checkins) {
-          await adminClient.from("meta_checkins").upsert(row, { onConflict: "id" });
-          restored.meta_checkins++;
-        }
-      }
-
-      if (backupData.data.relatorios_gerados?.length > 0) {
-        for (const row of backupData.data.relatorios_gerados) {
-          await adminClient.from("relatorios_gerados").upsert(row, { onConflict: "id" });
-          restored.relatorios_gerados++;
-        }
-      }
-
-      return new Response(JSON.stringify({ success: true, restored }), {
+      return new Response(JSON.stringify({ success: true, scope, restored }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
       });
 
     } else {
