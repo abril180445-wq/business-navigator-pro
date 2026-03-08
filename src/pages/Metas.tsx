@@ -735,6 +735,15 @@ export default function Metas() {
                             <span className="font-medium text-foreground">{ci.user_name}</span>
                             <span className="text-muted-foreground"> · {new Date(ci.created_at).toLocaleDateString("pt-BR")}</span>
                             {ci.comentario && <p className="text-muted-foreground truncate">{ci.comentario}</p>}
+                            {ci.imagens && ci.imagens.length > 0 && (
+                              <div className="flex gap-1 mt-1">
+                                {ci.imagens.map((img, i) => (
+                                  <a key={i} href={img} target="_blank" rel="noopener noreferrer">
+                                    <img src={img} alt="" className="w-8 h-8 rounded object-cover" style={{ border: "1px solid hsl(var(--pbi-border))" }} />
+                                  </a>
+                                ))}
+                              </div>
+                            )}
                           </div>
                           {ci.valor_anterior !== ci.valor_novo && (
                             <span className="text-[9px] font-medium shrink-0" style={{ color: ci.valor_novo > ci.valor_anterior ? "hsl(152, 60%, 38%)" : "hsl(0, 72%, 51%)" }}>
