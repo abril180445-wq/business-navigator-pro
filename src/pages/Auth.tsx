@@ -8,7 +8,7 @@ import {
   BarChart3, TrendingUp, Building2, DollarSign, Users, Target,
   Lock, Mail, User, Eye, EyeOff, Sparkles,
 } from "lucide-react";
-import logoSanRemo from "@/assets/logo-san-remo.png";
+
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
@@ -174,28 +174,12 @@ export default function Auth() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7 }}
           >
-            {/* Logo */}
-            <div className="flex items-center gap-4 mb-10">
-              <div className="relative">
-                <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center"
-                  style={{ background: "linear-gradient(135deg, hsl(45, 100%, 51%), hsl(38, 92%, 45%))" }}
-                >
-                  <img src={logoSanRemo} alt="Logo San Remo" className="h-10 w-10 object-contain" />
-                </div>
-                <motion.div
-                  className="absolute -inset-1 rounded-2xl"
-                  style={{ border: "1px solid hsl(45, 100%, 51%, 0.3)" }}
-                  animate={{ opacity: [0.3, 0.7, 0.3] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.4em] font-medium" style={{ color: "hsl(45, 100%, 51%)" }}>
-                  Business Navigator
-                </p>
-                <h1 className="text-3xl font-bold text-white tracking-tight">San Remo</h1>
-              </div>
+            {/* Title */}
+            <div className="mb-10">
+              <p className="text-xs uppercase tracking-[0.4em] font-medium mb-1" style={{ color: "hsl(45, 100%, 51%)" }}>
+                Business Navigator
+              </p>
+              <h1 className="text-3xl font-bold text-white tracking-tight">San Remo</h1>
             </div>
 
             {/* Tagline */}
@@ -265,18 +249,10 @@ export default function Auth() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="w-full max-w-[420px]"
           >
-            {/* Mobile logo */}
-            <div className="flex items-center gap-3 mb-8 lg:hidden">
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, hsl(45, 100%, 51%), hsl(38, 92%, 45%))" }}
-              >
-                <img src={logoSanRemo} alt="Logo San Remo" className="h-8 w-8 object-contain" />
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.3em]" style={{ color: "hsl(45, 100%, 51%)" }}>ERP</p>
-                <h1 className="text-xl font-bold text-white">San Remo</h1>
-              </div>
+            {/* Mobile title */}
+            <div className="mb-8 lg:hidden">
+              <p className="text-[10px] uppercase tracking-[0.3em]" style={{ color: "hsl(45, 100%, 51%)" }}>Business Navigator</p>
+              <h1 className="text-xl font-bold text-white">San Remo</h1>
             </div>
 
             {/* Card */}
