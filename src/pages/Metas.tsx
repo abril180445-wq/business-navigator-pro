@@ -190,17 +190,22 @@ export default function Metas() {
       toast({ title: "Preencha nome e objetivo", variant: "destructive" });
       return;
     }
+    const categoriaFinal = newMeta.categoria === "__outra__" ? newMeta.categoriaCustom.trim() : newMeta.categoria;
+    if (!categoriaFinal) {
+      toast({ title: "Informe a categoria", variant: "destructive" });
+      return;
+    }
     const cor = coresMeta[metas.length % coresMeta.length];
     const { error } = await supabase.from("metas").insert({
       nome: newMeta.nome, atual: parseFloat(newMeta.atual) || 0,
       objetivo: parseFloat(newMeta.objetivo), unidade: newMeta.unidade, cor,
-      categoria: newMeta.categoria, responsavel: newMeta.responsavel,
+      categoria: categoriaFinal, responsavel: newMeta.responsavel,
       prioridade: newMeta.prioridade, created_by: user?.id,
       ciclo: newMeta.ciclo,
       parent_id: newMeta.parent_id || null,
     });
     if (error) { toast({ title: "Erro ao criar meta", description: error.message, variant: "destructive" }); return; }
-    setNewMeta({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "" });
+    setNewMeta({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "" });
     setDialogOpen(false);
     toast({ title: "Meta criada!" });
   };
