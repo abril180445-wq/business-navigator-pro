@@ -92,7 +92,7 @@ const vendasMensais = [
   { month: "Dez", unidades: 35 },
 ];
 
-const kpis = [
+const kpisDefault = [
   { title: "Faturamento", value: "R$ 2,1M", change: "+14.8%", trend: "up" as const, icon: DollarSign, color: "hsl(207, 89%, 48%)" },
   { title: "Obras Ativas", value: "8", change: "+2", trend: "up" as const, icon: Building2, color: "hsl(45, 100%, 51%)" },
   { title: "Unidades Vendidas", value: "145", change: "+12.3%", trend: "up" as const, icon: HardHat, color: "hsl(174, 62%, 47%)" },
