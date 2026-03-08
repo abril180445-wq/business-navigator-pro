@@ -45,14 +45,6 @@ const FloatingParticle = ({ delay, size, x, y, duration }: { delay: number; size
   />
 );
 
-// KPI data
-const kpis = [
-  { label: "Faturamento", value: "R$ 2,1M", change: "+14.8%", icon: DollarSign, color: "hsl(152, 60%, 38%)" },
-  { label: "Obras Ativas", value: "8", change: "+2", icon: Building2, color: "hsl(207, 89%, 48%)" },
-  { label: "Unidades", value: "145", change: "+23%", icon: TrendingUp, color: "hsl(45, 100%, 51%)" },
-  { label: "Equipe", value: "312", change: "+28", icon: Users, color: "hsl(174, 62%, 47%)" },
-];
-
 const features = [
   { icon: BarChart3, title: "Dashboard em Tempo Real", desc: "Visualize KPIs e métricas atualizados instantaneamente" },
   { icon: Target, title: "Gestão de Metas", desc: "Acompanhe objetivos com editor avançado e flexível" },
