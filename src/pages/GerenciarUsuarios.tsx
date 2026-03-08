@@ -274,7 +274,7 @@ export default function GerenciarUsuarios() {
               </thead>
               <tbody>
                 {filtered.map((u) => {
-                  const cfg = roleConfig[u.role] || roleConfig.normal;
+                  const cfg = roleConfig[u.role] || roleConfig.none;
                   const isSelf = u.id === user?.id;
                   return (
                     <tr key={u.id} className="pbi-row-hover transition-colors border-b border-border/50">
