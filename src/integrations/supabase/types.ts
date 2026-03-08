@@ -127,6 +127,45 @@ export type Database = {
         }
         Relationships: []
       }
+      relatorios_gerados: {
+        Row: {
+          created_at: string
+          formato: string
+          id: string
+          observacoes: string | null
+          periodo_fim: string
+          periodo_inicio: string
+          registros: number
+          tipo: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          created_at?: string
+          formato?: string
+          id?: string
+          observacoes?: string | null
+          periodo_fim: string
+          periodo_inicio: string
+          registros?: number
+          tipo: string
+          user_id: string
+          user_name?: string
+        }
+        Update: {
+          created_at?: string
+          formato?: string
+          id?: string
+          observacoes?: string | null
+          periodo_fim?: string
+          periodo_inicio?: string
+          registros?: number
+          tipo?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
