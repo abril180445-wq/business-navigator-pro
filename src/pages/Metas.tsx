@@ -170,7 +170,11 @@ export default function Metas() {
     prioridade: string; ciclo: string; parent_id: string; prazo: string;
   }>({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "", prazo: "" });
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [newMeta, setNewMeta] = useState({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media" as Meta["prioridade"], ciclo: "Q1 2026", parent_id: "" });
+  const [newMetaTipo, setNewMetaTipo] = useState<MetaTipo>("quantitativa");
+  const [newMetaToggles, setNewMetaToggles] = useState<FieldToggles>(defaultTogglesQuant);
+  const [editMetaTipo, setEditMetaTipo] = useState<MetaTipo>("quantitativa");
+  const [editMetaToggles, setEditMetaToggles] = useState<FieldToggles>(defaultTogglesQuant);
+  const [newMeta, setNewMeta] = useState({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media" as Meta["prioridade"], ciclo: "Q1 2026", parent_id: "", descricao: "" });
 
   // Dynamic categories: base + any custom ones from existing metas
   const categorias = useMemo(() => {
