@@ -296,7 +296,8 @@ export default function BackupRestore() {
           </p>
           <div className="space-y-2">
             {[
-              "backup_completo.json — para restauração",
+              "backup_completo.json — para restauração via sistema",
+              "backup_supabase.sql — compatível com SQL Editor do Supabase",
               "tabelas/*.csv — abrir no Excel",
               "tabelas/*.json — dados por tabela",
               "LEIAME.txt — resumo do backup",
