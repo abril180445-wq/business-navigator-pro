@@ -22,7 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useRealtimeTable } from "@/hooks/useRealtimeTable";
-import MetaImageUpload from "@/components/MetaImageUpload";
+import MetaFileUpload from "@/components/MetaFileUpload";
 
 interface Meta {
   id: string;
