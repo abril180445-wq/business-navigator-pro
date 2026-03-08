@@ -308,7 +308,7 @@ export default function Metas() {
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
 
     // Update meta value and status if changed
-    if (novoValor !== meta.atual && canEditMetas) {
+    if (novoValor !== meta.atual) {
       const pct = (novoValor / meta.objetivo) * 100;
       let st: Meta["status"] = newCheckin.confianca === "em_risco" ? "em_risco" : newCheckin.confianca === "atencao" ? "atencao" : pct >= 100 ? "atingida" : "no_prazo";
       await supabase.from("metas").update({ atual: novoValor, status: st }).eq("id", checkinMetaId);

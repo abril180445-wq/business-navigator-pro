@@ -46,7 +46,7 @@ function getFileName(url: string) {
   }
 }
 
-export default function MetaFileUpload({ files, onChange, maxFiles = 3, folder = "uploads" }: MetaFileUploadProps) {
+export default function MetaFileUpload({ files, onChange, maxFiles = 5, folder = "uploads" }: MetaFileUploadProps) {
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
