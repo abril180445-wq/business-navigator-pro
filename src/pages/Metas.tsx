@@ -223,23 +223,33 @@ export default function Metas() {
   }, [canEditMetas]);
 
   const addMeta = async () => {
-    if (!newMeta.nome || !newMeta.objetivo) {
-      toast({ title: "Preencha nome e objetivo", variant: "destructive" });
+    if (!newMeta.nome) {
+      toast({ title: "Preencha o nome da meta", variant: "destructive" });
       return;
     }
-    const categoriaFinal = newMeta.categoria === "__outra__" ? newMeta.categoriaCustom.trim() : newMeta.categoria;
-    if (!categoriaFinal) {
+    if (newMetaTipo === "quantitativa" && newMetaToggles.valores && !newMeta.objetivo) {
+      toast({ title: "Preencha o objetivo", variant: "destructive" });
+      return;
+    }
+    const categoriaFinal = !newMetaToggles.categoria ? "Geral" : newMeta.categoria === "__outra__" ? newMeta.categoriaCustom.trim() : newMeta.categoria;
+    if (newMetaToggles.categoria && !categoriaFinal) {
       toast({ title: "Informe a categoria", variant: "destructive" });
       return;
     }
     const cor = coresMeta[metas.length % coresMeta.length];
+    const isQual = newMetaTipo === "qualitativa" || !newMetaToggles.valores;
     const { error } = await supabase.from("metas").insert({
-      nome: newMeta.nome, atual: parseFloat(newMeta.atual) || 0,
-      objetivo: parseFloat(newMeta.objetivo), unidade: newMeta.unidade, cor,
-      categoria: categoriaFinal, responsavel: newMeta.responsavel,
-      prioridade: newMeta.prioridade, created_by: user?.id,
-      ciclo: newMeta.ciclo,
-      parent_id: newMeta.parent_id || null,
+      nome: newMeta.nome,
+      atual: isQual ? 0 : (parseFloat(newMeta.atual) || 0),
+      objetivo: isQual ? 1 : (parseFloat(newMeta.objetivo) || 1),
+      unidade: isQual ? "texto" : newMeta.unidade,
+      cor,
+      categoria: categoriaFinal || "Geral",
+      responsavel: newMetaToggles.responsavel ? newMeta.responsavel : "",
+      prioridade: newMetaToggles.prioridade ? newMeta.prioridade : "media",
+      created_by: user?.id,
+      ciclo: newMetaToggles.ciclo ? newMeta.ciclo : "Q1 2026",
+      parent_id: newMetaToggles.metaPai ? (newMeta.parent_id || null) : null,
     });
     if (error) { toast({ title: "Erro ao criar meta", description: error.message, variant: "destructive" }); return; }
     setNewMeta({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "", descricao: "" });
