@@ -141,7 +141,34 @@ export default function Relatorios() {
     if (data) setMetasData(data as MetaRow[]);
   }, []);
 
-  useEffect(() => { fetchHistorico(); fetchMetas(); }, [fetchHistorico, fetchMetas]);
+  const fetchFinanceiro = useCallback(async () => {
+    const [fat, cp, cr, dc] = await Promise.all([
+      supabase.from("faturamento").select("cliente,valor,data_emissao,status"),
+      supabase.from("contas_pagar").select("fornecedor,descricao,valor,data_emissao,categoria"),
+      supabase.from("contas_receber").select("cliente,descricao,valor,data_emissao,categoria"),
+      supabase.from("dados_cadastro").select("descricao,valor,data,categoria"),
+    ]);
+    const dados: DadoFinanceiro[] = [];
+    ((fat.data || []) as any[]).forEach((f: any) => dados.push({
+      data: new Date(f.data_emissao).toLocaleDateString("pt-BR"),
+      categoria: "Faturamento", descricao: f.cliente, valor: Number(f.valor),
+    }));
+    ((cp.data || []) as any[]).forEach((c: any) => dados.push({
+      data: new Date(c.data_emissao).toLocaleDateString("pt-BR"),
+      categoria: c.categoria || "Contas a Pagar", descricao: `${c.fornecedor} — ${c.descricao}`, valor: -Number(c.valor),
+    }));
+    ((cr.data || []) as any[]).forEach((c: any) => dados.push({
+      data: new Date(c.data_emissao).toLocaleDateString("pt-BR"),
+      categoria: c.categoria || "Contas a Receber", descricao: `${c.cliente} — ${c.descricao}`, valor: Number(c.valor),
+    }));
+    ((dc.data || []) as any[]).forEach((d: any) => dados.push({
+      data: new Date(d.data).toLocaleDateString("pt-BR"),
+      categoria: d.categoria, descricao: d.descricao, valor: Number(d.valor),
+    }));
+    setDadosFinanceiros(dados);
+  }, []);
+
+  useEffect(() => { fetchHistorico(); fetchMetas(); fetchFinanceiro(); }, [fetchHistorico, fetchMetas, fetchFinanceiro]);
 
   const logRelatorio = async (formato: string, observacoes: string) => {
     if (!user) return;
