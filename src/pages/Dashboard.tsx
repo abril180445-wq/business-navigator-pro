@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/hooks/useTheme";
 import {
   DollarSign,
@@ -91,7 +92,7 @@ const vendasMensais = [
   { month: "Dez", unidades: 35 },
 ];
 
-const kpis = [
+const kpisDefault = [
   { title: "Faturamento", value: "R$ 2,1M", change: "+14.8%", trend: "up" as const, icon: DollarSign, color: "hsl(207, 89%, 48%)" },
   { title: "Obras Ativas", value: "8", change: "+2", trend: "up" as const, icon: Building2, color: "hsl(45, 100%, 51%)" },
   { title: "Unidades Vendidas", value: "145", change: "+12.3%", trend: "up" as const, icon: HardHat, color: "hsl(174, 62%, 47%)" },
@@ -123,6 +124,25 @@ export default function Dashboard() {
   const { userRole, profile, isAdmin } = useAuth();
   const { theme } = useTheme();
   const isNormal = userRole === "normal";
+
+  // Real metas stats
+  const [metaStats, setMetaStats] = useState({ total: 0, atingidas: 0, emRisco: 0 });
+  useEffect(() => {
+    supabase.from("metas").select("status").then(({ data }) => {
+      if (data) {
+        setMetaStats({
+          total: data.length,
+          atingidas: data.filter((m) => m.status === "atingida").length,
+          emRisco: data.filter((m) => m.status === "em_risco").length,
+        });
+      }
+    });
+  }, []);
+
+  const kpis = kpisDefault.map((k) => {
+    if (k.title === "Obras Ativas") return { ...k, value: String(metaStats.total), change: `${metaStats.atingidas} atingidas` };
+    return k;
+  });
 
   // Theme-adaptive colors
   const gridColor = theme === "dark" ? "hsl(0, 0%, 25%)" : "hsl(0, 0%, 88%)";

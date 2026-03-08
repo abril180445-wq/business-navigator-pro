@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Users, Plus, Trash2, ShieldCheck, Shield, User, RefreshCw, Search } from "lucide-react";
+import { Users, Plus, Trash2, ShieldCheck, Shield, User, RefreshCw, Search, Pencil } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -34,6 +34,8 @@ export default function GerenciarUsuarios() {
   const [creating, setCreating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [form, setForm] = useState({ full_name: "", email: "", password: "", role: "normal" });
+  const [editingRole, setEditingRole] = useState<{ userId: string; role: string } | null>(null);
+  const [updatingRole, setUpdatingRole] = useState(false);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -95,6 +97,27 @@ export default function GerenciarUsuarios() {
       fetchUsers();
     } catch (err: any) {
       toast({ title: "Erro ao excluir", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleUpdateRole = async () => {
+    if (!editingRole) return;
+    setUpdatingRole(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await supabase.functions.invoke("update-user-role", {
+        body: { user_id: editingRole.userId, role: editingRole.role },
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (res.error) throw res.error;
+      if (res.data?.error) throw new Error(res.data.error);
+      toast({ title: "Permissão atualizada!" });
+      setEditingRole(null);
+      fetchUsers();
+    } catch (err: any) {
+      toast({ title: "Erro ao alterar permissão", description: err.message, variant: "destructive" });
+    } finally {
+      setUpdatingRole(false);
     }
   };
 
@@ -199,6 +222,38 @@ export default function GerenciarUsuarios() {
         <span className="text-[10px] text-muted-foreground">{filtered.length} resultados</span>
       </div>
 
+      {/* Edit role dialog */}
+      <Dialog open={!!editingRole} onOpenChange={(open) => !open && setEditingRole(null)}>
+        <DialogContent className="sm:max-w-sm bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="text-[14px] text-foreground">Alterar Permissão</DialogTitle>
+          </DialogHeader>
+          {editingRole && (
+            <div className="space-y-3 mt-2">
+              <p className="text-[12px] text-muted-foreground">
+                Usuário: <strong className="text-foreground">{users.find((u) => u.id === editingRole.userId)?.full_name}</strong>
+              </p>
+              <div className="space-y-1.5">
+                <Label className="text-[11px] text-muted-foreground">Novo Tipo</Label>
+                <Select value={editingRole.role} onValueChange={(v) => setEditingRole({ ...editingRole, role: v })}>
+                  <SelectTrigger className="h-8 text-[12px] pbi-input-bg border-none">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin — Acesso total</SelectItem>
+                    <SelectItem value="master">Master — Gerencia módulos</SelectItem>
+                    <SelectItem value="normal">Normal — Acesso básico</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={handleUpdateRole} disabled={updatingRole} className="w-full h-8 text-[12px] font-semibold" style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}>
+                {updatingRole ? "Salvando..." : "Salvar Permissão"}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Users table */}
       <div className="pbi-tile">
         <p className="text-[11px] font-semibold mb-3 text-foreground">Usuários do Sistema</p>
@@ -239,11 +294,22 @@ export default function GerenciarUsuarios() {
                         {new Date(u.created_at).toLocaleDateString("pt-BR")}
                       </td>
                       <td className="py-2 px-2">
-                        {!isSelf && (
-                          <button onClick={() => handleDelete(u.id, u.full_name)} className="p-1 rounded hover:bg-destructive/20 transition-colors text-muted-foreground">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
+                        <div className="flex items-center gap-1">
+                          {!isSelf && (
+                            <>
+                              <button
+                                onClick={() => setEditingRole({ userId: u.id, role: u.role })}
+                                className="p-1 rounded hover:bg-primary/20 transition-colors text-muted-foreground"
+                                title="Alterar permissão"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                              <button onClick={() => handleDelete(u.id, u.full_name)} className="p-1 rounded hover:bg-destructive/20 transition-colors text-muted-foreground" title="Excluir">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
