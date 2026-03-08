@@ -381,10 +381,11 @@ export default function Metas() {
   });
 
   // Analytics
-  const totalProgress = metas.length > 0 ? metas.reduce((acc, m) => acc + (m.atual / m.objetivo) * 100, 0) / metas.length : 0;
-  const metasAtingidas = metas.filter((m) => m.atual >= m.objetivo).length;
-  const metasEmRisco = metas.filter((m) => m.status === "em_risco" || (m.atual / m.objetivo) < 0.3).length;
-  const metasNoPrazo = metas.filter((m) => m.status === "no_prazo" || (m.atual / m.objetivo) >= 0.7).length;
+  const quantMetas = metas.filter(m => m.unidade !== "texto");
+  const totalProgress = quantMetas.length > 0 ? quantMetas.reduce((acc, m) => acc + (m.atual / m.objetivo) * 100, 0) / quantMetas.length : 0;
+  const metasAtingidas = quantMetas.filter((m) => m.atual >= m.objetivo).length;
+  const metasEmRisco = metas.filter((m) => m.status === "em_risco" || (m.unidade !== "texto" && (m.atual / m.objetivo) < 0.3)).length;
+  const metasNoPrazo = metas.filter((m) => m.status === "no_prazo" || (m.unidade !== "texto" && (m.atual / m.objetivo) >= 0.7)).length;
 
   const categoriasData = categorias.map((cat) => {
     const catMetas = metas.filter((m) => m.categoria === cat);
