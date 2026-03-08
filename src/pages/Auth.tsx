@@ -221,9 +221,6 @@ export default function Auth() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="w-full max-w-[420px]"
           >
-            <div className="mb-8 lg:hidden">
-              <h1 className="text-xl font-bold text-white">San Remo</h1>
-            </div>
 
             {/* Card */}
             <div
@@ -234,23 +231,8 @@ export default function Auth() {
                 boxShadow: "0 25px 60px -12px hsl(222, 30%, 5%, 0.8), 0 0 0 1px hsl(220, 20%, 18%)",
               }}
             >
-              {/* Header icon */}
-              <div className="flex items-center justify-center mb-6">
-                <motion.div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center"
-                  style={{ background: "linear-gradient(135deg, hsl(45, 100%, 51%, 0.15), hsl(45, 100%, 51%, 0.05))" }}
-                  animate={{ boxShadow: ["0 0 0 0 hsl(45, 100%, 51%, 0)", "0 0 20px 4px hsl(45, 100%, 51%, 0.1)", "0 0 0 0 hsl(45, 100%, 51%, 0)"] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                >
-                  {mode === "setup" ? (
-                    <ShieldCheck className="w-7 h-7" style={{ color: "hsl(45, 100%, 51%)" }} />
-                  ) : mode === "forgot" ? (
-                    <KeyRound className="w-7 h-7" style={{ color: "hsl(45, 100%, 51%)" }} />
-                  ) : (
-                    <Lock className="w-7 h-7" style={{ color: "hsl(45, 100%, 51%)" }} />
-                  )}
-                </motion.div>
-              </div>
+              {/* San Remo title */}
+              <h1 className="text-2xl font-bold text-white text-center mb-6">San Remo</h1>
 
               <AnimatePresence mode="wait">
                 <motion.div
