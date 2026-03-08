@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   Target, TrendingUp, Award, Plus, X, Pencil, Check, Filter, Calendar,
   ChevronDown, AlertTriangle, BarChart3, Clock, CheckCircle2, XCircle,
-  Flame, Trophy, ListChecks, Eye, RefreshCw, Trash2,
+  Flame, Trophy, ListChecks, Eye, RefreshCw, Trash2, Users, Zap, MessageSquarePlus,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
