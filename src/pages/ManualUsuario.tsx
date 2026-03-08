@@ -127,10 +127,11 @@ const sections: ManualSection[] = [
     id: "obras",
     title: "Módulo de Obras",
     icon: Building2,
+    status: "placeholder",
     content: [
       {
         title: "Gestão de Obras",
-        body: `O módulo de Obras permite gerenciar todos os empreendimentos da construtora.\n\n**Submódulos:**\n- **Empreendimentos:** Cadastro e acompanhamento de obras\n- **Contratos:** Gestão de contratos com fornecedores e clientes\n- **Materiais:** Controle de estoque de materiais\n- **Clientes:** CRM com informações de compradores`,
+        body: `O módulo de Obras permitirá gerenciar todos os empreendimentos da construtora.\n\n**Submódulos planejados:**\n- **Empreendimentos:** Cadastro e acompanhamento de obras\n- **Contratos:** Gestão de contratos com fornecedores e clientes\n- **Materiais:** Controle de estoque de materiais\n- **Clientes:** CRM com informações de compradores\n\n⚠️ **Este módulo está em desenvolvimento e será disponibilizado em breve.**`,
       },
     ],
   },
