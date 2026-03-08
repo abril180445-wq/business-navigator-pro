@@ -1088,7 +1088,7 @@ export default function Metas() {
 
       {/* Add Action Dialog */}
       <Dialog open={acaoDialogOpen} onOpenChange={setAcaoDialogOpen}>
-        <DialogContent className="sm:max-w-md" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }}>
+        <DialogContent className="sm:max-w-md" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }} onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="text-[14px]" style={{ color: "hsl(var(--pbi-text-primary))" }}>
               {canEditMetas ? "Adicionar Ação" : "Adicionar Contribuição"} — {metas.find((m) => m.id === acaoMetaId)?.nome}
