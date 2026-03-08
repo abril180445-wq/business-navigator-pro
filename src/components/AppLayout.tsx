@@ -96,7 +96,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const location = useLocation();
-  const { profile, user, signOut } = useAuth();
+  const { profile, user, userRole, isAdmin, canEditMetas, signOut } = useAuth();
+
+  // Filter modules based on role
+  const visibleModules = modules.filter((mod) => {
+    if (mod.section === "Admin") return isAdmin;
+    if (mod.path === "/metas") return true; // all can view
+    if (mod.path === "/relatorios") return userRole === "admin" || userRole === "master";
+    if (mod.path === "/importacao") return userRole === "admin" || userRole === "master";
+    if (mod.path === "/cadastro") return userRole === "admin" || userRole === "master";
+    return true;
+  });
 
   const toggleModule = (label: string) => {
     setExpandedModules((prev) =>
