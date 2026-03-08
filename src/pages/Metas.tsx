@@ -715,7 +715,7 @@ export default function Metas() {
         <DialogContent className="sm:max-w-md" style={{ background: "hsl(var(--pbi-surface))", border: "1px solid hsl(var(--pbi-border))" }}>
           <DialogHeader>
             <DialogTitle className="text-[14px]" style={{ color: "hsl(var(--pbi-text-primary))" }}>
-              Adicionar Ação — {metas.find((m) => m.id === acaoMetaId)?.nome}
+              {canEditMetas ? "Adicionar Ação" : "Adicionar Contribuição"} — {metas.find((m) => m.id === acaoMetaId)?.nome}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 pt-2">
