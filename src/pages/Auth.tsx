@@ -213,23 +213,6 @@ export default function Auth() {
               })}
             </div>
 
-            {/* KPI preview strip */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.8 }}
-              className="mt-8 flex gap-6"
-            >
-              {kpis.map((kpi) => (
-                <div key={kpi.label} className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-white">{kpi.value}</span>
-                  <div>
-                    <span className="text-[10px] block" style={{ color: "hsl(220, 15%, 50%)" }}>{kpi.label}</span>
-                    <span className="text-xs font-semibold" style={{ color: kpi.color }}>{kpi.change}</span>
-                  </div>
-                </div>
-              ))}
-            </motion.div>
           </motion.div>
         </section>
 
