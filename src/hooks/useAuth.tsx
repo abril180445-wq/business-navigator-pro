@@ -58,17 +58,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userRole, setUserRole] = useState<AppRole | null>(null);
+  const [canEditMetas, setCanEditMetas] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const refreshAuth = async () => {
-    setLoading(true);
-    const { data } = await supabase.auth.getSession();
-    const authState = await loadAuthState(data.session);
+  const applyState = (authState: Awaited<ReturnType<typeof loadAuthState>>) => {
     setSession(authState.session);
     setUser(authState.user);
     setProfile(authState.profile);
     setIsAdmin(authState.isAdmin);
+    setUserRole(authState.userRole);
+    setCanEditMetas(authState.canEditMetas);
     setLoading(false);
+  };
+
+  const applyFallback = (s: Session | null) => {
+    setSession(s);
+    setUser(s?.user ?? null);
+    setProfile(null);
+    setIsAdmin(false);
+    setUserRole(null);
+    setCanEditMetas(false);
+    setLoading(false);
+  };
+
+  const refreshAuth = async () => {
+    setLoading(true);
+    const { data } = await supabase.auth.getSession();
+    applyState(await loadAuthState(data.session));
   };
 
   useEffect(() => {
@@ -76,42 +93,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       loadAuthState(nextSession)
-        .then((authState) => {
-          if (!mounted) return;
-          setSession(authState.session);
-          setUser(authState.user);
-          setProfile(authState.profile);
-          setIsAdmin(authState.isAdmin);
-          setLoading(false);
-        })
-        .catch(() => {
-          if (!mounted) return;
-          setSession(nextSession);
-          setUser(nextSession?.user ?? null);
-          setProfile(null);
-          setIsAdmin(false);
-          setLoading(false);
-        });
+        .then((s) => { if (mounted) applyState(s); })
+        .catch(() => { if (mounted) applyFallback(nextSession); });
     });
 
     supabase.auth.getSession().then(({ data }) => {
       loadAuthState(data.session)
-        .then((authState) => {
-          if (!mounted) return;
-          setSession(authState.session);
-          setUser(authState.user);
-          setProfile(authState.profile);
-          setIsAdmin(authState.isAdmin);
-          setLoading(false);
-        })
-        .catch(() => {
-          if (!mounted) return;
-          setSession(data.session);
-          setUser(data.session?.user ?? null);
-          setProfile(null);
-          setIsAdmin(false);
-          setLoading(false);
-        });
+        .then((s) => { if (mounted) applyState(s); })
+        .catch(() => { if (mounted) applyFallback(data.session); });
     });
 
     return () => {
@@ -126,13 +115,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       session,
       profile,
       isAdmin,
+      userRole,
+      canEditMetas,
       loading,
       refreshAuth,
       signOut: async () => {
         await supabase.auth.signOut();
       },
     }),
-    [user, session, profile, isAdmin, loading],
+    [user, session, profile, isAdmin, userRole, canEditMetas, loading],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
