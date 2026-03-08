@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTheme } from "@/hooks/useTheme";
-import { BookOpen, ChevronDown, ChevronRight, Search, Shield, LayoutDashboard, Target, FileText, Users, HardDrive, FileSpreadsheet, DollarSign, Building2, HardHat, Download, Construction, Landmark, FolderKanban, Headphones, Truck, Rocket } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronRight, Search, Shield, LayoutDashboard, Target, FileText, Users, HardDrive, FileSpreadsheet, Download, Construction, Rocket } from "lucide-react";
 
 interface ManualSection {
   id: string;
