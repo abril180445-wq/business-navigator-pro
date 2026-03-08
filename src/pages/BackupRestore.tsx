@@ -41,10 +41,10 @@ const SCOPES: { value: RestoreScope; label: string; desc: string; icon: any; col
   {
     value: "database",
     label: "Apenas Banco de Dados",
-    desc: "Metas, ações, check-ins e relatórios",
+    desc: "Metas, ações, check-ins, relatórios, financeiro, obras e materiais",
     icon: Database,
     color: "hsl(207, 89%, 48%)",
-    tables: ["Metas", "Ações", "Check-ins", "Relatórios"],
+    tables: ["Metas", "Ações", "Check-ins", "Relatórios", "Dados Cadastro", "Faturamento", "Contas Pagar", "Contas Receber", "Empreendimentos", "Contratos", "Materiais"],
   },
   {
     value: "all",
@@ -52,7 +52,7 @@ const SCOPES: { value: RestoreScope; label: string; desc: string; icon: any; col
     desc: "Restauração completa de todos os dados",
     icon: Layers,
     color: "hsl(152, 60%, 38%)",
-    tables: ["Perfis", "Roles", "Metas", "Ações", "Check-ins", "Relatórios"],
+    tables: ["Perfis", "Roles", "Metas", "Ações", "Check-ins", "Relatórios", "Financeiro", "Obras"],
   },
 ];
 
@@ -90,7 +90,7 @@ export default function BackupRestore() {
       zip.file("backup_completo.json", JSON.stringify(backupWithoutSQL, null, 2));
       if (sql_dump) zip.file("backup_supabase.sql", sql_dump);
 
-      const tables = ["profiles", "user_roles", "metas", "acoes_meta", "meta_checkins", "relatorios_gerados", "auth_users"];
+      const tables = ["profiles", "user_roles", "metas", "acoes_meta", "meta_checkins", "relatorios_gerados", "dados_cadastro", "faturamento", "contas_pagar", "contas_receber", "empreendimentos", "contratos", "materiais", "auth_users"];
       for (const table of tables) {
         const rows = backup.data[table];
         if (rows && rows.length > 0) {

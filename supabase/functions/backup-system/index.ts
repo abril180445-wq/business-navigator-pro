@@ -33,9 +33,13 @@ function generateTableSQL(tableName: string, rows: any[]): string {
   return lines.join("\n");
 }
 
-// Tables grouped by scope
 const SYSTEM_TABLES = ["profiles", "user_roles"];
-const DATA_TABLES = ["metas", "acoes_meta", "meta_checkins", "relatorios_gerados"];
+const DATA_TABLES = [
+  "metas", "acoes_meta", "meta_checkins", "relatorios_gerados", "dados_cadastro",
+  "faturamento", "contas_pagar", "contas_receber",
+  "empreendimentos", "contratos", "materiais",
+];
+const ALL_TABLES = [...SYSTEM_TABLES, ...DATA_TABLES];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -60,12 +64,13 @@ Deno.serve(async (req) => {
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     if (action === "export") {
-      const { data: profiles } = await adminClient.from("profiles").select("*");
-      const { data: userRoles } = await adminClient.from("user_roles").select("*");
-      const { data: metas } = await adminClient.from("metas").select("*");
-      const { data: acoesMeta } = await adminClient.from("acoes_meta").select("*");
-      const { data: metaCheckins } = await adminClient.from("meta_checkins").select("*");
-      const { data: relatoriosGerados } = await adminClient.from("relatorios_gerados").select("*");
+      // Fetch all tables in parallel
+      const tableData: Record<string, any[]> = {};
+      await Promise.all(ALL_TABLES.map(async (table) => {
+        const { data } = await adminClient.from(table).select("*");
+        tableData[table] = data || [];
+      }));
+
       const { data: { users } } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
 
       const sqlParts: string[] = [];
@@ -73,39 +78,29 @@ Deno.serve(async (req) => {
       sqlParts.push(`-- Generated: ${new Date().toISOString()}`);
       sqlParts.push(`-- By: ${caller.email}`);
       sqlParts.push(`BEGIN;`);
-      sqlParts.push(generateTableSQL("profiles", profiles || []));
-      sqlParts.push(generateTableSQL("user_roles", userRoles || []));
-      sqlParts.push(generateTableSQL("metas", metas || []));
-      sqlParts.push(generateTableSQL("acoes_meta", acoesMeta || []));
-      sqlParts.push(generateTableSQL("meta_checkins", metaCheckins || []));
-      sqlParts.push(generateTableSQL("relatorios_gerados", relatoriosGerados || []));
+      for (const table of ALL_TABLES) {
+        sqlParts.push(generateTableSQL(table, tableData[table]));
+      }
       sqlParts.push(`COMMIT;`);
 
+      const metadata: Record<string, number> = {};
+      for (const table of ALL_TABLES) {
+        metadata[`total_${table}`] = tableData[table].length;
+      }
+      metadata.total_users = users?.length || 0;
+
       const backup = {
-        version: "3.0",
+        version: "4.0",
         created_at: new Date().toISOString(),
         created_by: caller.email,
         data: {
-          profiles: profiles || [],
-          user_roles: userRoles || [],
-          metas: metas || [],
-          acoes_meta: acoesMeta || [],
-          meta_checkins: metaCheckins || [],
-          relatorios_gerados: relatoriosGerados || [],
+          ...tableData,
           auth_users: users?.map(u => ({
             id: u.id, email: u.email, user_metadata: u.user_metadata, created_at: u.created_at,
           })) || [],
         },
         sql_dump: sqlParts.join("\n"),
-        metadata: {
-          total_profiles: profiles?.length || 0,
-          total_roles: userRoles?.length || 0,
-          total_users: users?.length || 0,
-          total_metas: metas?.length || 0,
-          total_acoes: acoesMeta?.length || 0,
-          total_checkins: metaCheckins?.length || 0,
-          total_relatorios: relatoriosGerados?.length || 0,
-        },
+        metadata,
       };
 
       return new Response(JSON.stringify(backup, null, 2), {
@@ -116,9 +111,7 @@ Deno.serve(async (req) => {
       const backupData = body.backup;
       if (!backupData?.data) throw new Error("Invalid backup format");
 
-      // scope: "system" | "database" | "all" (default "all")
       const scope: string = body.scope || "all";
-
       const restored: Record<string, number> = {};
 
       const upsertTable = async (name: string, rows: any[]) => {
@@ -130,18 +123,16 @@ Deno.serve(async (req) => {
         }
       };
 
-      // System tables: profiles + user_roles
       if (scope === "system" || scope === "all") {
-        await upsertTable("profiles", backupData.data.profiles);
-        await upsertTable("user_roles", backupData.data.user_roles);
+        for (const table of SYSTEM_TABLES) {
+          await upsertTable(table, backupData.data[table]);
+        }
       }
 
-      // Data tables: metas, acoes_meta, meta_checkins, relatorios_gerados
       if (scope === "database" || scope === "all") {
-        await upsertTable("metas", backupData.data.metas);
-        await upsertTable("acoes_meta", backupData.data.acoes_meta);
-        await upsertTable("meta_checkins", backupData.data.meta_checkins);
-        await upsertTable("relatorios_gerados", backupData.data.relatorios_gerados);
+        for (const table of DATA_TABLES) {
+          await upsertTable(table, backupData.data[table]);
+        }
       }
 
       return new Response(JSON.stringify({ success: true, scope, restored }), {
