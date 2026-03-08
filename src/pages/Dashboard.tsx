@@ -298,6 +298,8 @@ export default function Dashboard() {
             </AreaChart>
           </ResponsiveContainer>
         </PBITile>
+      </div>
+
       {/* Admin: Modules to implement */}
       {isAdmin && (
         <div className="space-y-3">
