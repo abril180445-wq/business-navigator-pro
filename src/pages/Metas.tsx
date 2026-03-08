@@ -40,6 +40,21 @@ interface Meta {
   status: "no_prazo" | "atencao" | "em_risco" | "atingida";
 }
 
+type MetaTipo = "quantitativa" | "qualitativa";
+
+interface FieldToggles {
+  valores: boolean;
+  responsavel: boolean;
+  prazo: boolean;
+  prioridade: boolean;
+  ciclo: boolean;
+  metaPai: boolean;
+  categoria: boolean;
+}
+
+const defaultTogglesQuant: FieldToggles = { valores: true, responsavel: true, prazo: false, prioridade: true, ciclo: true, metaPai: false, categoria: true };
+const defaultTogglesQual: FieldToggles = { valores: false, responsavel: true, prazo: true, prioridade: true, ciclo: false, metaPai: false, categoria: true };
+
 interface AcaoMeta {
   id: string;
   meta_id: string;
@@ -155,7 +170,11 @@ export default function Metas() {
     prioridade: string; ciclo: string; parent_id: string; prazo: string;
   }>({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "", prazo: "" });
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [newMeta, setNewMeta] = useState({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media" as Meta["prioridade"], ciclo: "Q1 2026", parent_id: "" });
+  const [newMetaTipo, setNewMetaTipo] = useState<MetaTipo>("quantitativa");
+  const [newMetaToggles, setNewMetaToggles] = useState<FieldToggles>(defaultTogglesQuant);
+  const [editMetaTipo, setEditMetaTipo] = useState<MetaTipo>("quantitativa");
+  const [editMetaToggles, setEditMetaToggles] = useState<FieldToggles>(defaultTogglesQuant);
+  const [newMeta, setNewMeta] = useState({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media" as Meta["prioridade"], ciclo: "Q1 2026", parent_id: "", descricao: "" });
 
   // Dynamic categories: base + any custom ones from existing metas
   const categorias = useMemo(() => {
@@ -204,64 +223,77 @@ export default function Metas() {
   }, [canEditMetas]);
 
   const addMeta = async () => {
-    if (!newMeta.nome || !newMeta.objetivo) {
-      toast({ title: "Preencha nome e objetivo", variant: "destructive" });
+    if (!newMeta.nome) {
+      toast({ title: "Preencha o nome da meta", variant: "destructive" });
       return;
     }
-    const categoriaFinal = newMeta.categoria === "__outra__" ? newMeta.categoriaCustom.trim() : newMeta.categoria;
-    if (!categoriaFinal) {
+    if (newMetaTipo === "quantitativa" && newMetaToggles.valores && !newMeta.objetivo) {
+      toast({ title: "Preencha o objetivo", variant: "destructive" });
+      return;
+    }
+    const categoriaFinal = !newMetaToggles.categoria ? "Geral" : newMeta.categoria === "__outra__" ? newMeta.categoriaCustom.trim() : newMeta.categoria;
+    if (newMetaToggles.categoria && !categoriaFinal) {
       toast({ title: "Informe a categoria", variant: "destructive" });
       return;
     }
     const cor = coresMeta[metas.length % coresMeta.length];
+    const isQual = newMetaTipo === "qualitativa" || !newMetaToggles.valores;
     const { error } = await supabase.from("metas").insert({
-      nome: newMeta.nome, atual: parseFloat(newMeta.atual) || 0,
-      objetivo: parseFloat(newMeta.objetivo), unidade: newMeta.unidade, cor,
-      categoria: categoriaFinal, responsavel: newMeta.responsavel,
-      prioridade: newMeta.prioridade, created_by: user?.id,
-      ciclo: newMeta.ciclo,
-      parent_id: newMeta.parent_id || null,
+      nome: newMeta.nome,
+      atual: isQual ? 0 : (parseFloat(newMeta.atual) || 0),
+      objetivo: isQual ? 1 : (parseFloat(newMeta.objetivo) || 1),
+      unidade: isQual ? "texto" : newMeta.unidade,
+      cor,
+      categoria: categoriaFinal || "Geral",
+      responsavel: newMetaToggles.responsavel ? newMeta.responsavel : "",
+      prioridade: newMetaToggles.prioridade ? newMeta.prioridade : "media",
+      created_by: user?.id,
+      ciclo: newMetaToggles.ciclo ? newMeta.ciclo : "Q1 2026",
+      parent_id: newMetaToggles.metaPai ? (newMeta.parent_id || null) : null,
     });
     if (error) { toast({ title: "Erro ao criar meta", description: error.message, variant: "destructive" }); return; }
-    setNewMeta({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "" });
+    setNewMeta({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "", descricao: "" });
     setDialogOpen(false);
     toast({ title: "Meta criada!" });
   };
 
   const saveEdit = async (id: string) => {
     const meta = metas.find(m => m.id === id);
-    const novoValor = parseFloat(editValues.atual) || 0;
-    const novoObj = parseFloat(editValues.objetivo) || 1;
-    const categoriaFinal = editValues.categoria === "__outra__" ? editValues.categoriaCustom.trim() : editValues.categoria;
-    if (!categoriaFinal) {
+    const isQual = editMetaTipo === "qualitativa" || !editMetaToggles.valores;
+    const novoValor = isQual ? 0 : (parseFloat(editValues.atual) || 0);
+    const novoObj = isQual ? 1 : (parseFloat(editValues.objetivo) || 1);
+    const categoriaFinal = !editMetaToggles.categoria ? (meta?.categoria || "Geral") : editValues.categoria === "__outra__" ? editValues.categoriaCustom.trim() : editValues.categoria;
+    if (editMetaToggles.categoria && !categoriaFinal) {
       toast({ title: "Informe a categoria", variant: "destructive" });
       return;
     }
     
     // Auto-calculate status
-    const pct = (novoValor / novoObj) * 100;
+    const pct = isQual ? 0 : (novoValor / novoObj) * 100;
     let newStatus: Meta["status"] = "no_prazo";
-    if (pct >= 100) newStatus = "atingida";
-    else if (pct < 30) newStatus = "em_risco";
-    else if (pct < 60) newStatus = "atencao";
+    if (!isQual) {
+      if (pct >= 100) newStatus = "atingida";
+      else if (pct < 30) newStatus = "em_risco";
+      else if (pct < 60) newStatus = "atencao";
+    }
 
     const { error } = await supabase.from("metas").update({
       nome: editValues.nome,
       atual: novoValor,
       objetivo: novoObj,
-      unidade: editValues.unidade,
-      categoria: categoriaFinal,
-      responsavel: editValues.responsavel,
-      prioridade: editValues.prioridade,
-      ciclo: editValues.ciclo,
-      parent_id: editValues.parent_id || null,
-      prazo: editValues.prazo || null,
+      unidade: isQual ? "texto" : editValues.unidade,
+      categoria: categoriaFinal || "Geral",
+      responsavel: editMetaToggles.responsavel ? editValues.responsavel : "",
+      prioridade: editMetaToggles.prioridade ? editValues.prioridade : "media",
+      ciclo: editMetaToggles.ciclo ? editValues.ciclo : meta?.ciclo || "Q1 2026",
+      parent_id: editMetaToggles.metaPai ? (editValues.parent_id || null) : null,
+      prazo: editMetaToggles.prazo ? (editValues.prazo || null) : null,
       status: newStatus,
     }).eq("id", id);
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
 
-    // Auto check-in when editor updates value
-    if (meta && novoValor !== meta.atual) {
+    // Auto check-in when editor updates value (only for quantitative)
+    if (!isQual && meta && novoValor !== meta.atual) {
       await supabase.from("meta_checkins").insert({
         meta_id: id, user_id: user!.id,
         user_name: profile?.full_name || user?.email || "—",
@@ -349,10 +381,11 @@ export default function Metas() {
   });
 
   // Analytics
-  const totalProgress = metas.length > 0 ? metas.reduce((acc, m) => acc + (m.atual / m.objetivo) * 100, 0) / metas.length : 0;
-  const metasAtingidas = metas.filter((m) => m.atual >= m.objetivo).length;
-  const metasEmRisco = metas.filter((m) => m.status === "em_risco" || (m.atual / m.objetivo) < 0.3).length;
-  const metasNoPrazo = metas.filter((m) => m.status === "no_prazo" || (m.atual / m.objetivo) >= 0.7).length;
+  const quantMetas = metas.filter(m => m.unidade !== "texto");
+  const totalProgress = quantMetas.length > 0 ? quantMetas.reduce((acc, m) => acc + (m.atual / m.objetivo) * 100, 0) / quantMetas.length : 0;
+  const metasAtingidas = quantMetas.filter((m) => m.atual >= m.objetivo).length;
+  const metasEmRisco = metas.filter((m) => m.status === "em_risco" || (m.unidade !== "texto" && (m.atual / m.objetivo) < 0.3)).length;
+  const metasNoPrazo = metas.filter((m) => m.status === "no_prazo" || (m.unidade !== "texto" && (m.atual / m.objetivo) >= 0.7)).length;
 
   const categoriasData = categorias.map((cat) => {
     const catMetas = metas.filter((m) => m.categoria === cat);
@@ -382,10 +415,13 @@ export default function Metas() {
   const rankingMetas = [...metas].sort((a, b) => (b.atual / b.objetivo) - (a.atual / a.objetivo));
 
   const formatVal = (v: number, unidade: string) => {
+    if (unidade === "texto") return "";
     if (unidade === "R$") return `R$ ${v.toLocaleString("pt-BR")}`;
     if (unidade === "%") return `${v}%`;
     return `${v.toLocaleString("pt-BR")} ${unidade}`;
   };
+
+  const isQualitativa = (meta: Meta) => meta.unidade === "texto" || (meta.objetivo <= 1 && meta.atual === 0 && meta.unidade === "texto");
 
   // Parent metas (top-level)
   const parentMetas = metas.filter(m => !m.parent_id);
@@ -465,91 +501,157 @@ export default function Metas() {
                 <DialogTitle className="text-[14px]" style={{ color: "hsl(var(--pbi-text-primary))" }}>Criar Nova Meta</DialogTitle>
               </DialogHeader>
               <div className="space-y-3 pt-2">
+                {/* Tipo de Meta */}
+                <div className="space-y-1.5">
+                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Tipo de Meta</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {([
+                      { key: "quantitativa" as MetaTipo, label: "📊 Quantitativa", desc: "Com valores numéricos e progresso" },
+                      { key: "qualitativa" as MetaTipo, label: "📝 Qualitativa", desc: "Apenas texto, sem valores" },
+                    ]).map((t) => (
+                      <button key={t.key} type="button" onClick={() => {
+                        setNewMetaTipo(t.key);
+                        setNewMetaToggles(t.key === "quantitativa" ? defaultTogglesQuant : defaultTogglesQual);
+                      }}
+                        className="text-left p-2.5 rounded transition-all"
+                        style={{
+                          background: newMetaTipo === t.key ? "hsl(var(--pbi-yellow) / 0.15)" : "hsl(var(--pbi-dark))",
+                          border: `1.5px solid ${newMetaTipo === t.key ? "hsl(var(--pbi-yellow))" : "hsl(var(--pbi-border))"}`,
+                        }}
+                      >
+                        <p className="text-[12px] font-semibold" style={{ color: newMetaTipo === t.key ? "hsl(var(--pbi-yellow))" : "hsl(var(--pbi-text-primary))" }}>{t.label}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{t.desc}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Campos opcionais toggle */}
+                <div className="space-y-1.5">
+                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Campos da Meta (clique para ativar/desativar)</Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {([
+                      { key: "valores" as keyof FieldToggles, label: "Valores/Progresso", hidden: newMetaTipo === "qualitativa" },
+                      { key: "responsavel" as keyof FieldToggles, label: "Responsável" },
+                      { key: "prioridade" as keyof FieldToggles, label: "Prioridade" },
+                      { key: "categoria" as keyof FieldToggles, label: "Categoria" },
+                      { key: "ciclo" as keyof FieldToggles, label: "Ciclo" },
+                      { key: "prazo" as keyof FieldToggles, label: "Prazo" },
+                      { key: "metaPai" as keyof FieldToggles, label: "Meta Pai" },
+                    ] as { key: keyof FieldToggles; label: string; hidden?: boolean }[]).filter(f => !f.hidden).map((f) => (
+                      <button key={f.key} type="button" onClick={() => setNewMetaToggles({ ...newMetaToggles, [f.key]: !newMetaToggles[f.key] })}
+                        className="text-[10px] px-2.5 py-1.5 rounded font-medium transition-all"
+                        style={{
+                          background: newMetaToggles[f.key] ? "hsl(152, 60%, 38%, 0.15)" : "hsl(var(--pbi-dark))",
+                          color: newMetaToggles[f.key] ? "hsl(152, 60%, 38%)" : "hsl(var(--pbi-text-secondary))",
+                          border: `1px solid ${newMetaToggles[f.key] ? "hsl(152, 60%, 38%, 0.4)" : "hsl(var(--pbi-border))"}`,
+                        }}
+                      >
+                        {newMetaToggles[f.key] ? "✓ " : ""}{f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="space-y-1.5">
                   <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Nome da Meta *</Label>
                   <Input value={newMeta.nome} onChange={(e) => setNewMeta({ ...newMeta, nome: e.target.value })} placeholder="Ex: Construir muro, Faturamento Mensal, Treinar equipe..." className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Unidade de Medida</Label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {unidadesPreset.map((u) => (
-                      <button
-                        key={u.value}
-                        type="button"
-                        onClick={() => setNewMeta({ ...newMeta, unidade: u.value })}
-                        className="text-[10px] px-2.5 py-1.5 rounded font-medium transition-all"
-                        style={{
-                          background: newMeta.unidade === u.value ? "hsl(var(--pbi-yellow))" : "hsl(var(--pbi-dark))",
-                          color: newMeta.unidade === u.value ? "hsl(var(--pbi-dark))" : "hsl(var(--pbi-text-secondary))",
-                          border: `1px solid ${newMeta.unidade === u.value ? "hsl(var(--pbi-yellow))" : "hsl(var(--pbi-border))"}`,
-                        }}
-                      >
-                        {u.label}
-                      </button>
-                    ))}
-                  </div>
-                  <Input value={newMeta.unidade} onChange={(e) => setNewMeta({ ...newMeta, unidade: e.target.value })} placeholder="Ou digite uma personalizada..." className="h-7 text-[11px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
-                      {newMeta.unidade === "%" ? "Progresso Atual (%)" : newMeta.unidade === "dias" ? "Dias Transcorridos" : `Valor Atual (${newMeta.unidade})`}
-                    </Label>
-                    <Input type="number" value={newMeta.atual} onChange={(e) => setNewMeta({ ...newMeta, atual: e.target.value })} placeholder="0" className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
-                      {newMeta.unidade === "%" ? "Meta (%) *" : newMeta.unidade === "dias" ? "Total de Dias *" : `Objetivo (${newMeta.unidade}) *`}
-                    </Label>
-                    <Input type="number" value={newMeta.objetivo} onChange={(e) => setNewMeta({ ...newMeta, objetivo: e.target.value })} placeholder={newMeta.unidade === "%" ? "100" : newMeta.unidade === "dias" ? "30" : "100"} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-                  </div>
-                </div>
+
+                {/* Unidade + Valores (only for quantitativa with valores toggled on) */}
+                {newMetaTipo === "quantitativa" && newMetaToggles.valores && (
+                  <>
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Unidade de Medida</Label>
+                      <div className="flex flex-wrap gap-1.5">
+                        {unidadesPreset.map((u) => (
+                          <button key={u.value} type="button" onClick={() => setNewMeta({ ...newMeta, unidade: u.value })}
+                            className="text-[10px] px-2.5 py-1.5 rounded font-medium transition-all"
+                            style={{
+                              background: newMeta.unidade === u.value ? "hsl(var(--pbi-yellow))" : "hsl(var(--pbi-dark))",
+                              color: newMeta.unidade === u.value ? "hsl(var(--pbi-dark))" : "hsl(var(--pbi-text-secondary))",
+                              border: `1px solid ${newMeta.unidade === u.value ? "hsl(var(--pbi-yellow))" : "hsl(var(--pbi-border))"}`,
+                            }}
+                          >{u.label}</button>
+                        ))}
+                      </div>
+                      <Input value={newMeta.unidade} onChange={(e) => setNewMeta({ ...newMeta, unidade: e.target.value })} placeholder="Ou digite uma personalizada..." className="h-7 text-[11px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
+                          {newMeta.unidade === "%" ? "Progresso Atual (%)" : newMeta.unidade === "dias" ? "Dias Transcorridos" : `Valor Atual (${newMeta.unidade})`}
+                        </Label>
+                        <Input type="number" value={newMeta.atual} onChange={(e) => setNewMeta({ ...newMeta, atual: e.target.value })} placeholder="0" className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>
+                          {newMeta.unidade === "%" ? "Meta (%) *" : newMeta.unidade === "dias" ? "Total de Dias *" : `Objetivo (${newMeta.unidade}) *`}
+                        </Label>
+                        <Input type="number" value={newMeta.objetivo} onChange={(e) => setNewMeta({ ...newMeta, objetivo: e.target.value })} placeholder={newMeta.unidade === "%" ? "100" : newMeta.unidade === "dias" ? "30" : "100"} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Conditional fields based on toggles */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Categoria</Label>
-                    <select value={newMeta.categoria} onChange={(e) => setNewMeta({ ...newMeta, categoria: e.target.value, categoriaCustom: "" })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                      {categorias.map((c) => <option key={c} value={c}>{c}</option>)}
-                      <option value="__outra__">✨ Outra (personalizada)</option>
-                    </select>
-                    {newMeta.categoria === "__outra__" && (
-                      <Input
-                        value={newMeta.categoriaCustom}
-                        onChange={(e) => setNewMeta({ ...newMeta, categoriaCustom: e.target.value })}
-                        placeholder="Digite a nova categoria..."
-                        maxLength={40}
-                        className="h-8 text-[12px] border-none mt-1"
-                        style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}
-                      />
-                    )}
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Responsável</Label>
-                    <Input value={newMeta.responsavel} onChange={(e) => setNewMeta({ ...newMeta, responsavel: e.target.value })} placeholder="Nome" className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Prioridade</Label>
-                    <select value={newMeta.prioridade} onChange={(e) => setNewMeta({ ...newMeta, prioridade: e.target.value as Meta["prioridade"] })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                      <option value="alta">Alta</option>
-                      <option value="media">Média</option>
-                      <option value="baixa">Baixa</option>
-                    </select>
-                  </div>
+                  {newMetaToggles.categoria && (
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Categoria</Label>
+                      <select value={newMeta.categoria} onChange={(e) => setNewMeta({ ...newMeta, categoria: e.target.value, categoriaCustom: "" })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                        {categorias.map((c) => <option key={c} value={c}>{c}</option>)}
+                        <option value="__outra__">✨ Outra (personalizada)</option>
+                      </select>
+                      {newMeta.categoria === "__outra__" && (
+                        <Input value={newMeta.categoriaCustom} onChange={(e) => setNewMeta({ ...newMeta, categoriaCustom: e.target.value })} placeholder="Digite a nova categoria..." maxLength={40} className="h-8 text-[12px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                      )}
+                    </div>
+                  )}
+                  {newMetaToggles.responsavel && (
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Responsável</Label>
+                      <Input value={newMeta.responsavel} onChange={(e) => setNewMeta({ ...newMeta, responsavel: e.target.value })} placeholder="Nome" className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                    </div>
+                  )}
+                  {newMetaToggles.prioridade && (
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Prioridade</Label>
+                      <select value={newMeta.prioridade} onChange={(e) => setNewMeta({ ...newMeta, prioridade: e.target.value as Meta["prioridade"] })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                        <option value="alta">Alta</option>
+                        <option value="media">Média</option>
+                        <option value="baixa">Baixa</option>
+                      </select>
+                    </div>
+                  )}
                 </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Ciclo</Label>
-                    <select value={newMeta.ciclo} onChange={(e) => setNewMeta({ ...newMeta, ciclo: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                      {ciclosDisponiveis.map((c) => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Meta Pai (cascata)</Label>
-                    <select value={newMeta.parent_id} onChange={(e) => setNewMeta({ ...newMeta, parent_id: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                      <option value="">Nenhuma (meta principal)</option>
-                      {metas.filter(m => !m.parent_id).map((m) => <option key={m.id} value={m.id}>{m.nome}</option>)}
-                    </select>
-                  </div>
+                  {newMetaToggles.ciclo && (
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Ciclo</Label>
+                      <select value={newMeta.ciclo} onChange={(e) => setNewMeta({ ...newMeta, ciclo: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                        {ciclosDisponiveis.map((c) => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
+                  )}
+                  {newMetaToggles.metaPai && (
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Meta Pai (cascata)</Label>
+                      <select value={newMeta.parent_id} onChange={(e) => setNewMeta({ ...newMeta, parent_id: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                        <option value="">Nenhuma (meta principal)</option>
+                        {metas.filter(m => !m.parent_id).map((m) => <option key={m.id} value={m.id}>{m.nome}</option>)}
+                      </select>
+                    </div>
+                  )}
+                  {newMetaToggles.prazo && (
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Prazo</Label>
+                      <Input type="date" value={newMeta.objetivo} onChange={(e) => setNewMeta({ ...newMeta, objetivo: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                    </div>
+                  )}
                 </div>
+
                 <Button onClick={addMeta} className="w-full h-8 text-[12px] font-semibold" style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}>Criar Meta</Button>
               </div>
             </DialogContent>
@@ -627,8 +729,8 @@ export default function Metas() {
             <PBITile title="Progresso Individual" className="lg:col-span-2">
               <div className="space-y-2.5">
                 {filteredMetas.map((meta) => {
-                  const pct = Math.min(Math.round((meta.atual / meta.objetivo) * 100), 100);
-                  const isEditing = editingId === meta.id;
+                  const qual = isQualitativa(meta);
+                  const pct = qual ? 0 : Math.min(Math.round((meta.atual / meta.objetivo) * 100), 100);
                   const pCfg = prioridadeConfig[meta.prioridade];
                   const sCfg = statusConfig[meta.status];
                   const metaAcoes = acoes.filter((a) => a.meta_id === meta.id);
@@ -640,10 +742,12 @@ export default function Metas() {
                       <div className="flex items-center justify-between mb-1 flex-wrap gap-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           {meta.parent_id && <GitBranch className="w-3 h-3 text-muted-foreground" />}
+                          {qual && <FileText className="w-3 h-3 text-muted-foreground" />}
                           <span className="text-[12px] font-medium text-foreground">{meta.nome}</span>
+                          {qual && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">📝 Qualitativa</span>}
                           <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: pCfg.bg, color: pCfg.color }}>{pCfg.label}</span>
                           <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: sCfg.bg, color: sCfg.color }}>{sCfg.label}</span>
-                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{meta.ciclo}</span>
+                          {meta.ciclo && <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{meta.ciclo}</span>}
                           {metaAcoes.length > 0 && (
                             <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">
                               <ListChecks className="w-3 h-3 inline mr-0.5" />{metaAcoes.filter((a) => a.concluida).length}/{metaAcoes.length}
@@ -661,12 +765,23 @@ export default function Metas() {
                           )}
                         </div>
                         <div className="flex items-center gap-1.5">
-                              <span className="text-[10px] text-muted-foreground hidden sm:inline">{meta.responsavel}</span>
-                              <span className="text-[11px] text-muted-foreground">{formatVal(meta.atual, meta.unidade)} / {formatVal(meta.objetivo, meta.unidade)}</span>
-                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: `${meta.cor}18`, color: meta.cor }}>{pct}%</span>
+                              {meta.responsavel && <span className="text-[10px] text-muted-foreground hidden sm:inline">{meta.responsavel}</span>}
+                              {!qual && <span className="text-[11px] text-muted-foreground">{formatVal(meta.atual, meta.unidade)} / {formatVal(meta.objetivo, meta.unidade)}</span>}
+                              {!qual && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: `${meta.cor}18`, color: meta.cor }}>{pct}%</span>}
                               <button onClick={() => { setCheckinMetaId(meta.id); setCheckinDialogOpen(true); }} className="p-1 rounded hover:bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" title="Check-in"><MessageCircle className="w-3 h-3" /></button>
                               <button onClick={() => {
                                 setEditingId(meta.id);
+                                const isMetaQual = meta.unidade === "texto";
+                                setEditMetaTipo(isMetaQual ? "qualitativa" : "quantitativa");
+                                setEditMetaToggles({
+                                  valores: !isMetaQual,
+                                  responsavel: !!meta.responsavel,
+                                  prazo: !!meta.prazo,
+                                  prioridade: true,
+                                  ciclo: !!meta.ciclo,
+                                  metaPai: !!meta.parent_id,
+                                  categoria: !!meta.categoria,
+                                });
                                 setEditValues({
                                   nome: meta.nome, atual: meta.atual.toString(), objetivo: meta.objetivo.toString(),
                                   unidade: meta.unidade, categoria: categorias.includes(meta.categoria) ? meta.categoria : "__outra__",
@@ -680,9 +795,11 @@ export default function Metas() {
                               <button onClick={() => removeMeta(meta.id)} className="p-1 rounded hover:bg-destructive/10 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-3 h-3" /></button>
                         </div>
                       </div>
-                      <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: meta.cor }} />
-                      </div>
+                      {!qual && (
+                        <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: meta.cor }} />
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -727,7 +844,8 @@ export default function Metas() {
           )}
 
           {filteredMetas.map((meta) => {
-            const pct = Math.min(Math.round((meta.atual / meta.objetivo) * 100), 100);
+            const qual = isQualitativa(meta);
+            const pct = qual ? 0 : Math.min(Math.round((meta.atual / meta.objetivo) * 100), 100);
             const metaAcoes = acoes.filter((a) => a.meta_id === meta.id && a.tipo === "acao");
             const metaContribs = acoes.filter((a) => a.meta_id === meta.id && a.tipo === "contribuicao");
             const pCfg = prioridadeConfig[meta.prioridade];
@@ -738,15 +856,16 @@ export default function Metas() {
               <PBITile key={meta.id}>
                 <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Target className="w-4 h-4" style={{ color: meta.cor }} />
+                    {qual ? <FileText className="w-4 h-4" style={{ color: meta.cor }} /> : <Target className="w-4 h-4" style={{ color: meta.cor }} />}
                     <span className="text-[13px] font-semibold text-foreground">{meta.nome}</span>
+                    {qual && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">📝 Qualitativa</span>}
                     <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: pCfg.bg, color: pCfg.color }}>{pCfg.label}</span>
                     <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: sCfg.bg, color: sCfg.color }}>{sCfg.label}</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{meta.ciclo}</span>
+                    {meta.ciclo && <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{meta.ciclo}</span>}
                   </div>
                   <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                    <span className="text-[11px] text-muted-foreground">{formatVal(meta.atual, meta.unidade)} / {formatVal(meta.objetivo, meta.unidade)}</span>
-                    <span className="text-[14px] font-bold" style={{ color: barColor }}>{pct}%</span>
+                    {!qual && <span className="text-[11px] text-muted-foreground">{formatVal(meta.atual, meta.unidade)} / {formatVal(meta.objetivo, meta.unidade)}</span>}
+                    {!qual && <span className="text-[14px] font-bold" style={{ color: barColor }}>{pct}%</span>}
                     <button onClick={() => { setCheckinMetaId(meta.id); setCheckinDialogOpen(true); }} className="text-[10px] px-2 py-1 rounded font-medium" style={{ background: "hsl(262, 52%, 47%)", color: "white" }}>
                       <MessageCircle className="w-3 h-3 inline mr-0.5" /> Check-in
                     </button>
@@ -762,9 +881,11 @@ export default function Metas() {
                     )}
                   </div>
                 </div>
-                <div className="h-2 bg-secondary rounded-full overflow-hidden mb-3">
-                  <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: barColor }} />
-                </div>
+                {!qual && (
+                  <div className="h-2 bg-secondary rounded-full overflow-hidden mb-3">
+                    <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: barColor }} />
+                  </div>
+                )}
 
                 {meta.responsavel && (
                   <p className="text-[10px] text-muted-foreground mb-2">Responsável: <span className="text-foreground font-medium">{meta.responsavel}</span></p>
@@ -1240,82 +1361,155 @@ export default function Metas() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
+            {/* Tipo de Meta */}
+            <div className="space-y-1.5">
+              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Tipo de Meta</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { key: "quantitativa" as MetaTipo, label: "📊 Quantitativa", desc: "Com valores numéricos" },
+                  { key: "qualitativa" as MetaTipo, label: "📝 Qualitativa", desc: "Apenas texto" },
+                ]).map((t) => (
+                  <button key={t.key} type="button" onClick={() => {
+                    setEditMetaTipo(t.key);
+                    if (t.key === "qualitativa") setEditMetaToggles(prev => ({ ...prev, valores: false }));
+                    else setEditMetaToggles(prev => ({ ...prev, valores: true }));
+                  }}
+                    className="text-left p-2 rounded transition-all"
+                    style={{
+                      background: editMetaTipo === t.key ? "hsl(var(--pbi-yellow) / 0.15)" : "hsl(var(--pbi-dark))",
+                      border: `1.5px solid ${editMetaTipo === t.key ? "hsl(var(--pbi-yellow))" : "hsl(var(--pbi-border))"}`,
+                    }}
+                  >
+                    <p className="text-[11px] font-semibold" style={{ color: editMetaTipo === t.key ? "hsl(var(--pbi-yellow))" : "hsl(var(--pbi-text-primary))" }}>{t.label}</p>
+                    <p className="text-[9px] text-muted-foreground">{t.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Field toggles */}
+            <div className="space-y-1.5">
+              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Campos ativos</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {([
+                  { key: "valores" as keyof FieldToggles, label: "Valores/Progresso", hidden: editMetaTipo === "qualitativa" },
+                  { key: "responsavel" as keyof FieldToggles, label: "Responsável" },
+                  { key: "prioridade" as keyof FieldToggles, label: "Prioridade" },
+                  { key: "categoria" as keyof FieldToggles, label: "Categoria" },
+                  { key: "ciclo" as keyof FieldToggles, label: "Ciclo" },
+                  { key: "prazo" as keyof FieldToggles, label: "Prazo" },
+                  { key: "metaPai" as keyof FieldToggles, label: "Meta Pai" },
+                ] as { key: keyof FieldToggles; label: string; hidden?: boolean }[]).filter(f => !f.hidden).map((f) => (
+                  <button key={f.key} type="button" onClick={() => setEditMetaToggles({ ...editMetaToggles, [f.key]: !editMetaToggles[f.key] })}
+                    className="text-[9px] px-2 py-1 rounded font-medium transition-all"
+                    style={{
+                      background: editMetaToggles[f.key] ? "hsl(152, 60%, 38%, 0.15)" : "hsl(var(--pbi-dark))",
+                      color: editMetaToggles[f.key] ? "hsl(152, 60%, 38%)" : "hsl(var(--pbi-text-secondary))",
+                      border: `1px solid ${editMetaToggles[f.key] ? "hsl(152, 60%, 38%, 0.4)" : "hsl(var(--pbi-border))"}`,
+                    }}
+                  >
+                    {editMetaToggles[f.key] ? "✓ " : ""}{f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="space-y-1.5">
               <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Nome da Meta</Label>
               <Input value={editValues.nome} onChange={(e) => setEditValues({ ...editValues, nome: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Unidade de Medida</Label>
-              <div className="flex flex-wrap gap-1">
-                {unidadesPreset.map((u) => (
-                  <button key={u.value} type="button" onClick={() => setEditValues({ ...editValues, unidade: u.value })}
-                    className="text-[9px] px-2 py-1 rounded font-medium transition-all"
-                    style={{
-                      background: editValues.unidade === u.value ? "hsl(var(--pbi-yellow))" : "hsl(var(--pbi-dark))",
-                      color: editValues.unidade === u.value ? "hsl(var(--pbi-dark))" : "hsl(var(--pbi-text-secondary))",
-                      border: `1px solid ${editValues.unidade === u.value ? "hsl(var(--pbi-yellow))" : "hsl(var(--pbi-border))"}`,
-                    }}
-                  >{u.label}</button>
-                ))}
-              </div>
-              <Input value={editValues.unidade} onChange={(e) => setEditValues({ ...editValues, unidade: e.target.value })} placeholder="Ou personalizada..." className="h-7 text-[11px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+
+            {editMetaToggles.valores && (
+              <>
+                <div className="space-y-1.5">
+                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Unidade de Medida</Label>
+                  <div className="flex flex-wrap gap-1">
+                    {unidadesPreset.map((u) => (
+                      <button key={u.value} type="button" onClick={() => setEditValues({ ...editValues, unidade: u.value })}
+                        className="text-[9px] px-2 py-1 rounded font-medium transition-all"
+                        style={{
+                          background: editValues.unidade === u.value ? "hsl(var(--pbi-yellow))" : "hsl(var(--pbi-dark))",
+                          color: editValues.unidade === u.value ? "hsl(var(--pbi-dark))" : "hsl(var(--pbi-text-secondary))",
+                          border: `1px solid ${editValues.unidade === u.value ? "hsl(var(--pbi-yellow))" : "hsl(var(--pbi-border))"}`,
+                        }}
+                      >{u.label}</button>
+                    ))}
+                  </div>
+                  <Input value={editValues.unidade} onChange={(e) => setEditValues({ ...editValues, unidade: e.target.value })} placeholder="Ou personalizada..." className="h-7 text-[11px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Valor Atual ({editValues.unidade})</Label>
+                    <Input type="number" value={editValues.atual} onChange={(e) => setEditValues({ ...editValues, atual: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Objetivo ({editValues.unidade})</Label>
+                    <Input type="number" value={editValues.objetivo} onChange={(e) => setEditValues({ ...editValues, objetivo: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {editMetaToggles.responsavel && (
+                <div className="space-y-1.5">
+                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Responsável</Label>
+                  <Input value={editValues.responsavel} onChange={(e) => setEditValues({ ...editValues, responsavel: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                </div>
+              )}
+              {editMetaToggles.categoria && (
+                <div className="space-y-1.5">
+                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Categoria</Label>
+                  <select value={editValues.categoria} onChange={(e) => setEditValues({ ...editValues, categoria: e.target.value, categoriaCustom: "" })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                    {categorias.map((c) => <option key={c} value={c}>{c}</option>)}
+                    <option value="__outra__">✨ Outra</option>
+                  </select>
+                  {editValues.categoria === "__outra__" && (
+                    <Input value={editValues.categoriaCustom} onChange={(e) => setEditValues({ ...editValues, categoriaCustom: e.target.value })} placeholder="Nova categoria..." maxLength={40} className="h-8 text-[12px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                  )}
+                </div>
+              )}
+              {editMetaToggles.prioridade && (
+                <div className="space-y-1.5">
+                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Prioridade</Label>
+                  <select value={editValues.prioridade} onChange={(e) => setEditValues({ ...editValues, prioridade: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                    <option value="alta">Alta</option>
+                    <option value="media">Média</option>
+                    <option value="baixa">Baixa</option>
+                  </select>
+                </div>
+              )}
             </div>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Valor Atual ({editValues.unidade})</Label>
-                <Input type="number" value={editValues.atual} onChange={(e) => setEditValues({ ...editValues, atual: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Objetivo ({editValues.unidade})</Label>
-                <Input type="number" value={editValues.objetivo} onChange={(e) => setEditValues({ ...editValues, objetivo: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Responsável</Label>
-                <Input value={editValues.responsavel} onChange={(e) => setEditValues({ ...editValues, responsavel: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-              </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {editMetaToggles.ciclo && (
+                <div className="space-y-1.5">
+                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Ciclo</Label>
+                  <select value={editValues.ciclo} onChange={(e) => setEditValues({ ...editValues, ciclo: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                    {ciclosDisponiveis.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              )}
+              {editMetaToggles.prazo && (
+                <div className="space-y-1.5">
+                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Prazo</Label>
+                  <Input type="date" value={editValues.prazo} onChange={(e) => setEditValues({ ...editValues, prazo: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+                  {editValues.prazo && (
+                    <button onClick={() => setEditValues({ ...editValues, prazo: "" })} className="text-[10px] text-muted-foreground hover:text-destructive transition-colors">✕ Remover prazo</button>
+                  )}
+                </div>
+              )}
+              {editMetaToggles.metaPai && (
+                <div className="space-y-1.5">
+                  <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Meta Pai</Label>
+                  <select value={editValues.parent_id} onChange={(e) => setEditValues({ ...editValues, parent_id: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
+                    <option value="">Nenhuma (meta raiz)</option>
+                    {metas.filter(m => m.id !== editingId).map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
+                  </select>
+                </div>
+              )}
             </div>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Categoria</Label>
-                <select value={editValues.categoria} onChange={(e) => setEditValues({ ...editValues, categoria: e.target.value, categoriaCustom: "" })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                  {categorias.map((c) => <option key={c} value={c}>{c}</option>)}
-                  <option value="__outra__">✨ Outra</option>
-                </select>
-                {editValues.categoria === "__outra__" && (
-                  <Input value={editValues.categoriaCustom} onChange={(e) => setEditValues({ ...editValues, categoriaCustom: e.target.value })} placeholder="Nova categoria..." maxLength={40} className="h-8 text-[12px] border-none mt-1" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-                )}
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Prioridade</Label>
-                <select value={editValues.prioridade} onChange={(e) => setEditValues({ ...editValues, prioridade: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                  <option value="alta">Alta</option>
-                  <option value="media">Média</option>
-                  <option value="baixa">Baixa</option>
-                </select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Ciclo</Label>
-                <select value={editValues.ciclo} onChange={(e) => setEditValues({ ...editValues, ciclo: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                  {ciclosDisponiveis.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Prazo (opcional)</Label>
-                <Input type="date" value={editValues.prazo} onChange={(e) => setEditValues({ ...editValues, prazo: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
-                {editValues.prazo && (
-                  <button onClick={() => setEditValues({ ...editValues, prazo: "" })} className="text-[10px] text-muted-foreground hover:text-destructive transition-colors">✕ Remover prazo</button>
-                )}
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Meta Pai (opcional)</Label>
-                <select value={editValues.parent_id} onChange={(e) => setEditValues({ ...editValues, parent_id: e.target.value })} className="w-full h-8 rounded text-[12px] px-2 border-none outline-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}>
-                  <option value="">Nenhuma (meta raiz)</option>
-                  {metas.filter(m => m.id !== editingId).map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
-                </select>
-              </div>
-            </div>
+
             <div className="flex gap-2">
               <Button onClick={() => { setEditDialogOpen(false); setEditingId(null); }} variant="outline" className="flex-1 h-8 text-[12px]">Cancelar</Button>
               <Button onClick={() => editingId && saveEdit(editingId)} className="flex-1 h-8 text-[12px] font-semibold bg-primary text-primary-foreground">
