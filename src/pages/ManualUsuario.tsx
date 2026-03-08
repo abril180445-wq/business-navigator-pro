@@ -252,8 +252,8 @@ export default function ManualUsuario() {
         <div className="flex items-center gap-3">
           <BookOpen className="w-5 h-5" style={{ color: "hsl(var(--pbi-yellow))" }} />
           <div>
-            <h1 className="text-base font-semibold text-white">Manual do Usuário</h1>
-            <p className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Documentação completa do sistema ERP San Remo</p>
+            <h1 className="text-base font-semibold text-foreground">Manual do Usuário</h1>
+            <p className="text-[11px] text-muted-foreground">Documentação completa do sistema ERP San Remo</p>
           </div>
         </div>
         <button onClick={handlePrint} className="flex items-center gap-1.5 h-7 px-3 rounded text-[11px] font-medium" style={{ background: "hsl(var(--pbi-yellow))", color: "hsl(var(--pbi-dark))" }}>
