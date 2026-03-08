@@ -18,29 +18,35 @@ export type Database = {
         Row: {
           concluida: boolean
           created_at: string
+          created_by: string | null
           descricao: string
           id: string
           meta_id: string
           prazo: string | null
           responsavel: string | null
+          tipo: string
         }
         Insert: {
           concluida?: boolean
           created_at?: string
+          created_by?: string | null
           descricao: string
           id?: string
           meta_id: string
           prazo?: string | null
           responsavel?: string | null
+          tipo?: string
         }
         Update: {
           concluida?: boolean
           created_at?: string
+          created_by?: string | null
           descricao?: string
           id?: string
           meta_id?: string
           prazo?: string | null
           responsavel?: string | null
+          tipo?: string
         }
         Relationships: [
           {
