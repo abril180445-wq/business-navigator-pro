@@ -290,7 +290,7 @@ export default function ManualUsuario() {
                   <div key={section.id}>
                     <button
                       onClick={() => toggleSection(section.id)}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-medium hover:bg-white/5 transition-colors"
+                      className={`w-full flex items-center gap-2 px-3 py-2 text-[11px] font-medium transition-colors ${theme === "dark" ? "hover:bg-white/5" : "hover:bg-black/5"}`}
                       style={{ color: "hsl(var(--pbi-text-primary))" }}
                     >
                       <Icon className="w-3.5 h-3.5 shrink-0" style={{ color: "hsl(var(--pbi-yellow))" }} />
