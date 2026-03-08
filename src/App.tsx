@@ -14,6 +14,7 @@ import ImportacaoExcel from "@/pages/ImportacaoExcel";
 import Contabilidade from "@/pages/Contabilidade";
 import Pedidos from "@/pages/Pedidos";
 import GerenciarUsuarios from "@/pages/GerenciarUsuarios";
+import BackupRestore from "@/pages/BackupRestore";
 import ModulePlaceholder from "@/pages/ModulePlaceholder";
 import Auth from "@/pages/Auth";
 import ResetPassword from "@/pages/ResetPassword";
