@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTheme } from "@/hooks/useTheme";
 import { BookOpen, ChevronDown, ChevronRight, Search, Shield, LayoutDashboard, Target, FileText, Users, HardDrive, FileSpreadsheet, DollarSign, Building2, HardHat, Download } from "lucide-react";
 
 interface ManualSection {
