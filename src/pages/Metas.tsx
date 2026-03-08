@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useRealtimeTable } from "@/hooks/useRealtimeTable";
+import MetaImageUpload from "@/components/MetaImageUpload";
 
 interface Meta {
   id: string;
@@ -48,6 +49,7 @@ interface AcaoMeta {
   prazo: string | null;
   tipo: "acao" | "contribuicao";
   created_by: string | null;
+  imagens: string[];
 }
 
 interface CheckIn {
@@ -60,6 +62,7 @@ interface CheckIn {
   comentario: string | null;
   confianca: "no_prazo" | "atencao" | "em_risco";
   created_at: string;
+  imagens: string[];
 }
 
 const coresMeta = [
@@ -112,8 +115,8 @@ export default function Metas() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState({ atual: "", objetivo: "" });
   const [newMeta, setNewMeta] = useState({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", responsavel: "", prioridade: "media" as Meta["prioridade"], ciclo: "Q1 2026", parent_id: "" });
-  const [newAcao, setNewAcao] = useState({ descricao: "", responsavel: "", prazo: "" });
-  const [newCheckin, setNewCheckin] = useState({ valor: "", comentario: "", confianca: "no_prazo" as CheckIn["confianca"] });
+  const [newAcao, setNewAcao] = useState({ descricao: "", responsavel: "", prazo: "", imagens: [] as string[] });
+  const [newCheckin, setNewCheckin] = useState({ valor: "", comentario: "", confianca: "no_prazo" as CheckIn["confianca"], imagens: [] as string[] });
   const [activeTab, setActiveTab] = useState<"editor" | "analytics" | "ranking" | "acoes" | "timeline">(canEditMetas ? "editor" : "acoes");
   const [filtroCategoria, setFiltroCategoria] = useState("Todas");
   const [filtroPrioridade, setFiltroPrioridade] = useState("Todas");
@@ -212,10 +215,10 @@ export default function Metas() {
     const { error } = await supabase.from("acoes_meta").insert({
       meta_id: acaoMetaId, descricao: newAcao.descricao,
       responsavel: newAcao.responsavel || null, prazo: newAcao.prazo || null,
-      tipo, created_by: user?.id,
+      tipo, created_by: user?.id, imagens: newAcao.imagens,
     });
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
-    setNewAcao({ descricao: "", responsavel: "", prazo: "" });
+    setNewAcao({ descricao: "", responsavel: "", prazo: "", imagens: [] });
     setAcaoDialogOpen(false);
     toast({ title: tipo === "contribuicao" ? "Contribuição adicionada!" : "Ação adicionada!" });
   };
@@ -242,6 +245,7 @@ export default function Metas() {
       user_name: profile?.full_name || user?.email || "—",
       valor_anterior: meta.atual, valor_novo: novoValor,
       comentario: newCheckin.comentario, confianca: newCheckin.confianca,
+      imagens: newCheckin.imagens,
     });
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
 
@@ -252,7 +256,7 @@ export default function Metas() {
       await supabase.from("metas").update({ atual: novoValor, status: st }).eq("id", checkinMetaId);
     }
 
-    setNewCheckin({ valor: "", comentario: "", confianca: "no_prazo" });
+    setNewCheckin({ valor: "", comentario: "", confianca: "no_prazo", imagens: [] });
     setCheckinDialogOpen(false);
     toast({ title: "Check-in registrado!" });
   };
@@ -671,6 +675,15 @@ export default function Metas() {
                           )}
                         </button>
                         <span className={`text-[11px] flex-1 ${acao.concluida ? "line-through text-muted-foreground" : "text-foreground"}`}>{acao.descricao}</span>
+                        {acao.imagens && acao.imagens.length > 0 && (
+                          <div className="flex gap-1">
+                            {acao.imagens.map((img, i) => (
+                              <a key={i} href={img} target="_blank" rel="noopener noreferrer">
+                                <img src={img} alt="" className="w-8 h-8 rounded object-cover" style={{ border: "1px solid hsl(var(--pbi-border))" }} />
+                              </a>
+                            ))}
+                          </div>
+                        )}
                         {acao.responsavel && <span className="text-[9px] text-muted-foreground hidden sm:inline">{acao.responsavel}</span>}
                         {acao.prazo && <span className="text-[9px] text-muted-foreground">{new Date(acao.prazo).toLocaleDateString("pt-BR")}</span>}
                         {canEditMetas && (
@@ -698,6 +711,15 @@ export default function Metas() {
                           )}
                         </button>
                         <span className={`text-[11px] flex-1 ${contrib.concluida ? "line-through text-muted-foreground" : "text-foreground"}`}>{contrib.descricao}</span>
+                        {contrib.imagens && contrib.imagens.length > 0 && (
+                          <div className="flex gap-1">
+                            {contrib.imagens.map((img, i) => (
+                              <a key={i} href={img} target="_blank" rel="noopener noreferrer">
+                                <img src={img} alt="" className="w-8 h-8 rounded object-cover" style={{ border: "1px solid hsl(var(--pbi-border))" }} />
+                              </a>
+                            ))}
+                          </div>
+                        )}
                         {contrib.responsavel && <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground hidden sm:inline">{contrib.responsavel}</span>}
                         {(canEditMetas || contrib.created_by === user?.id) && (
                           <button onClick={() => removeAcao(contrib.id)} className="p-0.5 rounded hover:bg-destructive/10 text-muted-foreground"><X className="w-3 h-3" /></button>
@@ -722,6 +744,15 @@ export default function Metas() {
                             <span className="font-medium text-foreground">{ci.user_name}</span>
                             <span className="text-muted-foreground"> · {new Date(ci.created_at).toLocaleDateString("pt-BR")}</span>
                             {ci.comentario && <p className="text-muted-foreground truncate">{ci.comentario}</p>}
+                            {ci.imagens && ci.imagens.length > 0 && (
+                              <div className="flex gap-1 mt-1">
+                                {ci.imagens.map((img, i) => (
+                                  <a key={i} href={img} target="_blank" rel="noopener noreferrer">
+                                    <img src={img} alt="" className="w-8 h-8 rounded object-cover" style={{ border: "1px solid hsl(var(--pbi-border))" }} />
+                                  </a>
+                                ))}
+                              </div>
+                            )}
                           </div>
                           {ci.valor_anterior !== ci.valor_novo && (
                             <span className="text-[9px] font-medium shrink-0" style={{ color: ci.valor_novo > ci.valor_anterior ? "hsl(152, 60%, 38%)" : "hsl(0, 72%, 51%)" }}>
@@ -1002,6 +1033,10 @@ export default function Metas() {
                 <Input type="date" value={newAcao.prazo} onChange={(e) => setNewAcao({ ...newAcao, prazo: e.target.value })} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
               </div>
             </div>
+            <div className="space-y-1.5">
+              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Imagens (opcional)</Label>
+              <MetaImageUpload images={newAcao.imagens} onChange={(imgs) => setNewAcao({ ...newAcao, imagens: imgs })} folder="acoes" />
+            </div>
             <Button onClick={() => addAcao(canEditMetas ? "acao" : "contribuicao")} className="w-full h-8 text-[12px] font-semibold" style={{ background: canEditMetas ? "hsl(var(--pbi-yellow))" : "hsl(174, 62%, 47%)", color: "hsl(var(--pbi-dark))" }}>
               {canEditMetas ? "Adicionar Ação" : "Adicionar Minha Contribuição"}
             </Button>
@@ -1074,6 +1109,11 @@ export default function Metas() {
                 className="resize-none h-20 text-[12px] border-none"
                 style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }}
               />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>Imagens (opcional)</Label>
+              <MetaImageUpload images={newCheckin.imagens} onChange={(imgs) => setNewCheckin({ ...newCheckin, imagens: imgs })} folder="checkins" />
             </div>
 
             <Button onClick={addCheckin} className="w-full h-8 text-[12px] font-semibold" style={{ background: "hsl(262, 52%, 47%)", color: "white" }}>
