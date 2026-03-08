@@ -745,7 +745,10 @@ export default function Relatorios() {
                 <Bar dataKey="progresso" fill="hsl(207, 89%, 48%)" radius={[0, 4, 4, 0]} />
               </BarChart>
             ) : (
-              <BarChart data={chartData} layout="vertical">
+              <BarChart data={categorias.map(cat => {
+                const items = filteredData.filter(d => d.categoria === cat);
+                return { cat, valor: Math.abs(items.reduce((s, d) => s + d.valor, 0)) };
+              })} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke={gridColor} horizontal={false} />
                 <XAxis type="number" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} tick={{ fill: axisColor, fontSize: 10 }} axisLine={false} />
                 <YAxis type="category" dataKey="cat" tick={{ fill: axisColor, fontSize: 10 }} axisLine={false} width={70} />
