@@ -720,8 +720,8 @@ export default function Metas() {
           </DialogHeader>
           <div className="space-y-3 pt-2">
             <div className="space-y-1.5">
-              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>O que precisa ser feito? *</Label>
-              <Input value={newAcao.descricao} onChange={(e) => setNewAcao({ ...newAcao, descricao: e.target.value })} placeholder="Descrição da ação" className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
+              <Label className="text-[11px]" style={{ color: "hsl(var(--pbi-text-secondary))" }}>{canEditMetas ? "O que precisa ser feito? *" : "O que você está fazendo para ajudar? *"}</Label>
+              <Input value={newAcao.descricao} onChange={(e) => setNewAcao({ ...newAcao, descricao: e.target.value })} placeholder={canEditMetas ? "Descrição da ação" : "Descreva sua contribuição"} className="h-8 text-[12px] border-none" style={{ background: "hsl(var(--pbi-dark))", color: "hsl(var(--pbi-text-primary))" }} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
