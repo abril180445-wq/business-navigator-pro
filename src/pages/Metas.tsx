@@ -115,8 +115,8 @@ export default function Metas() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState({ atual: "", objetivo: "" });
   const [newMeta, setNewMeta] = useState({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", responsavel: "", prioridade: "media" as Meta["prioridade"], ciclo: "Q1 2026", parent_id: "" });
-  const [newAcao, setNewAcao] = useState({ descricao: "", responsavel: "", prazo: "" });
-  const [newCheckin, setNewCheckin] = useState({ valor: "", comentario: "", confianca: "no_prazo" as CheckIn["confianca"] });
+  const [newAcao, setNewAcao] = useState({ descricao: "", responsavel: "", prazo: "", imagens: [] as string[] });
+  const [newCheckin, setNewCheckin] = useState({ valor: "", comentario: "", confianca: "no_prazo" as CheckIn["confianca"], imagens: [] as string[] });
   const [activeTab, setActiveTab] = useState<"editor" | "analytics" | "ranking" | "acoes" | "timeline">(canEditMetas ? "editor" : "acoes");
   const [filtroCategoria, setFiltroCategoria] = useState("Todas");
   const [filtroPrioridade, setFiltroPrioridade] = useState("Todas");
