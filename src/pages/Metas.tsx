@@ -142,8 +142,8 @@ export default function Metas() {
   const [editValues, setEditValues] = useState<{
     nome: string; atual: string; objetivo: string; unidade: string;
     categoria: string; categoriaCustom: string; responsavel: string;
-    prioridade: string; ciclo: string; parent_id: string;
-  }>({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "" });
+    prioridade: string; ciclo: string; parent_id: string; prazo: string;
+  }>({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media", ciclo: "Q1 2026", parent_id: "", prazo: "" });
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [newMeta, setNewMeta] = useState({ nome: "", atual: "", objetivo: "", unidade: "R$", categoria: "Financeiro", categoriaCustom: "", responsavel: "", prioridade: "media" as Meta["prioridade"], ciclo: "Q1 2026", parent_id: "" });
 
