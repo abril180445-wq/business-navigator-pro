@@ -71,7 +71,7 @@ const coresMeta = [
   "hsl(270, 60%, 55%)", "hsl(330, 70%, 50%)",
 ];
 
-const categorias = ["Financeiro", "Vendas", "Operacional", "Qualidade", "RH", "Engenharia"];
+const categoriasBase = ["Financeiro", "Vendas", "Operacional", "Qualidade", "RH", "Engenharia"];
 const ciclosDisponiveis = ["Q1 2026", "Q2 2026", "Q3 2026", "Q4 2026", "Anual 2026"];
 
 const prioridadeConfig = {
