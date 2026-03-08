@@ -675,6 +675,15 @@ export default function Metas() {
                           )}
                         </button>
                         <span className={`text-[11px] flex-1 ${acao.concluida ? "line-through text-muted-foreground" : "text-foreground"}`}>{acao.descricao}</span>
+                        {acao.imagens && acao.imagens.length > 0 && (
+                          <div className="flex gap-1">
+                            {acao.imagens.map((img, i) => (
+                              <a key={i} href={img} target="_blank" rel="noopener noreferrer">
+                                <img src={img} alt="" className="w-8 h-8 rounded object-cover" style={{ border: "1px solid hsl(var(--pbi-border))" }} />
+                              </a>
+                            ))}
+                          </div>
+                        )}
                         {acao.responsavel && <span className="text-[9px] text-muted-foreground hidden sm:inline">{acao.responsavel}</span>}
                         {acao.prazo && <span className="text-[9px] text-muted-foreground">{new Date(acao.prazo).toLocaleDateString("pt-BR")}</span>}
                         {canEditMetas && (
