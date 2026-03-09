@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "@/hooks/useTheme";
 import {
@@ -27,6 +27,7 @@ import {
 import logoSanRemo from "@/assets/logo-san-remo.png";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ModuleItem {
   label: string;
@@ -34,6 +35,7 @@ interface ModuleItem {
   path: string;
   children?: { label: string; path: string }[];
   section?: string;
+  moduleKey?: string;
 }
 
 const modules: ModuleItem[] = [
@@ -47,6 +49,7 @@ const modules: ModuleItem[] = [
     icon: DollarSign,
     path: "/contabilidade",
     section: "Módulos",
+    moduleKey: "financeiro",
     children: [
       { label: "Faturamento", path: "/contabilidade/faturamento" },
       { label: "Contas a Pagar", path: "/contabilidade/pagamentos" },
@@ -60,6 +63,7 @@ const modules: ModuleItem[] = [
     icon: Building2,
     path: "/pedidos",
     section: "Módulos",
+    moduleKey: "obras",
     children: [
       { label: "Empreendimentos", path: "/pedidos/vendas" },
       { label: "Contratos", path: "/pedidos/compras" },
@@ -77,13 +81,44 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
+  const [enabledModules, setEnabledModules] = useState<Record<string, boolean>>({});
   const location = useLocation();
   const { profile, user, userRole, isAdmin, canEditMetas, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
-  // Filter modules based on role
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadEnabled = async () => {
+      const { data, error } = await supabase.from("app_modules").select("key, enabled");
+      if (cancelled) return;
+
+      if (error || !data) {
+        // Fail closed: don't show modules if we can't read flags.
+        setEnabledModules({});
+        return;
+      }
+
+      const map: Record<string, boolean> = {};
+      for (const row of data) map[row.key] = !!row.enabled;
+      setEnabledModules(map);
+    };
+
+    loadEnabled();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Filter modules based on role + enabled-by-admin flags
   const visibleModules = modules.filter((mod) => {
     if (mod.section === "Admin") return isAdmin;
+
+    if (mod.section === "Módulos") {
+      const key = mod.moduleKey;
+      return key ? enabledModules[key] === true : false;
+    }
+
     if (mod.path === "/metas") return true; // all can view
     if (mod.path === "/relatorios") return userRole === "admin" || userRole === "master";
     if (mod.path === "/importacao") return userRole === "admin" || userRole === "master";
